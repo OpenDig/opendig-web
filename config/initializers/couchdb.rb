@@ -3,12 +3,12 @@ require 'couchrest'
 couchdb_config = YAML.load_file("#{Rails.root}/config/couchdb.yml")[Rails.env]
 protocol = couchdb_config["protocol"]
 host     = couchdb_config["host"]
-port     = couchdb_config["port"]
+port     = couchdb_config["port"] || nil
 username = couchdb_config["username"]
 password = couchdb_config["password"]
 db_name  = couchdb_config["db_name"] || nil
-prefix   = couchdb_config["prefix"]
-suffix   = couchdb_config["suffix"]
+prefix   = couchdb_config["prefix"] || nil
+suffix   = couchdb_config["suffix"] || nil
 
 database = db_name ? db_name : "#{prefix}_#{suffix}"
 url = "#{protocol}://#{username}:#{password}@#{host}:#{port}/#{database}"

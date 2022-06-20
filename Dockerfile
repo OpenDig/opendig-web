@@ -14,6 +14,7 @@ RUN apk add --no-cache nodejs \
   sqlite-dev \
   tzdata && \
   cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
+  update-ca-certificates && \
   echo "Europe/London" > /etc/timezone
 
 WORKDIR /app
