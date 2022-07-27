@@ -1,5 +1,7 @@
 class ApplicationController < ActionController::Base
-  before_action :set_db, :set_descriptions
+  before_action :set_db, :set_descriptions, :set_edit_mode
+  before_action :check_editing_mode, only: [:new, :edit, :create, :update, :destroy]
+
   http_basic_authenticate_with name: "balua", password: "k3r@k2019" if Rails.env.production?
 
   private
@@ -11,4 +13,14 @@ class ApplicationController < ActionController::Base
     @descriptions = Rails.application.config.descriptions
   end
 
+  def set_edit_mode
+    @editing_enabled = ENV['EDITING_ENABLED'] || false
+  end
+
+  def check_editing_mode
+    unless @editing_enabled
+      flash[:error] = "Editing is disabled"
+      redirect_to request.referer
+    end
+  end
 end

@@ -1,0 +1,13 @@
+<div class="row mb-3">
+  <div class="col">
+    <h1><%= "Field Find Details" %></h1>
+  </div>
+</div>
+<% @descriptions['finds'].each do |find| %>
+  <div class="form-group row">
+    <label for="field" class="col-sm-12 col-form-label"><%= find['label'] %></label>
+    <div class="col-sm-12">
+      <%= input_for(find, @find.dig(find['key']),'find') %>
+    </div>
+  </div>
+<% end %>

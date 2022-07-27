@@ -1,0 +1,24 @@
+#!/usr/bin/env sh
+
+# delete file if it exists
+if [ -f "./tmp/pids/server.pid" ]; then
+  # capture pid from file
+  pid=$(cat ./tmp/pids/server.pid)
+  # check if process is running
+  if kill -0 "$pid" > /dev/null 2>&1; then
+    # process is running
+    echo "Process is running with pid $pid. Stoping..."
+    # kill process
+    kill $pid
+    # delete file
+    rm ./tmp/pids/server.pid
+    echo "Process stopped."
+  else
+    # process is not running
+    echo "Process is not running."
+    rm ./tmp/pids/server.pid
+  fi
+fi
+
+bin/rails assets:precompile
+bin/rails server -b 0.0.0.0

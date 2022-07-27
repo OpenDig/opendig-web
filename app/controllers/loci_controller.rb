@@ -20,7 +20,9 @@ class LociController < ApplicationController
 
   def update
     locus_params = params[:locus].to_enum.to_h
+    locus_params = repair_nested_params(locus_params)
     locus_params = @locus.deep_merge(locus_params)
+
     if @db.save_doc(locus_params)
       flash[:success] = "Success! Locus Updated"
       redirect_to area_square_locus_path(@area, @square, locus_params['code'])
@@ -48,5 +50,23 @@ class LociController < ApplicationController
       @square = params[:square_id]
       @locus_code = params[:id]
       @locus = @db.view('opendig/locus', key: [@area, @square, @locus_code])["rows"]&.first&.dig("value")
+    end
+
+    def locus_params
+      parameters.require(:locus).permit!
+    end
+
+    def repair_nested_params(obj)
+      obj.each do |key, value|
+        if value.is_a?(ActionController::Parameters) || value.is_a?(Hash)
+          # If any non-integer keys
+          if value.keys.find {|k, _| k =~ /\D/ }
+            repair_nested_params(value)
+          else
+            obj[key] = value.values
+            value.values.each {|h| repair_nested_params(h) }
+          end
+        end
+      end
     end
 end

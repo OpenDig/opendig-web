@@ -1,29 +1,29 @@
 <div class="form-row pail-<%= pail_index %>-reading-row" data-pail-<%= pail_index %>-reading-index=<%= reading_index %>>
-  <div class="form-group col-md-1">
+  <div class="form-group col-md-12">
     <%= label_tag "locus[pails[#{pail_index}][readings][#{reading_index}][count]]", "Count" %>
     <%= text_field_tag "locus[pails[#{pail_index}][readings][#{reading_index}][count]]", reading['count'], class: 'form-control' %>
   </div>
-  <div class="form-group col-md-2">
+  <div class="form-group col-md-12">
     <%= label_tag "locus[pails[#{pail_index}][readings][#{reading_index}][quantity_modifier]", "Qty Modifier" %>
     <%= text_field_tag "locus[pails[#{pail_index}][readings][#{reading_index}][quantity_modifier]", reading['quantity_modifier'], class: 'form-control' %>
   </div>
-  <div class="form-group col-md-2">
+  <div class="form-group col-md-12">
     <%= label_tag "locus[pails[#{pail_index}][readings][#{reading_index}][pot_form]", "Form" %>
     <%= text_field_tag "locus[pails[#{pail_index}][readings][#{reading_index}][pot_form]", reading['pot_form'], class: 'form-control' %>
   </div>
-  <div class="form-group col-md-2">
+  <div class="form-group col-md-12">
     <%= label_tag "locus[pails[#{pail_index}][readings][#{reading_index}][age]", "Period" %>
     <%= text_field_tag "locus[pails[#{pail_index}][readings][#{reading_index}][age]", reading['age'], class: 'form-control' %>
   </div>
-  <div class="form-group col-md-2">
+  <div class="form-group col-md-12">
     <%= label_tag "locus[pails[#{pail_index}][readings][#{reading_index}][time_level]", "Period Modifier" %>
     <%= text_field_tag "locus[pails[#{pail_index}][readings][#{reading_index}][time_level]", reading['time_level'], class: 'form-control' %>
   </div>
-  <div class="form-group col-md-2">
+  <div class="form-group col-md-12">
     <%= label_tag "locus[pails[#{pail_index}][readings][#{reading_index}][question]", "Question" %>
     <%= text_field_tag "locus[pails[#{pail_index}][readings][#{reading_index}][question]", reading['question'], class: 'form-control' %>
   </div>
-  <div class="form-group col-md-1 text-bottom d-flex flex-column">
+  <div class="form-group col-md-2 text-bottom d-flex flex-column">
     <button name="button" onclick="removeThisPail<%= pail_index %>Reading(this);" type="button" class="mt-auto btn btn-danger btn-sm">Delete</button>
   </div>
 </div>

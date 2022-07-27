@@ -1,0 +1,47 @@
+<div class="form-row pail-<%= pail_index %>-find-row" data-pail-<%= pail_index %>-find-index=<%= find_index %>>
+  <% @descriptions['finds'].each do |find_form| %>
+    <div class="form-group col-md-12">
+        <%= label_tag "locus[pails[#{pail_index}][finds][#{find_index}][#{find_form['key']}]]", "#{find_form['label']}" %>
+        <%= input_with_full_param_name(find_form, find[find_form['key']],"locus[pails[#{pail_index}][finds][#{find_index}][#{find_form['key']}]]") %>
+    </div>
+  <% end %>
+  <% @descriptions['registar_info'].each do |registrar_form| %>
+    <div class="form-group col-md-12">
+      <%= hidden_field_tag "locus[pails[#{pail_index}][finds][#{find_index}][#{registrar_form['key']}]]", find[registrar_form['key']], class: "form-control" %>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  function removeThisPail<%= pail_index %>Find(_this){
+    $(_this).parents('.pail-<%= pail_index %>-find-row').remove();
+  };
+  $( "#locus_pails_<%= pail_index %>_finds_<%= find_index %>_pot_form" ).autocomplete({
+    source: potFormValues,
+    minLength: 0,
+    delay: 0
+  }).bind('focus', function () {
+    $(this).autocomplete("search");
+  });
+  $( "#locus_pails_<%= pail_index %>_findss_<%= find_index %>_age" ).autocomplete({
+    source: ageValues,
+    minLength: 0,
+    delay: 0
+  }).bind('focus', function () {
+    $(this).autocomplete("search");
+  });
+  $( "#locus_pails_<%= pail_index %>_finds_<%= find_index %>_time_level" ).autocomplete({
+    source: timeLevelValues,
+    minLength: 0,
+    delay: 0
+  }).bind('focus', function () {
+    $(this).autocomplete("search");
+  });
+  $( "#locus_pails_<%= pail_index %>_readings_<%= find_index %>_question" ).autocomplete({
+    source: questionValues,
+    minLength: 0,
+    delay: 0
+  }).bind('focus', function () {
+    $(this).autocomplete("search");
+  });
+</script>

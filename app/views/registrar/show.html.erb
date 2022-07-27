@@ -1,0 +1,53 @@
+<div class="container">
+  <div class="row">
+    <div class="col-10 align-bottom">
+      <h1>Field Find <%= @find['field_number'] %></h1>
+    </div>
+    <div class="col-2 align-bottom">
+      <%= link_to "Edit", edit_registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code), class: "btn btn-primary float-right" %>
+
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to 'Registrar Home', registrar_index_path %></li>
+          <li class="breadcrumb-item"><%= link_to "Locus #{@area}.#{@square}.#{@locus_code}", area_square_locus_path(@area, @square, @locus_code) %></li>
+          <li class="breadcrumb-item">Pail Number <%= @pail_id %></li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+  <h2>General Information</h2>
+  <% @descriptions['finds'].each do |item| %>
+    <div class="row">
+      <div class="col-4">
+        <%= item["label"] %>
+      </div>
+      <div class="col-8">
+        <%= output(@find.dig(item["key"]), item["type"]) %>
+      </div>
+    </div>
+  <% end %>
+  </div>
+</div>
+<hr/>
+<div class="row">
+  <div class="col">
+  <h2>Detailed Information</h2>
+  <% @descriptions['registar_info'].each do |item| %>
+    <div class="row">
+      <div class="col-4">
+        <%= item["label"] %>
+      </div>
+      <div class="col-8">
+        <%= output(@find.dig(item["key"]), item["type"]) %>
+      </div>
+    </div>
+  <% end %>
+  </div>
+</div>

@@ -17,10 +17,13 @@
     <div class="container flash">
       <div class="row">
         <div class="col">
-          <% flash.each do |key, value| %>
-            <div class="<%= flash_class(key) %>">
-              <%= value %>
-            </div>
+          <% flash.each do |name, msg| %>
+            <% unless flash_blacklist(name) %>
+              <%= content_tag(:div, class: flash_class(name)) do %>
+                <%= msg %>
+                <button type="button" class="close" data-bs-dismiss="alert">×</button>
+              <% end %>
+            <% end %>
           <% end %>
         </div>
       </div>

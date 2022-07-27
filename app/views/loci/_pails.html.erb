@@ -61,6 +61,42 @@
               </td>
             </tr>
           <% end %>
+          <% if pail['finds'].present? %>
+            <tr>
+              <td></td>
+              <td colspan="5">
+                <h4>Field Finds and Samples</h4>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Field Number</th>
+                      <th>Registration Number</th>
+                      <th>Designation</th>
+                      <th>GPS ID</th>
+                      <th>Condition</th>
+                      <th>Origin</th>
+                      <th>Remarks</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% pail.dig('finds').each do |find| %>
+                      <tr>
+                        <td><%= find['field_number'] %></td>
+                        <td><%= find['registration_number'] %></td>
+                        <td><%= find['type'] %></td>
+                        <td><%= find['gps_id'] %></td>
+                        <td><%= find['condition'] %></td>
+                        <td><%= find['origin'] %></td>
+                        <td><%= find['remarks'] %></td>
+                        <td><%= find['state'] %></td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          <% end %>
         <% end %>
       </tbody>
     </table>

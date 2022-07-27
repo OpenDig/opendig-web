@@ -8,8 +8,7 @@ Rails.application.routes.draw do
     end
   end
 
-  # resources :squares, only: [:show]
-  # resources :loci, only: [:show]
+  resources :registrar
 
   root to: 'areas#index'
 end

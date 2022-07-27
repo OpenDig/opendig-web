@@ -1,5 +1,5 @@
 ---
-:version: 7
+:version: 12
 :design:
   "_id": _design/opendig
   :views:
@@ -28,10 +28,83 @@
           }
         }
       :reduce: "function(keys,values){return true;}"
+    :finds:
+      :map: >
+        function (doc) {
+          if (doc.pails) {
+            for (var _pail in doc.pails) {
+              var pail = doc.pails[_pail];
+              if (pail.finds) {
+                for (var _find in pail.finds) {
+                  var find = pail.finds[_find];
+                  emit([doc.area + '.' + doc.square + '.' + doc.code, pail.pail_number, find.field_number, find.type, find.remarks], [doc._id])
+                }
+              }
+            }
+          }
+        }
+      :reduce: "function(keys,values){return true;}"
+    :registrar:
+      :map: >
+        function (doc) {
+          if (doc.pails) {
+            for (var _pail in doc.pails) {
+              var pail = doc.pails[_pail];
+              pail_date = new Date(pail.pail_date);
+              pail_year = pail_date.getFullYear();
+              if (pail.finds) {
+                for (var _find in pail.finds) {
+                  var find = pail.finds[_find];
+                  emit(pail_year, [doc.area + '.' + doc.square + '.' + doc.code, pail.pail_number, find.field_number, find.type, find.remarks, doc._id])
+                }
+              }
+            }
+          }
+        }
+      :reduce: "function(keys,values){return true;}"
+    :seasons:
+      :map: >
+        function (doc) {
+          if (doc.start_date) {
+            var start_date = new Date(doc.start_date);
+            var start_year = start_date.getFullYear();
+            emit(start_year, start_year)
+          }
+        }
+      :reduce: "function(keys,values){return true;}"
     :bad_loci:
       :map: >
         function (doc) {
           if (doc.code && doc.code.charAt(0) == '9') {
             emit([doc.area + '.' + doc.square + ':' + doc.code], doc);
+          }
+        }
+    :bad_pails:
+      :map: >
+        function (doc) {
+          if (doc.pails) {
+            for (_pail in doc.pails) {
+              var pail = doc.pails[_pail];
+              if (pail.pail_number.charAt(0) == '9') {
+                emit([doc.area + '.' + doc.square + '.' + doc.code, pail.pail_number], doc);
+              }
+            }
+          }
+        }
+    :bad_finds:
+      :map: >
+        function (doc) {
+          if (doc.pails) {
+            for (_pail in doc.pails) {
+              var pail = doc.pails[_pail];
+              if (pail.finds) {
+                for (_find in pail.finds) {
+                  var find = pail.finds[_find];
+                  if (find.field_number.charAt(0) == '9') {
+                    emit([doc.area + '.' + doc.square + '.' + doc.code, pail.pail_number, find.field_number], doc);
+                  }
+                }
+              }
+            }
           }
         }
