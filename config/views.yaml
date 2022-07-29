@@ -38,7 +38,7 @@
               if (pail.finds) {
                 for (var _find in pail.finds) {
                   var find = pail.finds[_find];
-                  emit([doc.area + '.' + doc.square], [doc.code, pail.pail_number, pail.pail_date, find.field_number, find.type, find.remarks, doc._id])
+                  emit([doc.area + '.' + doc.square], [doc.code, pail.pail_number, pail.pail_date, find.field_number, find.type, find.remarks, find.gis_id, doc._id])
                 }
               }
             }

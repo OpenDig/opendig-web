@@ -1,18 +1,26 @@
 services:
   app:
-    build: .
+    image: opendig/web:latest
+    stdin_open: true
+    tty: true
+    environment:
+      RAILS_ENV: development
+      EDITING_ENABLED: true
     ports:
       - "3000:3000"
     volumes:
       - .:/app
-    links:
+    user: 501:20
+    depends_on:
       - db
+    command: "/app/bin/dev"
 
   db:
     image: couchdb:latest
     environment:
       COUCHDB_USER: admin
       COUCHDB_PASSWORD: password
+    user: 501:20
     ports:
       - 6984:5984
     volumes:

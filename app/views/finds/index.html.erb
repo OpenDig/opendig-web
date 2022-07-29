@@ -35,7 +35,7 @@
     <h3>Type</h3>
   </div>
   <div class="col-4">
-    <h3>Remarks</h3>
+    <h3>GPS_ID & Remarks</h3>
   </div>
 </div>
 
@@ -57,7 +57,7 @@
     <%= find.type %>
   </div>
   <div class="col-4">
-    <%= find.remarks %>
+    <%= "(#{find.gis_id}): " if find.gis_id.present? %><%= find.remarks %>
   </div>
 </div>
 <% end %>
