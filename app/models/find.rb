@@ -21,11 +21,20 @@ class Find
     true
   end
 
-  def self.check_image(registration_number)
-    Rails.cache.fetch("#{registration_number}_image", expires_in: 1.day) do
+  def self.get_image_keys(registration_number)
+    Rails.cache.fetch("#{registration_number}_images", expires_in: 1.day) do
       bucket = Rails.application.config.s3_bucket
-      object_key = "#{registration_number}.jpg"
-      bucket.object(object_key).exists?
+      object_key = "finds/#{registration_number}"
+      objects = bucket.objects(prefix: object_key)
+      keys = objects.map(&:key)
+      keys
+    end
+  end
+
+  def self.check_image(registration_number)
+    Rails.cache.fetch("#{registration_number}_has_keys", expires_in: 1.day) do
+      keys = get_image_keys(registration_number)
+      keys.any?
     end
   end
 
