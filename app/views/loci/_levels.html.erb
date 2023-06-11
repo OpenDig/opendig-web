@@ -1,20 +1,22 @@
-<div class="row">
-  <div class="col">
-    <h1>Levels</h1>
+<div class="flex flex-col mb-8 bg-gray-100 p-4 rounded-lg shadow">
+  <div class="flex items-center mb-4">
+    <h2 class="text-2xl font-semibold">Levels</h2>
+  </div>
+  <div class="overflow-x-auto">
     <table class="table">
       <thead>
         <tr>
-          <th>Location</th>
-          <th>Top Level</th>
-          <th>Bottom Level</th>
+          <th class="px-4 py-2">Location</th>
+          <th class="px-4 py-2">Top Level</th>
+          <th class="px-4 py-2">Bottom Level</th>
         </tr>
       </thead>
       <tbody>
         <% @locus.dig('levels').each do |level| %>
           <tr>
-            <td><%= level["location"] %></td>
-            <td><%= level_or_nil level["top_level"] %></td>
-            <td><%= level_or_nil level["bottom_level"] %></td>
+            <td class="px-4 py-2"><%= level["location"] %></td>
+            <td class="px-4 py-2"><%= level_or_nil(level["top_level"]) %></td>
+            <td class="px-4 py-2"><%= level_or_nil(level["bottom_level"]) %></td>
           </tr>
         <% end %>
       </tbody>

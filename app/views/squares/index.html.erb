@@ -1,21 +1,24 @@
-<div class="row">
-  <div class="col-10 align-bottom">
-    <h1>Squares for <%= @area %></h1>
-  </div>
-  <div class="col-2 align-bottom">
-    <%= link_to "New Square", new_area_square_path(@area), class: "btn btn-primary float-right" %>
-  </div>
-</div>
-<div class="row">
-  <div class="col">
+<div class="flex flex-col items-center h-screen">
+  <div class="w-1/3">
+    <div class="flex items-center mb-4">
+      <h1 class="text-3xl">Squares for <%= @area %></h1>
+      <div class="ml-auto">
+        <%= link_to new_area_square_path(@area) do %>
+          <button type="button" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded">
+            New Square
+          </button>
+        <% end %>
+      </div>
+    </div>
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><%= link_to 'Home', root_path %></li>
         <li class="breadcrumb-item active" aria-current="page"><%= "Area #{@area}" %></li>
       </ol>
     </nav>
+
+    <% @squares.each do |square| %>
+      <p class="mb-2"><%= link_to square, area_square_loci_path(@area, square), class: "text-blue-600 hover:underline" %></p>
+    <% end %>
   </div>
 </div>
-<% @squares.each do |square| %>
-  <p><%= link_to square, area_square_loci_path(@area, square) %></p>
-<% end %>

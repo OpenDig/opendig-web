@@ -1,21 +1,23 @@
-<div class="row">
-  <div class="col-10 align-bottom">
-    <h1>Areas</h1>
-  </div>
-  <div class="col-2 align-bottom">
-    <%= link_to "New area", new_area_path, class: "btn btn-primary float-right" %>
-  </div>
-</div>
-<div class="row">
-  <div class="col">
+<div class="flex flex-col items-center h-screen">
+  <div class="w-1/3">
+    <div class="flex items-center mb-4">
+      <h1 class="text-3xl">Areas</h1>
+      <div class="ml-auto">
+        <%= link_to new_area_path do %>
+          <button type="button" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded">
+            New area
+          </button>
+        <% end %>
+      </div>
+    </div>
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item active" aria-current="page">Home</li>
       </ol>
     </nav>
+
+    <% @areas.each do |area| %>
+      <p class="mb-2"><%= link_to area["key"], area_squares_path(area["key"]), class: "text-blue-600 hover:underline" %></p>
+    <% end %>
   </div>
 </div>
-
-<% @areas.each do |area| %>
-  <p><%= link_to area["key"], area_squares_path(area["key"]) %></p>
-<% end %>

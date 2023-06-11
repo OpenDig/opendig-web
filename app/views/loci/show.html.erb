@@ -1,24 +1,40 @@
-<div class="container">
-  <div class="row">
-    <div class="col-10 align-bottom">
-      <h1>Locus <%= @area %>.<%= @square %>.<%= @locus_code %></h1>
-    </div>
-    <div class="col-2 align-bottom">
+<div class="container mx-auto">
+  <div class="flex items-center mb-4">
+    <h1 class="text-3xl">Locus <%= @area %>.<%= @square %>.<%= @locus_code %></h1>
+    <div class="ml-auto">
       <%= link_to "Edit", edit_area_square_locus_path(@area, @square, @locus_code), class: "btn btn-primary float-right" %>
     </div>
   </div>
-  <div class="row">
-    <div class="col">
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><%= link_to 'Home', root_path %></li>
-          <li class="breadcrumb-item"><%= link_to "Area #{@area}", area_squares_path(@area) %></li>
-          <li class="breadcrumb-item"><%= link_to "Square #{@square}", area_square_loci_path(@area, @square) %></li>
-          <li class="breadcrumb-item active" aria-current="page">Locus <%= @area %>.<%= @square %>.<%= @locus_code %></li>
-        </ol>
-      </nav>
-    </div>
-  </div>
+
+<div class="flex mb-4">
+  <nav class="text-sm">
+    <ol class="flex items-center space-x-2">
+      <li>
+        <a href="/" class="text-gray-500 hover:text-gray-700">Home</a>
+      </li>
+      <li>
+        >
+      </li>
+      <li>
+        <a href="<%= area_squares_path(@area) %>" class="text-gray-500 hover:text-gray-700">Area <%= @area %></a>
+      </li>
+      <li>
+        >
+      </li>
+      <li>
+        <a href="<%= area_square_loci_path(@area, @square) %>" class="text-gray-500 hover:text-gray-700">Square <%= @square %></a>
+      </li>
+      <li>
+        >
+      </li>
+      <li class="text-gray-700">
+        Locus <%= @area %>.<%= @square %>.<%= @locus_code %>
+      </li>
+    </ol>
+  </nav>
+</div>
+
+
   <%= render 'general' %>
   <%= render 'interpretation' %>
   <%= render 'description' %>

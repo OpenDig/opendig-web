@@ -1,8 +1,9 @@
-<div class="row">
-  <div class="col">
-  <h2>General Information</h2>
+<div class="flex flex-col mb-8 bg-gray-100 p-4 rounded-lg shadow">
+  <h2 class="text-2xl font-semibold mb-4">General Information</h2>
   <% @descriptions['general_information'].each do |general_entry| %>
-    <p><%= general_entry["label"] %>: <%= output(@locus.dig(general_entry["key"]), general_entry["type"]) %></p>
+    <div class="flex mb-2 hover:bg-gray-200">
+      <p class="w-80 font-semibold"><%= general_entry["label"] %>:</p>
+      <p><%= output(@locus.dig(general_entry["key"]), general_entry["type"]) %></p>
+    </div>
   <% end %>
-  </div>
 </div>

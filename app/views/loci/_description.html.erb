@@ -1,19 +1,21 @@
 <% description_type = @descriptions['description_types'][@locus['locus_type']] %>
 <% if @locus.dig(description_type) %>
-  <div class="row"><div class="col"><h1><%= "#{@locus['locus_type']} Description" %></h1></div></div>
-  <div class="row">
+  <div class="flex flex-col mb-8 bg-gray-100 p-4 rounded-lg shadow">
+    <div class="flex items-center mb-4">
+      <h2 class="text-2xl font-semibold"><%= "#{@locus['locus_type']} Description" %></h2>
+    </div>
+    <div class="pl-4 grid gap-4">
       <% @descriptions[description_type].each do |description_section| %>
-        <div class="col-12">
-          <div class="card">
-            <div class="card-body">
-              <h3 class="card-title"><%= description_section[0] %></h3>
-              <dl class="row">
-                <% description_section[1].each do |descrtipion_section_entry| %>
-                <dt class="col-sm-3"><%= descrtipion_section_entry['label'] %></dt>
-                <dd class="col-sm-9"><%= @locus.dig(description_type).dig(descrtipion_section_entry['key']) %></dd>
-                <% end %>
-              </dl>
-            </div>
+        <div class="card">
+          <div class="card-body">
+            <h3 class="card-title text-xl font-semibold"><%= description_section[0] %></h3>
+            <% description_section[1].each do |description_section_entry| %>
+
+              <div class="pl-8 flex mb-2 hover:bg-gray-200">
+                <p class="w-80 font-semibold"><%= description_section_entry['label'] %>:</p>
+                <p><%= @locus.dig(description_type).dig(description_section_entry['key']) %></p>
+              </div>
+            <% end %>
           </div>
         </div>
       <% end %>

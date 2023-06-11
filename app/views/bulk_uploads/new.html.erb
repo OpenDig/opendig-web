@@ -1,0 +1,6 @@
+<%= form_tag(bulk_uploads_path, multipart: true, id: 'upload-form') do %>
+  <%= file_field_tag 'files[]', multiple: true, id: 'file-input' %>
+  <%= submit_tag 'Upload', id: 'upload-button' %>
+<% end %>
+
+<div id="progress-container"></div>

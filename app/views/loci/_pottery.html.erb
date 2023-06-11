@@ -1,38 +1,47 @@
-<div class="row">
-  <div class="col">
-    <h1>Pails and Pottery</h1>
+<div class="flex flex-col mb-8 bg-gray-100 p-4 rounded-lg shadow">
+  <div class="flex items-center mb-4">
+    <h2 class="text-2xl font-semibold">Pails and Pottery</h2>
+  </div>
+  <div class="overflow-x-auto">
     <table class="table">
       <thead>
         <tr>
-          <th>Date</th>
-          <th>Pail</th>
-          <th>Baskets</th>
-          <th>Publish</th>
-          <th>Diagnostics</th>
-          <th>Total Count</th>
+          <th class="px-4 py-2">Date</th>
+          <th class="px-4 py-2">Pail</th>
+          <th class="px-4 py-2">Baskets</th>
+          <th class="px-4 py-2">Publish</th>
+          <th class="px-4 py-2">Diagnostics</th>
+          <th class="px-4 py-2">Total Count</th>
         </tr>
       </thead>
       <tbody>
         <% @locus.dig('pails').each do |pail| %>
-          <tr>
-            <td><%= l read_date pail["pail_date"] %></td>
-            <td><%= pail["pail_number"] %></td>
-            <td><%= pail["baskets"] %></td>
-            <td><%= pail["publish"] %></td>
-            <td><%= pail["diagnostic_count"] %></td>
-            <td><%= pail["total_count"] %></td>
+          <tr class="hover:bg-gray-200">
+            <td class="px-4 py-2"><%= l read_date(pail["pail_date"]) %></td>
+            <td class="px-4 py-2"><%= pail["pail_number"] %></td>
+            <td class="px-4 py-2"><%= pail["baskets"] %></td>
+            <td class="px-4 py-2"><%= pail["publish"] %></td>
+            <td class="px-4 py-2"><%= pail["diagnostic_count"] %></td>
+            <td class="px-4 py-2"><%= pail["total_count"] %></td>
           </tr>
           <% if pail["comments"] %>
             <tr>
-              <td colspan="6">
+              <td colspan="6" class="px-4 py-2">
                 <i>Comments:</i> <%= pail["comments"] %>
               </td>
             </tr>
           <% end %>
           <% if pail["readings"] %>
-            <% pail["readings"].group_by{|reading| reading["age"]}.each do |age, reading| %>
+            <% pail["readings"].group_by { |reading| reading["age"] }.each do |age, readings| %>
               <tr>
-
+                <td colspan="6" class="px-4 py-2">
+                  <h3 class="text-lg font-semibold mb-2">Age: <%= age %></h3>
+                  <ul class="list-disc ml-6">
+                    <% readings.each do |reading| %>
+                      <li><%= reading["reading_data"] %></li>
+                    <% end %>
+                  </ul>
+                </td>
               </tr>
             <% end %>
           <% end %>

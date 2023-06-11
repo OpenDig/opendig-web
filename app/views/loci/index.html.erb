@@ -1,64 +1,55 @@
-<div class="row">
-  <div class="col-6 align-bottom">
-    <h1>Loci for <%= @area %>.<%= @square %></h1>
-  </div>
-  <div class="col-2 align-bottom">
-    <%= link_to "Finds for Square", area_square_finds_path(@area, @square), class: "btn btn-primary float-right" %>
-  </div>
-  <div class="col-2 align-bottom">
-    <%= link_to "Pails for Square", area_square_pails_path(@area, @square), class: "btn btn-primary float-right" %>
-  </div>
-  <div class="col-2 align-bottom">
-
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newLocus">
-      New Locus
-    </button>
-    <!-- Modal -->
-    <div class="modal fade" id="newLocus" tabindex="-1" role="dialog" aria-labelledby="newLocusLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="newLocusLabel">New Locus</h5>
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <p><%= link_to "New Architecture Locus", new_area_square_locus_path(@area, @square, type: 'Architecture') %></p>
-            <p><%= link_to "New Burial Locus", new_area_square_locus_path(@area, @square, type: 'Burial') %></p>
-            <p><%= link_to "New Earth Locus", new_area_square_locus_path(@area, @square, type: 'Earth') %></p>
-            <p><%= link_to "New Installation Locus", new_area_square_locus_path(@area, @square, type: 'Installation') %></p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          </div>
-        </div>
-      </div>
+<div class="container mx-auto">
+  <div class="flex items-center mb-4">
+    <h1 class="text-3xl">Loci for <%= @area %>.<%= @square %></h1>
+    <div class="ml-auto">
+      <%= link_to "Finds for Square", area_square_finds_path(@area, @square), class: "btn btn-primary mr-2" %>
+      <%= link_to "Pails for Square", area_square_pails_path(@area, @square), class: "btn btn-primary mr-2" %>
+      <button data-modal-target="newLocusModal" data-modal-toggle="newLocusModal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+        New Locus
+      </button>
     </div>
   </div>
+
+  <!-- Main modal -->
+<div id="newLocusModal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative w-full max-w-2xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <div class="p-6 space-y-6">
+              <p><%= link_to "New Architecture Locus", new_area_square_locus_path(@area, @square, type: 'Architecture'), class: "text-blue-600 hover:underline" %></p>
+              <p><%= link_to "New Burial Locus", new_area_square_locus_path(@area, @square, type: 'Burial'), class: "text-blue-600 hover:underline" %></p>
+              <p><%= link_to "New Earth Locus", new_area_square_locus_path(@area, @square, type: 'Earth'), class: "text-blue-600 hover:underline" %></p>
+              <p><%= link_to "New Installation Locus", new_area_square_locus_path(@area, @square, type: 'Installation'), class: "text-blue-600 hover:underline" %></p>
+            </div>
+            <!-- Modal footer -->
+            <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+              <button data-modal-hide="newLocusModal" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">Cancel</button>
+            </div>
+        </div>
+    </div>
 </div>
-<div class="row">
-  <div class="col">
+
+  <div class="mb-4">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><%= link_to 'Home', root_path %></li>
-        <li class="breadcrumb-item"><%= link_to "Area #{@area}", area_squares_path(@area) %></li>
+        <li class="breadcrumb-item"><%= link_to "Area #{@area}", area_squares_path(@area), class: "text-blue-600 hover:underline" %></li>
         <li class="breadcrumb-item active" aria-current="page"><%= "Square #{@square}" %></li>
       </ol>
     </nav>
   </div>
-</div>
 
-<% @loci.each do |locus| %>
-<div class="row">
-  <div class="col-3">
-    <%= link_to "#{locus.code}", area_square_locus_path(@area, @square, locus.code) %>
-  </div>
-  <div class="col-3">
-    <%= locus.locus_type %>
-  </div>
-  <div class="col-6">
-    <%= locus.designation %>
-  </div>
+  <% @loci.each do |locus| %>
+    <div class="flex mb-2">
+      <div class="w-1/4 pr-4">
+        <%= link_to "#{locus.code}", area_square_locus_path(@area, @square, locus.code), class: "text-blue-600 hover:underline" %>
+      </div>
+      <div class="w-1/4 pr-4">
+        <%= locus.locus_type %>
+      </div>
+      <div class="w-1/2">
+        <%= locus.designation %>
+      </div>
+    </div>
+  <% end %>
 </div>
-<% end %>

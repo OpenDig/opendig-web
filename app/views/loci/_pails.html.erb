@@ -1,59 +1,55 @@
-<div class="row">
-  <div class="col">
-    <h1>Pails</h1>
+<div class="flex flex-col mb-8 bg-gray-100 p-4 rounded-lg shadow">
+  <div class="flex items-center mb-4">
+    <h2 class="text-2xl font-semibold">Pails</h2>
+  </div>
+  <div class="overflow-x-auto">
     <table class="table">
       <thead>
         <tr>
-          <th>Number</th>
-          <th>Date</th>
-          <th>Baskets</th>
-          <th>Total</th>
-          <th>Diagnostic</th>
-          <th>Published</th>
+          <th class="px-4 py-2">Number</th>
+          <th class="px-4 py-2">Date</th>
+          <th class="px-4 py-2">Baskets</th>
+          <th class="px-4 py-2">Total</th>
+          <th class="px-4 py-2">Diagnostic</th>
+          <th class="px-4 py-2">Published</th>
         </tr>
       </thead>
       <tbody>
         <% @locus.dig('pails').each do |pail| %>
-          <tr>
-            <td><%= pail["pail_number"] %></td>
-            <td><%= read_date pail["pail_date"] %></td>
-            <td><%= pail["baskets"] %></td>
-            <td><%= pail["total_count"] %></td>
-            <td><%= pail["diagnostic_count"] %></td>
-            <td><%= pail["publish"] %></td>
+          <tr class="hover:bg-gray-200">
+            <td class="px-4 py-2"><%= pail["pail_number"] %></td>
+            <td class="px-4 py-2"><%= read_date(pail["pail_date"]) %></td>
+            <td class="px-4 py-2"><%= pail["baskets"] %></td>
+            <td class="px-4 py-2"><%= pail["total_count"] %></td>
+            <td class="px-4 py-2"><%= pail["diagnostic_count"] %></td>
+            <td class="px-4 py-2"><%= pail["publish"] %></td>
           </tr>
-          <% if pail["pottery_comments"].present? %>
-          <tr>
-            <td></td>
-            <td>Comments:</td>
-            <td colspan="4"><%= pail["pottery_comments"] %></td>
-          </tr>
-          <% end %>
+          <!-- ... -->
           <% if pail['readings'].present? %>
             <tr>
               <td></td>
-              <td colspan="5">
-                <h4>Pottery Readings</h4>
+              <td colspan="5" class="px-4 py-2">
+                <h4 class="text-lg font-semibold mb-2">Pottery Readings</h4>
                 <table class="table">
                   <thead>
                     <tr>
-                      <th>Count</th>
-                      <th>Quantity modifier</th>
-                      <th>Form</th>
-                      <th>Period</th>
-                      <th>Period modifier</th>
-                      <th>Question</th>
+                      <th class="pl-4 text-left">Count</th>
+                      <th class="pl-4 text-left">Quantity modifier</th>
+                      <th class="pl-4 text-left">Form</th>
+                      <th class="pl-4 text-left">Period</th>
+                      <th class="pl-4 text-left">Period modifier</th>
+                      <th class="pl-4 text-left">Question</th>
                     </tr>
                   </thead>
                   <tbody>
                     <% pail.dig('readings').each do |reading| %>
-                      <tr>
-                        <td><%= reading['count'] %></td>
-                        <td><%= reading['quantity_modifier'] %></td>
-                        <td><%= reading['pot_form'] %></td>
-                        <td><%= reading['age'] %></td>
-                        <td><%= reading['time_level'] %></td>
-                        <td><%= reading['question'] %></td>
+                      <tr class="hover:bg-gray-200">
+                        <td class="pl-4 pr-10 text-left"><%= reading['count'] %></td>
+                        <td class="pl-4 pr-10 text-left"><%= reading['quantity_modifier'] %></td>
+                        <td class="pl-4 pr-10 text-left"><%= reading['pot_form'] %></td>
+                        <td class="pl-4 pr-10 text-left"><%= reading['age'] %></td>
+                        <td class="pl-4 pr-10 text-left"><%= reading['time_level'] %></td>
+                        <td class="pl-4 pr-10 text-left"><%= reading['question'] %></td>
                       </tr>
                     <% end %>
                   </tbody>
@@ -61,11 +57,13 @@
               </td>
             </tr>
           <% end %>
+          <!-- ... -->
+
           <% if pail['finds'].present? %>
             <tr>
               <td></td>
-              <td colspan="5">
-                <h4>Field Finds and Samples</h4>
+              <td colspan="5" class="px-4 py-2">
+                <h4 class="text-lg font-semibold mb-2">Field Finds and Samples</h4>
                 <table class="table">
                   <thead>
                     <tr>
@@ -81,7 +79,7 @@
                   </thead>
                   <tbody>
                     <% pail.dig('finds').each do |find| %>
-                      <tr>
+                      <tr class="hover:bg-gray-200">
                         <td><%= find['field_number'] %></td>
                         <td><%= find['registration_number'] %></td>
                         <td><%= find['type'] %></td>

@@ -1,58 +1,95 @@
-<div class="container">
-  <div class="row">
-    <div class="col-10 align-bottom">
-      <h1>Field Find <%= @find['field_number'] %></h1>
+<div class="container mx-auto">
+  <div class="flex items-center mb-4">
+    <div class="w-10/12">
+      <h1 class="text-2xl font-bold">Field Find <%= @find['field_number'] %></h1>
     </div>
-    <div class="col-2 align-bottom">
-      <%= link_to "Edit", edit_registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code), class: "btn btn-primary float-right" %>
+    <div class="w-2/12">
+      <%= link_to "Edit", edit_registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code), class: "px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-full float-right" %>
+    </div>
+  </div>
+  <div class="flex mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="flex breadcrumb">
+        <li class="mr-2"><%= link_to 'Registrar Home', registrar_index_path, class: "text-blue-500 hover:underline" %></li>
+        <li class="mr-2"><%= link_to "Locus #{@area}.#{@square}.#{@locus_code}", area_square_locus_path(@area, @square, @locus_code), class: "text-blue-500 hover:underline" %></li>
+        <li>Pail Number <%= @pail_id %></li>
+      </ol>
+    </nav>
+  </div>
+  <div class="flex mb-4">
+    <div class="w-8/12">
+      <h2 class="text-xl font-semibold">General Information</h2>
+      <% @descriptions['finds'].each do |item| %>
+        <div class="flex mb-2">
+          <div class="w-1/4">
+            <%= item["label"] %>
+          </div>
+          <div class="w-3/4">
+            <%= output(@find.dig(item["key"]), item["type"]) %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <div class="w-4/12">
+      <% if Find.can_have_image?(@find.dig('registration_number')) %>
+      <div class="glide">
+        <div class="glide__track" data-glide-el="track">
+          <ul class="glide__slides">
 
-    </div>
-  </div>
-  <div class="row">
-    <div class="col">
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><%= link_to 'Registrar Home', registrar_index_path %></li>
-          <li class="breadcrumb-item"><%= link_to "Locus #{@area}.#{@square}.#{@locus_code}", area_square_locus_path(@area, @square, @locus_code) %></li>
-          <li class="breadcrumb-item">Pail Number <%= @pail_id %></li>
-        </ol>
-      </nav>
-    </div>
-  </div>
-</div>
-<div class="row">
-  <div class="col-8">
-    <h2>General Information</h2>
-    <% @descriptions['finds'].each do |item| %>
-      <div class="row">
-        <div class="col-4">
-          <%= item["label"] %>
-        </div>
-        <div class="col-8">
-          <%= output(@find.dig(item["key"]), item["type"]) %>
+          </ul>
         </div>
       </div>
-    <% end %>
-  </div>
-  <div class="col-4">
-    <% if Find.can_have_image?(@find.dig('registration_number')) %>
-      <%= image_tag(Find.get_presigned_url(@find.dig('registration_number')), class: 'find-img') %>
-    <% end %>
-  </div>
-</div>
-<hr/>
-<div class="row">
-  <div class="col">
-  <h2>Detailed Information</h2>
-  <% @descriptions['registar_info'].each do |item| %>
-    <div class="row">
-      <div class="col-4">
-        <%= item["label"] %>
-      </div>
-      <div class="col-8">
-        <%= output(@find.dig(item["key"]), item["type"]) %>
-      </div>
+
+
+      <div id="default-carousel" class="relative w-full" data-carousel="static">
+        <!-- Carousel wrapper -->
+        <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
+            <% Find.get_presigned_urls(@find.dig('registration_number')).each do |url| %>
+            <div class="hidden duration-700 ease-in-out" data-carousel-item>
+                <%= image_tag(url, class: 'absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2') %>
+            </div>
+            <% end %>
+        </div>
+        <!-- Slider indicators -->
+        <div class="absolute z-30 flex space-x-3 -translate-x-1/2 bottom-5 left-1/2">
+            <button type="button" class="w-3 h-3 rounded-full" aria-current="true" aria-label="Slide 1" data-carousel-slide-to="0"></button>
+            <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 2" data-carousel-slide-to="1"></button>
+        </div>
+        <!-- Slider controls -->
+        <button type="button" class="absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-full sm:w-10 sm:h-10 bg-black/30 dark:bg-gray-800/30 group-hover:bg-black/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
+            <svg aria-hidden="true" class="w-5 h-5 text-white sm:w-6 sm:h-6 dark:text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            <span class="sr-only">Previous</span>
+          </span>
+        </button>
+        <button type="button" class="absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-next>
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-full sm:w-10 sm:h-10 bg-black/30 dark:bg-gray-800/30 group-hover:bg-black/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
+            <svg aria-hidden="true" class="w-5 h-5 text-white sm:w-6 sm:h-6 dark:text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+            <span class="sr-only">Next</span>
+          </span>
+        </button>
     </div>
-  <% end %>
+      <% end %>
+    </div>
+  </div>
+  <hr class="my-4">
+  <div class="flex mb-4">
+    <div class="w-full">
+      <h2 class="text-xl font-semibold">Detailed Information</h2>
+      <% @descriptions['registar_info'].each do |item| %>
+        <div class="flex mb-2">
+          <div class="w-1/4">
+            <%= item["label"] %>
+          </div>
+          <div class="w-3/4">
+            <%= output(@find.dig(item["key"]), item["type"]) %>
+          </div>
+        </div>
+      <% end %>
+    </div>
   </div>
 </div>

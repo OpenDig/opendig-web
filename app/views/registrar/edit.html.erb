@@ -1,28 +1,27 @@
-<div class="container">
-  <div class="row">
-    <div class="col-10 align-bottom">
-      <h1>Field find or Sample #<%#= @find.field_number %></h1>
+<div class="container mx-auto">
+  <div class="flex items-center mb-4">
+    <div class="w-10/12">
+      <h1 class="text-2xl font-bold">Field find or Sample #<%#= @find.field_number %></h1>
     </div>
-    <div class="col-2 align-bottom">
-      <%= link_to "Back", registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code), class: "btn btn-primary float-right" %>
-
+    <div class="w-2/12">
+      <%= link_to "Back", registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code), class: "px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-full float-right" %>
     </div>
   </div>
-  <div class="row">
-    <div class="col">
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><%= link_to 'Registrar Home', registrar_index_path %></li>
-          <li class="breadcrumb-item"><%= link_to "Locus #{@area}.#{@square}.#{@locus_code}", area_square_locus_path(@area, @square, @locus_code) %></li>
-          <li class="breadcrumb-item">Pail Number <%= @pail_id %></li>
-        </ol>
-      </nav>
-    </div>
+  <div class="flex mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="flex breadcrumb">
+        <li class="mr-2"><%= link_to 'Registrar Home', registrar_index_path, class: "text-blue-500 hover:underline" %></li>
+        <li class="mr-2"><%= link_to "Locus #{@area}.#{@square}.#{@locus_code}", area_square_locus_path(@area, @square, @locus_code), class: "text-blue-500 hover:underline" %></li>
+        <li>Pail Number <%= @pail_id %></li>
+      </ol>
+    </nav>
   </div>
 </div>
 
 <%= form_with(url: registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code), method: 'patch', local: true) do |form| %>
-  <%= render 'form', form: form %>
+  <div class="container mx-auto">
+    <%= render 'form', form: form %>
+  </div>
 <% end %>
 
 <%= render 'shared/navigation_safety' %>

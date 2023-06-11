@@ -1,3 +1,37 @@
+<div class="flex flex-col">
+  <div class="flex flex-row items-center justify-between mb-4">
+    <h1 class="text-3xl font-bold">Finds for <%= @area %>.<%= @square %></h1>
+    <%= link_to "Back to Loci", area_square_loci_path(@area, @square), class: "btn btn-primary" %>
+  </div>
+  <div class="flex flex-row mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="flex flex-row">
+        <li class="mr-2"><%= link_to 'Home', root_path, class: "text-blue-500" %></li>
+        <li class="mr-2"><%= link_to "Area #{@area}", area_squares_path(@area), class: "text-blue-500" %></li>
+        <li class="text-gray-500" aria-current="page"><%= "Finds for square #{@square}" %></li>
+      </ol>
+    </nav>
+  </div>
+
+    <div class="flex flex-row mb-4">
+    <div class="w-2/12">
+      <h3 class="text-lg font-bold">Field Number</h3>
+    </div>
+    <div class="w-1/12">
+      <h3 class="text-lg font-bold">Locus</h3>
+    </div>
+    <div class="w-1/12">
+      <h3 class="text-lg font-bold">Pail</h3>
+    </div>
+    <div class="w-2/12">
+      <h3 class="text-lg font-bold">Pail Date</h3>
+    </div>
+    <div class="w-2/12">
+      <h3 class="text-lg font-bold">Type</h3>
+    </div>
+  </div>
+</div>
+
 <div class="row">
   <div class="col-10 align-bottom">
     <h1>Finds for <%= @area %>.<%= @square %></h1>

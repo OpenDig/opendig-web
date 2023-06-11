@@ -1,65 +1,69 @@
-<div class="row">
-  <div class="col-12 align-bottom">
-    <h1>Registar Homepage for season <%= @selected_season %></h1>
+<div class="flex mb-4">
+  <div class="col-span-12 align-bottom">
+    <h1 class="text-2xl font-semibold">Registar Homepage for season <%= @selected_season %></h1>
   </div>
 </div>
 
-<div class="row">
-  <div class="col-12">
-    <h1><%= @status.capitalize %> Items</h1>
+<div class="flex mb-4">
+  <div class="col-span-12">
+    <h1 class="text-2xl"><%= @status.capitalize %> Items</h1>
   </div>
 </div>
 
-<div class="row">
-  <div class="col-12">
-    <div class="row">
-      <div class="col-2">
-        <%= link_to 'All Field Finds', registrar_index_path(status: 'all') %>
+<div class="flex mb-4">
+  <div class="col-span-12">
+    <div class="flex flex-wrap">
+      <div class="col-span-2 mr-2">
+        <%= link_to 'All Field Finds', registrar_index_path(status: 'all'), class: 'w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded' %>
       </div>
-      <div class="col-2">
-        <%= link_to 'Unregistered', registrar_index_path(status: 'unregistered') %>
+      <div class="col-span-2 mr-2">
+        <%= link_to 'Unregistered', registrar_index_path(status: 'unregistered'), class: 'w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded' %>
       </div>
-      <div class="col-2">
-        <%= link_to 'Initial Registration', registrar_index_path(status: 'initial') %>
+      <div class="col-span-2 mr-2">
+        <%= link_to 'Initial Registration', registrar_index_path(status: 'initial'), class: 'w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded' %>
       </div>
-      <div class="col-2">
-        <%= link_to 'Work in Progress', registrar_index_path(status: 'wip') %>
+      <div class="col-span-2 mr-2">
+        <%= link_to 'Work in Progress', registrar_index_path(status: 'wip'), class: 'w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded' %>
       </div>
-      <div class="col-2">
-        <%= link_to 'Completed', registrar_index_path(status: 'completed') %>
+      <div class="col-span-2">
+        <%= link_to 'Completed', registrar_index_path(status: 'completed'), class: 'w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded' %>
       </div>
     </div>
   </div>
 </div>
 
-<div class="row">
-  <div class="col-4">
-    <h2>Information</h2>
-  </div>
-  <div class="col-2">
-    <h2>Reg Number</h2>
-  </div>
-  <div class="col-1">
-    <h2>Type</h2>
-  </div>
-  <div class="col-5">
-    <h2>Remarks</h2>
-  </div>
-</div>
 
-<% @finds.each do |find| %>
-<div class="row">
-  <div class="col-4">
-    <%= link_to "Locus: #{find.formatted_locus_code}, Pail: #{find.pail_number}, Field number: #{find.field_number}", registrar_path(id: find.id, pail_id: find.pail_number, item_type: find.type, item_number: find.field_number, item_locus_code: find.formatted_locus_code) %>
-  </div>
-  <div class="col-2">
-      <%= find.registration_number %>
-  </div>
-  <div class="col-1">
-      <%= find.type %>
-  </div>
-  <div class="col-5">
-    <%= find.remarks %>
-  </div>
-</div>
-<% end %>
+<table class="w-full mb-4">
+  <thead>
+    <tr>
+      <th class="px-4 py-2 text-left">Information</th>
+      <th class="px-4 py-2 text-left" style="width: 10%;">Reg Number</th>
+      <th class="px-4 py-2 text-left" style="width: 10%;">Type</th>
+      <th class="px-4 py-2 text-left">Remarks</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @finds.each.with_index do |find, index| %>
+      <tr class="<%= index.even? ? 'bg-gray-100' : '' %>">
+<td class="px-4 py-2 text-left">
+  <%= link_to registrar_path(id: find.id, pail_id: find.pail_number, item_type: find.type, item_number: find.field_number, item_locus_code: find.formatted_locus_code) do %>
+    <div class="flex flex-col">
+      <div class="text-lg font-semibold"><%= find.formatted_locus_code %></div>
+      <div class="grid grid-cols-2 gap-1">
+        <span class="text-sm font-semibold text-gray-600">Pail:</span>
+        <span class="text-sm text-left"><%= find.pail_number %></span>
+        <span class="text-sm font-semibold text-gray-600">Field number:</span>
+        <span class="text-sm text-left"><%= find.field_number %></span>
+      </div>
+    </div>
+  <% end %>
+</td>
+
+
+        <td class="px-4 py-2 text-left"><%= find.registration_number %></td>
+        <td class="px-4 py-2 text-left"><%= find.type %></td>
+        <td class="px-4 py-2 text-left"><%= find.remarks %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

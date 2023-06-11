@@ -1,23 +1,25 @@
-<div class="row">
-  <div class="col">
-    <h1>Photos</h1>
-    <table class="table">
+<div class="flex flex-col mb-8 bg-gray-100 p-4 rounded-lg shadow">
+  <h1 class="text-2xl font-bold mb-6">Photos</h1>
+  <div class="overflow-x-auto">
+    <table class="table w-full">
       <thead>
         <tr>
-          <th>Date</th>
-          <th>Photo Number</th>
-          <th>Subject</th>
-          <th>Photo</th>
+          <th class="px-4 py-2 text-left">Date</th>
+          <th class="px-4 py-2 text-left">Photo Number</th>
+          <th class="px-4 py-2 text-left">Subject</th>
+          <th class="px-4 py-2 text-center">Photo</th>
         </tr>
       </thead>
       <tbody>
         <% @locus.dig('photos').each do |photo| %>
-          <tr>
-            <td><%= read_date photo["date"] %></td>
-            <td><%= photo["number"] %></td>
-            <td><%= photo["subject"] %></td>
-            <td>
-              <a class="locus-photo-link" href="<%= Photo.photo_url(photo["number"], :medium) %>" data-lightbox="locus-photos"><img class="locus-photo" src="<%= Photo.photo_url(photo["number"], :thumb) %>" alt=""/></a>
+          <tr class="hover:bg-gray-200">
+            <td class="px-4 py-2 text-left"><%= read_date photo["date"] %></td>
+            <td class="px-4 py-2 text-left"><%= photo["number"] %></td>
+            <td class="px-4 py-2 text-left"><%= photo["subject"] %></td>
+            <td class="px-4 py-2 text-center">
+              <a class="locus-photo-link flex justify-center" href="<%= Photo.photo_url(photo["number"], :medium) %>" data-lightbox="locus-photos">
+                <img class="locus-photo w-32 h-32 object-cover rounded" src="<%= Photo.photo_url(photo["number"], :thumb) %>" alt="" />
+              </a>
             </td>
           </tr>
         <% end %>
