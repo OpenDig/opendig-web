@@ -9,7 +9,7 @@ class BulkUploadsController < ApplicationController
     uploaded_file_keys = []
     bucket = Rails.application.config.s3_bucket
     uploaded_files.each do |file|
-      s3_object = bucket.object("tests/#{file.original_filename}")
+      s3_object = bucket.object("finds/#{file.original_filename}")
 
       s3_object.upload_file(file.tempfile.path, acl: 'public-read') do |progress|
         # Progress tracking logic here
