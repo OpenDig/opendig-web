@@ -45,6 +45,7 @@ class Find
       Rails.cache.fetch("#{registration_number}_presigned_urls", expires_in: 5.minutes) do
         keys = get_image_keys(registration_number)
         urls = keys.map do |key|
+          self.find_url(key)
           bucket.object(key).presigned_url(:get)
         end
         urls
@@ -54,19 +55,14 @@ class Find
     end
   end
 
-  def self.photo_url(number, style, key)
-    Rails.cache.fetch "finds/photo_url_#{number}_#{style}" do
-      _style = self.styles(style)
-      if photo_exists?(number)
-        builder = Imgproxy::Builder.new(
-          _style.transform_keys(&:to_sym)
-        )
-        builder.url_for("s3://#{Rails.application.config.s3_bucket.name}/finds/#{key}")
-      else
-        height = _style[:height] || 1000
-        width = _style[:width] || 1000
-        "https://placehold.jp/#{height}x#{width}.jpg?text=No+Image"
-      end
+  def self.url(key, style="original")
+    Rails.cache.fetch("#{key}_url_#{style}", expires_in: 1.hour) do
+      _style = Photo.styles(style)
+      builder = Imgproxy::Builder.new(
+        _style.transform_keys(&:to_sym)
+      )
+      builder.url_for("s3://#{Rails.application.config.s3_bucket.name}/#{key}")
     end
   end
+
 end

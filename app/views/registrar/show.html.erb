@@ -44,9 +44,9 @@
       <div id="default-carousel" class="relative w-full" data-carousel="static">
         <!-- Carousel wrapper -->
         <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
-            <% Find.get_presigned_urls(@find.dig('registration_number')).each do |url| %>
+            <% Find.get_image_keys(@find.dig('registration_number')).each do |key| %>
             <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                <%= image_tag(url, class: 'absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2') %>
+                <%= image_tag(Find.url(key, :medium), class: 'absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2') %>
             </div>
             <% end %>
         </div>

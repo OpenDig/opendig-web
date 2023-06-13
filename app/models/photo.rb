@@ -17,7 +17,7 @@ class Photo
   def self.photo_exists?(number)
     Rails.cache.fetch "daily_photos/#{number}_exists" do
       bucket = Rails.application.config.s3_bucket
-      bucket.object("daily_photos/#{number}.jpg").exists?
+      bucket.object("daily_photos/#{number}.JPG").exists?
     end
   end
 
@@ -28,7 +28,7 @@ class Photo
         builder = Imgproxy::Builder.new(
           _style.transform_keys(&:to_sym)
         )
-        builder.url_for("s3://#{Rails.application.config.s3_bucket.name}/daily_photos/#{number}.jpg")
+        builder.url_for("s3://#{Rails.application.config.s3_bucket.name}/daily_photos/#{number}.JPG")
       else
         height = _style[:height] || 1000
         width = _style[:width] || 1000
