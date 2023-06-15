@@ -2246,7 +2246,7 @@
         "craftsmanship": ["Very crude", "Crude", "Moderate", "Fine", "Very Fine", "Natural"],
         "decoration": ["", "Appliqued", "Burnished", "Drilled", "Engraved", "Etched", "Fluted", "Glazed", "Impressed", "Incised", "Inscribed", "Modeled", "Molded", "None", "Painted", "Punctured", "Stamped", "Striped"],
         "condition": ["", "Broken", "Complete", "Mendable", "Fragile"],
-        "allocation": ["", "CNEA", "DoA - Kerak", "Field"]
+        "allocation": ["", "CNEA", "DoA - Kerak", "Field", "Missing"]
     },
     "lookup_labels": {
         "pot_form": "Pottery Form",
