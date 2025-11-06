@@ -8,10 +8,6 @@ class SquaresController < ApplicationController
   def new
   end
 
-  def pails
-    @pails = @db.view('opendig/pails', {group: true, start_key: [params[:id]], end_key: [params[:id], {}]})["rows"].map{|row| row["key"][1]}
-  end
-
   def create
     new_square = params[:square].upcase
     unless @squares.include? new_square
