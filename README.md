@@ -1,6 +1,6 @@
 # OpenDig Web
 
-A Rails 7 application for managing archaeological dig data.
+A Rails 7 application for managing archaeological dig data. [Join the Discord!](https://discord.gg/DJ7BZcQMsb)
 
 ## Requirements
 
