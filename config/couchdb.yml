@@ -1,6 +1,6 @@
 default: &default
   protocol: 'http'
-  host: couchdb
+  host: db
   port: 5984
   username: admin
   password: password
