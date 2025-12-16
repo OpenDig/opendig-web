@@ -3,12 +3,12 @@ name: Docker Image CI
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  # pull_request:
+  #   branches: [ "main" ]
 
 jobs:
-
-  build:
+#TO DO: deploy/build separate. Deploy only on original
+  build: 
 
     runs-on: ubuntu-latest
 
