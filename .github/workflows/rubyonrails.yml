@@ -14,6 +14,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     services:
+      couchdb:
+        image: couchdb:3
+        env:
+          COUCHDB_HOST: couchdb
+        ports:
+          - 5984:5984
       postgres:
         image: postgres:15
         env:
