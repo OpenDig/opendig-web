@@ -23,5 +23,4 @@ Imgproxy.configure do |config|
   config.endpoint = ENV['IMGPROXY_URL']
 end
 
-Rails.application.config.placeholder_url =
-  ENV['PLACEHOLDER_URL'] || "https://placehold.jp/1000x1000.jpg?text=No+Image"
+placeholder = ENV['PLACEHOLDER_URL'] || "https://placehold.jp/1000x1000.jpg?text=No+Image"
