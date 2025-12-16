@@ -10,14 +10,15 @@ if Rails.env.production?
     )
   end
 
-Aws.config.update(
-  region: 'us-east-1'
-)
-
-s3 = Aws::S3::Resource.new
-
-bucket_name = "opendig-#{Rails.env}"
-Rails.application.config.s3_bucket = s3.bucket(bucket_name)
+  Aws.config.update(
+    region: 'us-east-1'
+  )
+  
+  s3 = Aws::S3::Resource.new
+  
+  bucket_name = "opendig-#{Rails.env}"
+  Rails.application.config.s3_bucket = s3.bucket(bucket_name)
+end
 
 Imgproxy.configure do |config|
   config.endpoint = ENV['IMGPROXY_URL']
