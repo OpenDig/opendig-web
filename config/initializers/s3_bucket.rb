@@ -2,12 +2,13 @@ require 'aws-sdk-core'
 require 'aws-sdk-s3'
 require 'imgproxy'
 
-if ENV['S3_URL']
-  Aws.config.update(
-    endpoint: ENV['S3_URL'],
-    force_path_style: true
-  )
-end
+if Rails.env.production?
+  if ENV['S3_URL']
+    Aws.config.update(
+      endpoint: ENV['S3_URL'],
+      force_path_style: true
+    )
+  end
 
 Aws.config.update(
   region: 'us-east-1'
@@ -22,4 +23,5 @@ Imgproxy.configure do |config|
   config.endpoint = ENV['IMGPROXY_URL']
 end
 
-placerholder = ENV['PLACEHOLDER_URL'] || "https://placehold.jp/1000x1000.jpg?text=No+Image"
+Rails.application.config.placeholder_url =
+  ENV['PLACEHOLDER_URL'] || "https://placehold.jp/1000x1000.jpg?text=No+Image"
