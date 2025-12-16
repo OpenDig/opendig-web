@@ -21,6 +21,7 @@ prefix   = couchdb_config["prefix"] || nil
 suffix   = couchdb_config["suffix"] || nil
 
 database = db_name ? db_name : "#{prefix}_#{suffix}"
+host = ENV['COUCHDB_HOST'] || couchdb_config["host"]
 url = "#{protocol}://#{username}:#{password}@#{host}:#{port}/#{database}"
 Rails.application.config.couchdb = CouchRest.database!(url)
 
