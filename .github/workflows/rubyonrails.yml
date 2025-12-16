@@ -24,7 +24,7 @@ jobs:
 
     env:
       RAILS_ENV: test
-      COUCHDB_HOST: couchdb
+      COUCHDB_HOST: 127.0.0.1
       COUCHDB_PORT: 5984
       COUCHDB_USER: admin
       COUCHDB_PASSWORD: password
@@ -37,30 +37,12 @@ jobs:
         with:
           ruby-version: 3.2.0
           bundler-cache: true
-          
-      - name: Wait for CouchDB to be ready
-        run: |
-          echo "Waiting for CouchDB..."
-          for i in {1..30}; do
-            if curl -s http://admin:password@couchdb:5984 >/dev/null; then
-              echo "CouchDB is up"
-              break
-            fi
-            sleep 2
-          done
 
       - name: Prepare Rails log directory
         run: |
           mkdir -p log
           touch log/test.log
           chmod 0664 log/test.log
-
-      - name: Wait for CouchDB
-        run: |
-          until curl -s http://admin:password@localhost:5984/_up; do
-            echo "Waiting for CouchDB..."
-            sleep 3
-          done
 
       - name: Setup database
         run: |
