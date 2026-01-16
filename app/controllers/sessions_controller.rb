@@ -10,13 +10,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    session[:user_id] = nil
-    @current_user = nil
+    reset_session
     redirect_to root_path, notice: "Logged out!"
   end
-
-  def current_user
-    @current_user ||= User.find(session[:user_id]) if session[:user_id]
-  end
-  helper_method :current_user
 end
