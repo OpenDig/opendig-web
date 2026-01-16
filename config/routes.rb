@@ -6,6 +6,9 @@ Rails.application.routes.draw do
   get '/auth/failure', to: 'sessions#failure', as: :auth_failure
   delete '/logout', to: 'sessions#destroy', as: :logout
 
+  get '/auth/:provider/callback', to: 'sessions#create'
+  delete '/logout', to: 'sessions#destroy'
+
   resources :areas, only: [:index, :new, :create] do
     resources :squares, only: [:index, :new, :create] do
       resources :pails, only: [:index]

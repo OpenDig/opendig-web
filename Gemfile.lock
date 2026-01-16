@@ -415,6 +415,7 @@ DEPENDENCIES
   omniauth-google-oauth2
   omniauth-microsoft-office365
   omniauth-rails_csrf_protection
+  photoswipe-rails
   puma (~> 5.0)
   rack-mini-profiler
   rails (~> 7.0.4)
