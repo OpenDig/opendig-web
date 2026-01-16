@@ -1,4 +1,6 @@
 class SessionsController < ApplicationController
+  skip_before_action :check_editing_mode, only: [:create, :destroy]
+
   def create
     if user_signed_in?
       redirect_to root_path, notice: "Already logged in!"
