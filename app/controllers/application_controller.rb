@@ -4,7 +4,7 @@ class ApplicationController < ActionController::Base
 
   http_basic_authenticate_with name: "#{ENV['EDIT_USER']}", password: "#{ENV['EDIT_PASSWORD']}" if Rails.env.production?
 
-  helper_method :current_user, :user_signed_in?
+  helper_method :current_user, :user_signed_in?, :require_authentication
 
   private
   def set_db
