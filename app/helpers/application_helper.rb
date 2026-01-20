@@ -32,7 +32,7 @@ module ApplicationHelper
   end
 
   def sanitize_locus(locus)
-    locus.gsub(/\D/, '.') if locus
+    locus&.gsub(/\D/, '.')
   end
 
   # def flash_class(level)
@@ -70,11 +70,7 @@ module ApplicationHelper
   end
 
   def read_date(date_string)
-    if date_string.present?
-      Date.parse(date_string).strftime('%d %b, %Y')
-    else
-      nil
-    end
+    Date.parse(date_string).strftime('%d %b, %Y') if date_string.present?
   end
 
   def output(value, type)
@@ -91,7 +87,9 @@ module ApplicationHelper
     when 'picker'
       if form_definition_hash['values'].is_a? Hash
         select_tag "locus[#{description_type}][#{form_definition_hash['key']}]",
-                   options_for_select(@descriptions['lookups'][form_definition_hash['values']['from']], value), include_blank: true, class: 'form-control'
+                   options_for_select(@descriptions['lookups'][form_definition_hash['values']['from']], value),
+                   include_blank: true,
+                   class: 'form-control'
       else
         select_tag "locus[#{description_type}][#{form_definition_hash['key']}]",
                    options_for_select(form_definition_hash['values'], value), include_blank: true, class: 'form-control'
@@ -113,20 +111,28 @@ module ApplicationHelper
     case form_definition_hash['type']
     when 'picker'
       if form_definition_hash['values'].is_a? Hash
-        select_tag "#{full_param_name}",
-                   options_for_select(@descriptions['lookups'][form_definition_hash['values']['from']], value), include_blank: true, class: 'form-control'
+        select_tag(
+          full_param_name.to_s,
+          options_for_select(@descriptions['lookups'][form_definition_hash['values']['from']], value),
+          include_blank: true,
+          class: 'form-control'
+        )
       else
-        select_tag "#{full_param_name}", options_for_select(form_definition_hash['values'], value),
-                   include_blank: true, class: 'form-control'
+        select_tag(
+          full_param_name.to_s,
+          options_for_select(form_definition_hash['values'], value),
+          include_blank: true,
+          class: 'form-control'
+        )
       end
     when 'text_field'
-      text_field_tag "#{full_param_name}", value, class: 'form-control'
+      text_field_tag full_param_name.to_s, value, class: 'form-control'
     when 'date'
-      text_field_tag "#{full_param_name}", value, class: 'form-control'
+      text_field_tag full_param_name.to_s, value, class: 'form-control'
     when 'checkbox'
-      check_box_tag "#{full_param_name}", true, false, class: 'form-control'
+      check_box_tag full_param_name.to_s, true, false, class: 'form-control'
     when 'text_area'
-      text_area_tag "#{full_param_name}", value, class: 'form-control'
+      text_area_tag full_param_name.to_s, value, class: 'form-control'
     end
   end
 end

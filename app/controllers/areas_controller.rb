@@ -3,8 +3,7 @@ class AreasController < ApplicationController
     @areas = @db.view('opendig/areas', { group: true })['rows']
   end
 
-  def new
-  end
+  def new; end
 
   def create
     @areas = @db.view('opendig/areas', { group: true })['rows'].map { |area| area['key'] }

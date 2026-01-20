@@ -27,7 +27,7 @@ class Registrar
   end
 
   #   def self.import_csv(filename)
-  #     FindStruct = Struct.new( :registration_number, :field_number, :site, :square, :locus, :pail, :cu_or_bt, :gps_id, :designation, :certainty, :period, :stratum, :modifier_1, :modifier_2, :shape, :shape_modifier, :material, :color, :preservation, :percent, :craftsmanship, :decoration, :weight, :lg_ht, :width, :thickness, :diam, :perf_diam, :condition, :pieces, :allocation, :comments, :drawing, :drawing_date, :artist, :photo_file_names, :photo_date, :photographer, :parallels, :parallel_notes, :xrf, :three_d_scan, :rti, :residue_analysis, :conserved_restored )
+  #     FindStruct = Struct.new( :registration_number, :field_number, :site, :square, :locus, :pail, :cu_or_bt, :gps_id, :designation, :certainty, :period, :stratum, :modifier_1, :modifier_2, :shape, :shape_modifier, :material, :color, :preservation, :percent, :craftsmanship, :decoration, :weight, :lg_ht, :width, :thickness, :diam, :perf_diam, :condition, :pieces, :allocation, :comments, :drawing, :drawing_date, :artist, :photo_file_names, :photo_date, :photographer, :parallels, :parallel_notes, :xrf, :three_d_scan, :rti, :residue_analysis, :conserved_restored ) # rubocop:disable Layout/LineLength
 
   # # "technique"
   # # "munsell"

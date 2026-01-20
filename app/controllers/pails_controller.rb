@@ -8,11 +8,9 @@ class PailsController < ApplicationController
     @pails.sort! { |a, b| a.pail_number.to_i <=> b.pail_number.to_i }
   end
 
-  def show
-  end
+  def show; end
 
-  def edit
-  end
+  def edit; end
 
   def new
     @area = params[:area_id]

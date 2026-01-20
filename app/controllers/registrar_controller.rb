@@ -23,16 +23,14 @@ class RegistrarController < ApplicationController
     @finds.sort_by! { |find| [find.formatted_locus_code, find.pail_number] }
   end
 
-  def show
-  end
+  def show; end
 
-  def edit
-  end
+  def edit; end
 
   def update
     pails = @doc['pails']
     pail = pails.select { |p| p['pail_number'].to_s == @pail_id.to_s }.first
-    item = pail['finds'].select { |item| item.dig('field_number') == @item_number }.first
+    item = pail['finds'].select { |inner_item| inner_item['field_number'] == @item_number }.first
     item.merge!(params[:locus][:find].to_enum.to_h)
 
     if @doc.save
@@ -52,8 +50,9 @@ class RegistrarController < ApplicationController
     @area, @square, @locus_code = @item_locus_code.split('.')
     @pail_id = params[:pail_id]
     @doc = @db.get(@item_id)
-    @find = @doc['pails'].select do |pail|
-      pail['pail_number'].to_s == @pail_id.to_s
-    end.first.dig('finds').select { |item| item.dig('field_number') == @item_number }.first
+    pail = @doc['pails'].select do |p|
+      p['pail_number'].to_s == @pail_id.to_s
+    end
+    @find = pail.first['finds'].select { |item| item['field_number'] == @item_number }.first
   end
 end

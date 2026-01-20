@@ -17,10 +17,14 @@ class ReportsController < ApplicationController
         @report_type = 'samples'
       end
       @rows = CsvData.new(@report_type).rows
-      # @rows = @db.view('opendig/report', {reduce: false, start_key: [@season, report_type_param], end_key:[@season, report_type_param, {}] })["rows"]
+      # @rows = @db.view(
+      #   'opendig/report',
+      #   {reduce: false, start_key: [@season, report_type_param], end_key:[@season, report_type_param, {}] }
+      # )["rows"]
       @rows.select! do |row|
-        row.dig('allocation')&.upcase&.include?('DoA'.upcase)
-      end.sort_by! { |row| row.dig('registration_number').to_s }
+        row['allocation']&.upcase&.include?('DoA'.upcase)
+      end
+      @rows.sort_by! { |row| row['registration_number'].to_s }
     elsif %w[Z].include? report_type_param
       @report_type = 'bones'
       # @rows = @db.view('opendig/bone_report', {reduce: false, start_key: [@season], end_key:[@season, {}] })["rows"]
@@ -33,7 +37,7 @@ class ReportsController < ApplicationController
         r['pail'] = format('%03d', r['pail'].to_i)
       end
 
-      @rows.sort_by! { |row| [row.dig('area'), row.dig('square'), row.dig('locus'), row.dig('pail')] }
+      @rows.sort_by! { |row| [row['area'], row['square'], row['locus'], row['pail']] }
     end
 
     field_set_selector = @descriptions['reports'][@report_type]['field_set']

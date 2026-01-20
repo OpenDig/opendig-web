@@ -57,9 +57,9 @@ class Find
 
   def self.url(key, style = :original)
     Rails.cache.fetch("#{key}_url_#{style}", expires_in: 1.hour) do
-      _style = Photo.styles(style)
+      photo_style = Photo.styles(style)
       builder = Imgproxy::Builder.new(
-        _style.transform_keys(&:to_sym)
+        photo_style.transform_keys(&:to_sym)
       )
       builder.url_for("s3://#{Rails.application.config.s3_bucket.name}/#{key}")
     end

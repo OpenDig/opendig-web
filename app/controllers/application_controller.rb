@@ -2,7 +2,9 @@ class ApplicationController < ActionController::Base
   before_action :set_db, :set_descriptions, :set_edit_mode
   before_action :check_editing_mode, only: %i[new edit create update destroy]
 
-  http_basic_authenticate_with name: "#{ENV['EDIT_USER']}", password: "#{ENV['EDIT_PASSWORD']}" if Rails.env.production?
+  if Rails.env.production?
+    http_basic_authenticate_with name: (ENV['EDIT_USER']).to_s, password: (ENV['EDIT_PASSWORD']).to_s
+  end
 
   private
 

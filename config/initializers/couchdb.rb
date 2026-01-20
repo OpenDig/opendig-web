@@ -21,11 +21,10 @@ prefix   = couchdb_config['prefix'] || nil
 suffix   = couchdb_config['suffix'] || nil
 
 database = db_name || "#{prefix}_#{suffix}"
-host = ENV['COUCHDB_HOST'] || couchdb_config['host']
 url = "#{protocol}://#{username}:#{password}@#{host}:#{port}/#{database}"
 Rails.application.config.couchdb = CouchRest.database!(url)
 
-def get_config
+def load_or_create_config
   doc_id = 'opendig_config'
   begin
     doc = begin
@@ -55,13 +54,14 @@ def get_config
 end
 
 design = YAML.load_file("#{Rails.root}/config/views.yaml")
-config = get_config
+config = load_or_create_config
 config_version = (config[:version] || 0).to_i
 design_version = (design[:version] || 0).to_i
 
 if config_version != design_version
   Rails.logger.info 'Design docs out of date, updating'
-  if design_docs = Rails.application.config.couchdb.get('_design/opendig')
+  design_docs = Rails.application.config.couchdb.get('_design/opendig')
+  if design_docs
     design_docs['views'] = design[:design][:views]
     design_docs.save
   else

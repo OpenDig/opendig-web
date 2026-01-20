@@ -9,11 +9,9 @@ class LociController < ApplicationController
     end
   end
 
-  def show
-  end
+  def show; end
 
-  def edit
-  end
+  def edit; end
 
   def new
     @area = params[:area_id]
@@ -67,7 +65,7 @@ class LociController < ApplicationController
           repair_nested_params(value)
         else
           obj[key] = value.values
-          value.values.each { |h| repair_nested_params(h) }
+          value.each_value { |h| repair_nested_params(h) }
         end
       end
     end

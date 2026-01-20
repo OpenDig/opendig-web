@@ -1,11 +1,9 @@
 class SquaresController < ApplicationController
   before_action :set_area_and_squares
 
-  def index
-  end
+  def index; end
 
-  def new
-  end
+  def new; end
 
   def create
     new_square = params[:square].upcase
