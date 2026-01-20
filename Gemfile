@@ -63,6 +63,7 @@ group :development, :test do
   gem 'debug'
   gem 'rails_live_reload'
   gem 'rubocop', require: false
+  gem 'rubocop-rails', require: false
 end
 
 group :development do
