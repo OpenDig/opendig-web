@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  get '/about', to: 'static_pages#about', as: 'about'
+  get '/help', to: 'static_pages#help', as: 'help'
+
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 
   resources :areas, only: [:index, :new, :create] do

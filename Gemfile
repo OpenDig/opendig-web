@@ -61,6 +61,7 @@ gem 'aws-sdk-s3'
 
 group :development, :test do
   gem 'debug'
+  gem 'rails_live_reload'
 
   # Test dependencies (moved them here since Bundler wasn't loading them in CI)
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
