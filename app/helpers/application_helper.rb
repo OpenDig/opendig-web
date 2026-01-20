@@ -1,5 +1,4 @@
 module ApplicationHelper
-
   def stratigraphic_relationships
     DataDigger.stratigraphy_related_how
   end
@@ -33,7 +32,7 @@ module ApplicationHelper
   end
 
   def sanitize_locus(locus)
-    locus.gsub(/\D/,'.') if locus
+    locus.gsub(/\D/, '.') if locus
   end
 
   # def flash_class(level)
@@ -48,23 +47,23 @@ module ApplicationHelper
   # This will assign the correct bootstrap colors to the messages
   def flash_class(name)
     case name
-      when 'notice' then 'alert alert-info alert-dismissable fade show'
-      when 'success' then 'alert alert-success alert-dismissable fade show'
-      when 'error' then 'alert alert-danger alert-dismissable fade show'
-      when 'alert' then 'alert alert-danger alert-dismissable fade show'
-      else
-        'alert alert-primary alert-dismissable fade show'
+    when 'notice' then 'alert alert-info alert-dismissable fade show'
+    when 'success' then 'alert alert-success alert-dismissable fade show'
+    when 'error' then 'alert alert-danger alert-dismissable fade show'
+    when 'alert' then 'alert alert-danger alert-dismissable fade show'
+    else
+      'alert alert-primary alert-dismissable fade show'
     end
   end
 
   # Exlude these messages from appearing
   def flash_blacklist(name)
-    %w(timedout).include?(name)
+    %w[timedout].include?(name)
   end
 
   def level_or_nil(level)
-    if level == "0" || nil
-      "-"
+    if level == '0' || nil
+      '-'
     else
       level
     end
@@ -88,42 +87,46 @@ module ApplicationHelper
   end
 
   def input_for(form_definition_hash, value, description_type)
-    case form_definition_hash["type"]
-    when "picker"
+    case form_definition_hash['type']
+    when 'picker'
       if form_definition_hash['values'].is_a? Hash
-        select_tag "locus[#{description_type}][#{form_definition_hash['key']}]", options_for_select(@descriptions['lookups'][form_definition_hash['values']['from']], value), include_blank: true, class: "form-control"
+        select_tag "locus[#{description_type}][#{form_definition_hash['key']}]",
+                   options_for_select(@descriptions['lookups'][form_definition_hash['values']['from']], value), include_blank: true, class: 'form-control'
       else
-        select_tag "locus[#{description_type}][#{form_definition_hash['key']}]", options_for_select(form_definition_hash['values'], value), include_blank: true, class: "form-control"
+        select_tag "locus[#{description_type}][#{form_definition_hash['key']}]",
+                   options_for_select(form_definition_hash['values'], value), include_blank: true, class: 'form-control'
       end
-    when "text_field"
-      text_field_tag "locus[#{description_type}][#{form_definition_hash['key']}]", value, class: "form-control"
-    when "date"
-      text_field_tag "locus[#{description_type}][#{form_definition_hash['key']}]", value, class: "form-control"
-    when "checkbox"
-      check_box_tag "locus[#{description_type}][#{form_definition_hash['key']}]", true, false, :class => 'form-control'
-    when "text_area"
-      text_area_tag "locus[#{description_type}][#{form_definition_hash['key']}]", value, class: "form-control"
+    when 'text_field'
+      text_field_tag "locus[#{description_type}][#{form_definition_hash['key']}]", value, class: 'form-control'
+    when 'date'
+      text_field_tag "locus[#{description_type}][#{form_definition_hash['key']}]", value, class: 'form-control'
+    when 'checkbox'
+      check_box_tag "locus[#{description_type}][#{form_definition_hash['key']}]", true, false, class: 'form-control'
+    when 'text_area'
+      text_area_tag "locus[#{description_type}][#{form_definition_hash['key']}]", value, class: 'form-control'
     end
   end
 
   def input_with_full_param_name(form_definition_hash, value, full_param_name)
     puts "input_with_full_param_name: #{form_definition_hash.inspect}"
 
-    case form_definition_hash["type"]
-    when "picker"
+    case form_definition_hash['type']
+    when 'picker'
       if form_definition_hash['values'].is_a? Hash
-        select_tag "#{full_param_name}", options_for_select(@descriptions['lookups'][form_definition_hash['values']['from']], value), include_blank: true, class: "form-control"
+        select_tag "#{full_param_name}",
+                   options_for_select(@descriptions['lookups'][form_definition_hash['values']['from']], value), include_blank: true, class: 'form-control'
       else
-        select_tag "#{full_param_name}", options_for_select(form_definition_hash['values'], value), include_blank: true, class: "form-control"
+        select_tag "#{full_param_name}", options_for_select(form_definition_hash['values'], value),
+                   include_blank: true, class: 'form-control'
       end
-    when "text_field"
-      text_field_tag "#{full_param_name}", value, class: "form-control"
-    when "date"
-      text_field_tag "#{full_param_name}", value, class: "form-control"
-    when "checkbox"
-      check_box_tag "#{full_param_name}", true, false, :class => 'form-control'
-    when "text_area"
-      text_area_tag "#{full_param_name}", value, class: "form-control"
+    when 'text_field'
+      text_field_tag "#{full_param_name}", value, class: 'form-control'
+    when 'date'
+      text_field_tag "#{full_param_name}", value, class: 'form-control'
+    when 'checkbox'
+      check_box_tag "#{full_param_name}", true, false, class: 'form-control'
+    when 'text_area'
+      text_area_tag "#{full_param_name}", value, class: 'form-control'
     end
   end
 end

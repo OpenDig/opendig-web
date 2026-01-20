@@ -4,10 +4,9 @@
 # are locale specific, and you may define rules for as many different
 # locales as you wish. All of these examples are active by default:
 ActiveSupport::Inflector.inflections(:en) do |inflect|
-  inflect.plural /^(loc)us$/i, '\1i'
-  inflect.singular /^(loc)i/i, '\1us'
+  inflect.plural(/^(loc)us$/i, '\1i')
+  inflect.singular(/^(loc)i/i, '\1us')
 end
-
 
 # These inflection rules are supported but not enabled by default:
 # ActiveSupport::Inflector.inflections(:en) do |inflect|

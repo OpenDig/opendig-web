@@ -1,9 +1,8 @@
 require 'date'
-require "aws-sdk-s3"
-require "net/http"
+require 'aws-sdk-s3'
+require 'net/http'
 
 class Find
-
   attr_accessor :locus, :pail_number, :pail_date, :field_number, :type, :remarks, :id, :season, :gis_id
 
   def initialize(row)
@@ -17,7 +16,8 @@ class Find
 
   def self.can_have_image?(registration_number)
     return unless registration_number.present?
-    return false if registration_number.upcase.start_with?("S")
+    return false if registration_number.upcase.start_with?('S')
+
     true
   end
 
@@ -45,7 +45,7 @@ class Find
       Rails.cache.fetch("#{registration_number}_presigned_urls", expires_in: 5.minutes) do
         keys = get_image_keys(registration_number)
         urls = keys.map do |key|
-          self.find_url(key)
+          find_url(key)
           bucket.object(key).presigned_url(:get)
         end
         urls
@@ -55,7 +55,7 @@ class Find
     end
   end
 
-  def self.url(key, style=:original)
+  def self.url(key, style = :original)
     Rails.cache.fetch("#{key}_url_#{style}", expires_in: 1.hour) do
       _style = Photo.styles(style)
       builder = Imgproxy::Builder.new(
@@ -70,5 +70,4 @@ class Find
     Rails.cache.delete("#{registration_number}_has_keys")
     Rails.cache.delete("#{registration_number}_presigned_urls")
   end
-
 end

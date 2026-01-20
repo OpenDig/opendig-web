@@ -1,5 +1,4 @@
 class Photo
-
   def self.styles(style)
     {
       medium: {
@@ -23,7 +22,7 @@ class Photo
 
   def self.photo_url(number, style)
     Rails.cache.fetch "daily_photos/photo_url_#{number}_#{style}" do
-      _style = self.styles(style)
+      _style = styles(style)
       if photo_exists?(number)
         builder = Imgproxy::Builder.new(
           _style.transform_keys(&:to_sym)
@@ -46,5 +45,4 @@ class Photo
       end
     end
   end
-
 end
