@@ -19,10 +19,9 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     provider :developer,
       fields: [:name, :email, :access_level],
       uid_field: :email
+    
+    configure do |config|
+      config.allowed_request_methods = [:get, :post]
+    end
   end
-
-end
-
-if Rails.env.development?
-  OmniAuth.config.allowed_request_methods = [:get, :post]
 end
