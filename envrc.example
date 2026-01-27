@@ -7,11 +7,11 @@ export IMGPROXY_SALT= # Hex-encoded string
 export IMGPROXY_URL=http://imgproxy:8080
 
 # Omniauth credentials
-export GOOGLE_CLIENT_ID=
-export GOOGLE_CLIENT_SECRET=
-export MICROSOFT_CLIENT_ID=
-export MICROSOFT_CLIENT_SECRET=
-export GITHUB_CLIENT_ID=
-export GITHUB_CLIENT_SECRET=
+export GOOGLE_CLIENT_ID= # retrieve from Google Cloud Console
+export GOOGLE_CLIENT_SECRET= # retrieve from Google Cloud Console
+export MICROSOFT_CLIENT_ID= # retrieve from Microsoft Entra admin center
+export MICROSOFT_CLIENT_SECRET= # retrieve from Microsoft Entra admin center
+export GITHUB_CLIENT_ID= # retrieve from GitHub developer settings
+export GITHUB_CLIENT_SECRET= # retrieve from GitHub developer settings
 
 export RAILS_ENV=development
