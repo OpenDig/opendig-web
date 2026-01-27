@@ -2,7 +2,7 @@
 
 ## Overview
 
-OpenDig integrates with various identity providers to allow users to sign in and out of the application using [OmniAuth](https://github.com/omniauth/omniauth). The following sections describe how to configure these integrations. OpenDig itself is configured through environment variables set in the `.envrc` file. For more information about `.envrc`, see [README.md](../README.md) and [.envrc.example](../.envrc.example).
+OpenDig integrates with various identity providers using [OmniAuth](https://github.com/omniauth/omniauth) to allow users to sign in and out of the application. The following sections describe how to configure these integrations. OpenDig itself is configured through environment variables set in the `.envrc` file. For more information about `.envrc`, see [README.md](../README.md) and [.envrc.example](../.envrc.example).
 
 In development, OpenDig also supports quickly creating developer accounts using OmniAuth's built-in developer strategy. Simply navigate to <http://localhost:3000/auth/developer> to create an account for manual testing.
 
