@@ -1,5 +1,5 @@
 class SessionsController < ApplicationController
-  skip_before_action :check_editing_mode, only: [:create, :destroy]
+  skip_before_action :check_editing_mode, only: [:create, :destroy, :failure]
 
   def create
     if user_signed_in?
