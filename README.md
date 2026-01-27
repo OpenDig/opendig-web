@@ -10,7 +10,7 @@ Before getting started, ensure you have the following installed:
 - **Docker Compose** (version 2.0 or later)
 - **direnv** (for environment variable management)
   - Install via Homebrew: `brew install direnv`
-  - Or visit: https://direnv.net/docs/installation.html
+  - Or visit: <https://direnv.net/docs/installation.html>
 - **Ruby 3.2.0** (if running locally without Docker)
 
 ## Environment Setup
@@ -39,9 +39,11 @@ Edit the `.envrc` file with your configuration. The file includes:
 - **Image Proxy** (imgproxy):
   - `IMGPROXY_KEY`: 128-character string
   - `IMGPROXY_SALT`: 128-character string
-  - `IMGPROXY_URL`: http://imgproxy:8080
+  - `IMGPROXY_URL`: <http://imgproxy:8080>
 
-Generated a hex encoded string using the following example (from https://docs.imgproxy.net/configuration/options)
+AWS credentials for development can be found/updated in the `docker-compose.yml` file.
+
+Generate hex encoded strings using the following example (from <https://docs.imgproxy.net/configuration/options>)
 
 ```bash
 echo $(xxd -g 2 -l 64 -p /dev/random | tr -d '\n')
@@ -87,6 +89,7 @@ docker compose up -d
 ```
 
 This will:
+
 - Build the Rails application container
 - Start all dependent services (CouchDB, MinIO, imgproxy, Redis)
 - Run the Rails application using `bin/dev` (which uses foreman)
@@ -95,9 +98,9 @@ This will:
 
 Once the containers are running, you can access:
 
-- **Rails Application**: http://localhost:3000
-- **MinIO Console**: http://localhost:9001 (admin/password)
-- **CouchDB**: http://localhost:5984 (admin/password)
+- **Rails Application**: <http://localhost:3000>
+- **MinIO Console**: <http://localhost:9001> (admin/password)
+- **CouchDB**: <http://localhost:5984> (admin/password)
 
 ### 4. View logs
 
@@ -162,23 +165,27 @@ bin/spec
 ## Services Overview
 
 ### CouchDB
+
 - **Purpose**: Document database
 - **Port**: 5984
 - **Credentials**: admin/password (development)
 - **Data**: Persisted in `./couchdb-data/`
 
 ### MinIO
+
 - **Purpose**: S3-compatible object storage
 - **Ports**: 9000 (API), 9001 (Console)
 - **Credentials**: admin/password (development)
 - **Data**: Persisted in `./minio-data/`
 
 ### imgproxy
+
 - **Purpose**: Image processing and optimization
 - **Port**: 8080
 - **Note**: Configured to use MinIO as S3 backend
 
 ### Redis
+
 - **Purpose**: Caching and session storage
 - **Port**: 6379
 
@@ -225,6 +232,6 @@ docker compose up -d
 
 ## Additional Resources
 
-- Rails documentation: https://guides.rubyonrails.org/
-- Docker Compose documentation: https://docs.docker.com/compose/
-- direnv documentation: https://direnv.net/docs/
+- Rails documentation: <https://guides.rubyonrails.org/>
+- Docker Compose documentation: <https://docs.docker.com/compose/>
+- direnv documentation: <https://direnv.net/docs/>
