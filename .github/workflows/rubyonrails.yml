@@ -1,0 +1,54 @@
+name: Tests & Linting
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      couchdb:
+        image: couchdb:3.4
+        env:
+          COUCHDB_USER: admin
+          COUCHDB_PASSWORD: password
+        ports:
+          - 5984:5984
+        options: >-
+          --health-cmd "curl -f http://localhost:5984/ || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      RAILS_ENV: test
+      COUCHDB_HOST: 127.0.0.1
+      COUCHDB_PORT: 5984
+      COUCHDB_USER: admin
+      COUCHDB_PASSWORD: password
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2.0
+          bundler-cache: true
+
+      - name: Prepare Rails log directory
+        run: |
+          mkdir -p log
+          touch log/test.log
+          chmod 0664 log/test.log
+
+      - name: Setup database
+        run: |
+          bundle exec rails db:create
+
+      - name: Run tests
+        run: |
+          bundle exec rails test
+          bundle exec rails spec
