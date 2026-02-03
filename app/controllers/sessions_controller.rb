@@ -1,5 +1,5 @@
 class SessionsController < ApplicationController
-  skip_before_action :check_editing_mode, only: [:create, :destroy, :failure]
+  skip_before_action :check_editing_mode, only: %i[create destroy failure]
 
   def create
     if user_signed_in?
@@ -21,11 +21,6 @@ class SessionsController < ApplicationController
 
   def failure
     flash[:error] = 'Authentication failed, please try again.'
-    redirect_to root_path
-  end
-
-  def failure
-    flash[:error] = "Authentication failed, please try again."
     redirect_to root_path
   end
 end
