@@ -13,7 +13,7 @@ class SessionsController < ApplicationController
       u.name = auth['info']['name']
     end
     session[:user_id] = user.id
-    redirect_to root_path, notice: 'Logged in!'
+    redirect_to root_path, notice: "Logged in! Welcome, #{user.name}!"
   end
 
   def destroy
