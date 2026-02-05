@@ -31,6 +31,23 @@ end
   'Microsoft' => :microsoft_office365
 }.each do |provider_formatted, provider_id|
   RSpec.describe "#{provider_formatted} authentication", type: :request do
+    fixtures :users
+
+    before do
+      # Load users
+      OmniAuth.config.test_mode = true
+      test_user = users(provider_id.to_s)
+      test_auth_hash = {
+        uid: test_user['uid'],
+        provider: test_user['provider'],
+        info: {
+          name: test_user['name'] || '',
+          email: test_user['email']
+        }
+      }
+      OmniAuth.config.mock_auth[provider_id] = OmniAuth::AuthHash.new(test_auth_hash)
+    end
+
     it_behaves_like 'authentication provider', provider_id
   end
 end
