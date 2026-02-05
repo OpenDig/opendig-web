@@ -49,5 +49,10 @@ end
     end
 
     it_behaves_like 'authentication provider', provider_id
+
+    after(:each) do
+      # Ensure no user is signed in
+      delete logout_path
+    end
   end
 end
