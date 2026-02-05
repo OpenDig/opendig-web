@@ -61,11 +61,11 @@ end
       OmniAuth.config.test_mode = true
       test_user = users(provider_id.to_s)
       test_auth_hash = {
-        uid: test_user['uid'],
-        provider: test_user['provider'],
+        uid: test_user.uid,
+        provider: test_user.provider,
         info: {
-          name: test_user['name'] || '',
-          email: test_user['email']
+          name: test_user.name || '',
+          email: test_user.email
         }
       }
       OmniAuth.config.mock_auth[provider_id] = OmniAuth::AuthHash.new(test_auth_hash)
