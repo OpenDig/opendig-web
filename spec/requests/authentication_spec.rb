@@ -2,13 +2,36 @@ require 'rails_helper'
 
 shared_examples_for 'authentication provider' do |provider|
   context "- logging in with #{provider}" do
-    it 'creates a user and signs them in upon successful authentication' do
-      get auth_callback_path(provider: provider)
-      expect(response).to redirect_to(root_path)
+    it 'signs a user in upon successful authentication' do
+      test_user = users(provider.to_s)
+      initial_user_count = User.count
 
+      get auth_callback_path(provider: provider)
+
+      expect(response).to redirect_to(root_path)
       follow_redirect!
-      expect(response.body).to include('John Doe') # verify the user info appears
-      expect(User.count).to eq(1)
+      expect(response.body).to include(test_user.email) # verify the user info appears
+      expect(User.count).to eq(initial_user_count) # No new user should be created
+    end
+
+    it 'creates a new user if one does not exist' do
+      initial_user_count = User.count
+      test_email = 'new_user@example.com'
+      OmniAuth.config.mock_auth[provider.to_sym] = OmniAuth::AuthHash.new(
+        uid: 'new_uid_12345',
+        provider: provider.to_s,
+        info: {
+          name: 'New User',
+          email: test_email
+        }
+      )
+
+      get auth_callback_path(provider: provider)
+
+      expect(response).to redirect_to(root_path)
+      follow_redirect!
+      expect(response.body).to include(test_email)
+      expect(User.count).to eq(initial_user_count + 1) # A new user should be created
     end
 
     it 'handles authentication failure' do
