@@ -13,7 +13,8 @@ class SessionsController < ApplicationController
       u.name = auth['info']['name']
     end
     session[:user_id] = user.id
-    redirect_to root_path, notice: "Logged in! Welcome, #{user.name}!"
+    greeting = user.name ? '' : ". Welcome #{user.name}!"
+    redirect_to root_path, notice: "Logged in with #{user.email}" + greeting
   end
 
   def destroy
