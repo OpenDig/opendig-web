@@ -1,19 +1,16 @@
 class Hash
-
   def deep_diff(b)
     a = self
-    (a.keys | b.keys).inject({}) do |diff, k|
-      if a[k] != b[k]
-        if a[k].respond_to?(:deep_diff) && b[k].respond_to?(:deep_diff)
-          diff[k] = a[k].deep_diff(b[k])
-        else
-          diff[k] = [a[k], b[k]]
-        end
-      end
-      diff
+    (a.keys | b.keys).each_with_object({}) do |k, diff|
+      next unless a[k] != b[k]
+
+      diff[k] = if a[k].respond_to?(:deep_diff) && b[k].respond_to?(:deep_diff)
+                  a[k].deep_diff(b[k])
+                else
+                  [a[k], b[k]]
+                end
     end
   end
-
 end
 
 class SquareDbDiff
@@ -31,19 +28,22 @@ class SquareDbDiff
   end
 
   def get_loci_for_square(database)
-    database.view('opendig/loci', {group: true, start_key: [@area, @square], end_key: [@area, @square, {}]})["rows"].map do |row|
-      _doc = database.get(row["key"][3])
-      {id: _doc['_id'], revision: _doc['_rev'], locus: "#{row['key'][0]}.#{row['key'][1]}.#{row['key'][2]}"}
-    end.sort_by!{|l| l[:locus]}
+    database.view('opendig/loci',
+                  { group: true, start_key: [@area, @square], end_key: [@area, @square, {}] })['rows'].map do |row|
+      _doc = database.get(row['key'][3])
+      { id: _doc['_id'], revision: _doc['_rev'], locus: "#{row['key'][0]}.#{row['key'][1]}.#{row['key'][2]}" }
+    end.sort_by! do |l|
+      l[:locus]
+    end
   end
 
   def get_changed_loci
-    @primary_loci.select{|locus| @backup_loci.none?{|backup_locus| backup_locus[:revision] == locus[:revision]}}
+    @primary_loci.select { |locus| @backup_loci.none? { |backup_locus| backup_locus[:revision] == locus[:revision] } }
   end
 
   def build_diff_hash
     @changed_loci.map do |locus|
-      {locus: locus[:locus], diff: deep_diff(locus[:id])}
+      { locus: locus[:locus], diff: deep_diff(locus[:id]) }
     end
   end
 
@@ -52,5 +52,4 @@ class SquareDbDiff
     backup_doc = @backup_db.get(id)
     primary_doc.to_enum.to_h.deep_diff(backup_doc.to_enum.to_h)
   end
-
 end

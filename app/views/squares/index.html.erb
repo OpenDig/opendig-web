@@ -1,7 +1,8 @@
-<div class="flex flex-col items-center h-screen">
-  <div class="w-1/3">
+<div class="flex">
+<div class="flex flex-col h-screen mt-10">
+  <div class="w-full px-4 mb-4">
     <div class="flex items-center mb-4">
-      <h1 class="text-3xl">Squares for <%= @area %></h1>
+      <h1 class="text-3xl">Square <%= @area %></h1>
       <div class="ml-auto">
         <%= link_to new_area_square_path(@area) do %>
           <button type="button" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded">
@@ -10,15 +11,56 @@
         <% end %>
       </div>
     </div>
-    <nav aria-label="breadcrumb">
+
+  <%# let text overflow and set the width to be predetermined %>
+  <div class="p-6 bg-white rounded border border-solid border-black-200 overflow-y-auto h-[600px] w-[300px]">
+
+    <%# Breadcrumb navigation %>
+    <nav aria-label="breadcrumb" class="mb-4 text-center border-b border-gray-200 pb-4">
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><%= link_to 'Home', root_path %></li>
+        <li class="breadcrumb-item"><%= link_to 'Home', root_path, class: "text-blue-600 hover:underline" %></li>
         <li class="breadcrumb-item active" aria-current="page"><%= "Area #{@area}" %></li>
       </ol>
     </nav>
 
-    <% @squares.each do |square| %>
-      <p class="mb-2"><%= link_to square, area_square_loci_path(@area, square), class: "text-blue-600 hover:underline" %></p>
+    <% if @squares.empty? %>
+      <p class="text-gray-400">Create a new square to get started</p>
+    <% else %>
+      <% @squares.each do |square| %>
+      <div class="border-b border-gray-200 px-1 last:border-0">
+        <p class="mb-2"><%= link_to "Square: #{square}", area_square_loci_path(@area, square), class: "text-blue-600 hover:underline" %></p>
+      </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+</div>
+
+<div class="flex flex-col gap-4 mr-auto ml-4 py-10 px-4 overflow-x-auto">
+  <h2 class="text-3xl">Favorites</h2>
+  <%# force the size of the container to be predetermined by height with a min width set  and scroll when it is too full to fit %>
+  <div class="flex flex-row gap-4 h-[200px] min-w-[600px] overflow-x-auto mb-8">
+    <div class="p-6 bg-white rounded border border-solid border-black-200">
+      <p class="text-gray-400">You have no favorite squares yet.</p>
+    </div>
+  </div>
+  <h2 class="text-3xl">Recent</h2>
+  <div class="flex flex-row gap-4 h-[300px] min-w-[600px] overflow-x-auto mb-8">
+    <% if @squares.empty? %>
+      <div class="p-6 bg-white rounded border border-solid border-black-200">
+        <p class="text-gray-400">You have no recent squares yet.</p>
+      </div>
+    <% else %>
+      <% @squares.each do |square| %>
+      <div class="p-4 bg-white rounded border border-solid border-black-200 flex flex-col items-center flex-none w-[100rpx] h-[220px] overflow-hidden">
+        <img src="<%= asset_path("default.jpg") %>" alt="Default image" class="h-[100px] mb-3"/>
+        <p class="w-full text-center truncate">
+          <%= link_to "Square: #{square}", area_square_loci_path(@area, square), class: "text-blue-600 hover:underline block" %>
+        </p>
+        <%# shrink text by 1/4 %>
+        <p class="text-xs text-blue-600 hover:underline">Loci</p>
+      </div>
+      <% end %>
     <% end %>
   </div>
 </div>

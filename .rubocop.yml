@@ -1,0 +1,38 @@
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*
+    - config/**/*
+
+Style/Documentation:
+  Exclude:
+    - app/**/*
+    - config/application.rb
+
+Metrics/ModuleLength:
+  Exclude:
+    - app/**/*
+
+Metrics/AbcSize:
+  Exclude:
+    - app/controllers/*
+    - app/models/*
+    - app/helpers/*
+    - config/initializers/*
+Metrics/MethodLength:
+  Exclude:
+    - app/controllers/*
+    - app/models/*
+    - app/helpers/*
+    - config/initializers/*
+Metrics/PerceivedComplexity:
+  Exclude:
+    - app/controllers/*
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - app/controllers/*
