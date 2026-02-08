@@ -36,8 +36,12 @@ jobs:
       - name: Install dependencies
         run: apk add --no-cache build-base sqlite-dev
 
+      # Force install `tzinfo-data` gem since
+      # this version of Bundler doesn't have a
+      # platform that matches alpine
       - name: Set up Ruby
-        run: bundle install
+        run: bundle install && \
+             bundle install tzinfo-data
 
       - name: Prepare Rails log directory
         run: |
