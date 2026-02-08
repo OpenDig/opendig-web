@@ -33,6 +33,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install system dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            libyaml-dev
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
