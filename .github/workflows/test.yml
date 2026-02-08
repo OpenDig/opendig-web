@@ -1,0 +1,55 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: ubuntu
+
+    services:
+      couchdb:
+        image: couchdb:3.4
+        env:
+          COUCHDB_USER: ${{ env.COUCHDB_USER }}
+          COUCHDB_PASSWORD: ${{ env.COUCHDB_PASSWORD }}
+        ports:
+          - 5984:5984
+        options: >-
+          --health-cmd "curl -f http://localhost:5984/_up || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      RAILS_ENV: test
+      COUCHDB_HOST: couchdb
+      COUCHDB_PORT: 5984
+      COUCHDB_USER: admin
+      COUCHDB_PASSWORD: password
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y libyaml-dev libsqlite3-dev tzdata
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          # No need to specify Ruby version, action reads from .ruby-version
+          bundler-cache: true
+
+      - name: Prepare Rails log directory
+        run: |
+          mkdir -p log
+          touch log/test.log
+          chmod 0664 log/test.log
+
+      - name: Run RSpec tests
+        run: |
+          bundle exec rails spec

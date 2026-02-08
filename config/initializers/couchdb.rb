@@ -12,15 +12,16 @@ end
 
 couchdb_config = YAML.load_file("#{Rails.root}/config/couchdb.yml")[Rails.env]
 protocol = couchdb_config["protocol"]
-host     = couchdb_config["host"]
+host     = ENV['COUCHDB_HOST'] || couchdb_config["host"]
 port     = couchdb_config["port"] || nil
-username = couchdb_config["username"]
-password = couchdb_config["password"]
+username = ENV['COUCHDB_USER'] || couchdb_config["username"]
+password = ENV['COUCHDB_PASSWORD'] || couchdb_config["password"]
 db_name  = couchdb_config["db_name"] || nil
 prefix   = couchdb_config["prefix"] || nil
 suffix   = couchdb_config["suffix"] || nil
 
 database = db_name ? db_name : "#{prefix}_#{suffix}"
+host = ENV['COUCHDB_HOST'] || couchdb_config["host"]
 url = "#{protocol}://#{username}:#{password}@#{host}:#{port}/#{database}"
 Rails.application.config.couchdb = CouchRest.database!(url)
 
