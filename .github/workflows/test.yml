@@ -34,32 +34,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: apk add --update --no-cache \
-             build-base \
-             ca-certificates \
-             glib \
-             libc-dev \
-             libffi-dev \
-             libgcc \
-             libintl \
-             libstdc++ \
-             libx11 \
-             libxext \
-             libxml2-dev \
-             libxrender \
-             libxslt-dev \
-             nodejs \
-             pcre-dev \
-             ruby-dev \
-             sqlite \
-             sqlite-dev \
-             ttf-dejavu \
-             ttf-droid \
-             ttf-freefont \
-             ttf-liberation \
-             tzdata \
-             xvfb \
-             zlib-dev
+        run: apk add --no-cache build-base sqlite-dev
 
       - name: Set up Ruby
         run: bundle install
