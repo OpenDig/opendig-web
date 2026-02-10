@@ -85,4 +85,11 @@ class ApplicationController < ActionController::Base
 
     helper_method "require_#{role}"
   end
+
+  def require_admin
+    unless user_signed_in? && current_user.admin?
+      flash[:error] = "You must be an admin to access this section"
+      redirect_to root_path
+    end
+  end
 end
