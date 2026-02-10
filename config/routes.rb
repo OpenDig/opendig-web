@@ -6,18 +6,24 @@ Rails.application.routes.draw do
   get '/auth/failure', to: 'sessions#failure', as: :auth_failure
   delete '/logout', to: 'sessions#destroy', as: :logout
 
-  resources :areas, only: [:index, :new, :create] do
-    resources :squares, only: [:index, :new, :create] do
+  resources :areas, only: %i[index new create] do
+    resources :squares, only: %i[index new create] do
       resources :pails, only: [:index]
       resources :finds, only: [:index]
-      resources :loci, only: [:index, :show, :edit, :new, :create, :update]
+      resources :loci, only: %i[index show edit new create update]
     end
   end
 
   resources :registrar
-  resources :bulk_uploads, only: [:new, :create]
+  resources :bulk_uploads, only: %i[new create]
 
-  resources :reports, only: [:index, :show]
+  resources :admin, only: [] do
+    collection do
+      get 'manage_users'
+    end
+  end
+
+  resources :reports, only: %i[index show]
 
   root to: 'areas#index'
 end

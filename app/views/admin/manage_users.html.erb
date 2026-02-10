@@ -1,0 +1,37 @@
+<div>
+  <h1 class="text-3xl font-bold mb-4 text-center">User Management</h1>
+  <div class="space-y-4">
+  <table class="w-full mt-6 border-collapse border border-gray-300">
+    <thead>
+      <tr class="bg-gray-200">
+        <th class="border border-gray-300 p-2 text-center">User</th>
+        <th class="border border-gray-300 p-2 text-center">Role</th>
+        <th class="border border-gray-300 p-2 text-center">Email</th>
+        <th class="border border-gray-300 p-2 text-center">Access Log</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @users.each do |user| %>
+        <tr>
+            <td class="border border-gray-300 p-2 text-center">
+            <span class="<%= user.name.blank? ? 'text-gray-400' : '' %>">
+              <%= user.name.blank? ? 'no name' : user.name %>
+            </span>
+            </td>
+          <td class="border border-gray-300 p-2">
+              <select class="px-2 py-1 border rounded">
+              <option selected>Admin</option>
+              <option>Contributor</option>
+              <option>Guest</option>
+              </select>
+          </td>
+          <td class="border border-gray-300 p-2"><%= user.email %></td>
+          <td class="border border-gray-300 p-2">
+            <a href="#" class="text-blue-600 hover:underline">View Log</a>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  </div>
+</div>
