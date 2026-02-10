@@ -25,5 +25,7 @@ Rails.application.routes.draw do
 
   resources :reports, only: %i[index show]
 
+  resources :users, only: [:show, :edit, :create, :update, :destroy]
+
   root to: 'areas#index'
 end
