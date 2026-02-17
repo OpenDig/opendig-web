@@ -69,6 +69,14 @@ group :development, :test do
   gem "rubocop-rails", require: false
   gem "rubocop-rspec_rails", require: false
   gem "rubocop-capybara", require: false
+
+  # Test dependencies
+  gem "capybara"
+  gem "selenium-webdriver"
+  gem "webdrivers"
+  gem 'rspec-rails'
+  gem "buildkite-test_collector"
+  gem "rails-controller-testing"
 end
 
 group :development do
@@ -80,16 +88,6 @@ group :development do
 
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
-end
-
-group :test do
-  # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
-  gem "capybara"
-  gem "selenium-webdriver"
-  gem "webdrivers"
-  gem 'rspec-rails'
-  gem "buildkite-test_collector"
-  gem "rails-controller-testing"
 end
 
 gem "tailwindcss-rails", "~> 2.0"
