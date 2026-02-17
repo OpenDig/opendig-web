@@ -61,6 +61,13 @@ gem 'aws-sdk-s3'
 
 group :development, :test do
   gem 'debug'
+
+  gem "capybara"
+  gem "selenium-webdriver"
+  gem "webdrivers"
+  gem 'rspec-rails'
+  gem "buildkite-test_collector"
+  gem "rails-controller-testing"
 end
 
 group :development do
@@ -74,14 +81,11 @@ group :development do
   # gem "spring"
 end
 
-group :test do
-  # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
-  gem "capybara"
-  gem "selenium-webdriver"
-  gem "webdrivers"
-  gem 'rspec-rails'
-  gem "buildkite-test_collector"
-  gem "rails-controller-testing"
-end
-
 gem "tailwindcss-rails", "~> 2.0"
+
+# Omniauth for: Google, Github, Microsoft
+gem "omniauth"
+gem "omniauth-rails_csrf_protection"
+gem "omniauth-google-oauth2"
+gem "omniauth-github"
+gem "omniauth-microsoft-office365"

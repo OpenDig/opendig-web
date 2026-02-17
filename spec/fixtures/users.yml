@@ -1,0 +1,14 @@
+google_oauth2:
+  provider: google_oauth2
+  uid: 12345
+  email: john@example.com
+
+github:
+  provider: github
+  uid: 67890
+  email: jane@example.com
+
+microsoft_office365:
+  provider: microsoft_office365
+  uid: 11223
+  email: alice@example.com

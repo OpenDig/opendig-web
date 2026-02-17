@@ -150,6 +150,12 @@ docker compose exec app bundle exec rails db:migrate
 bin/spec
 ```
 
+### Logging in
+
+When OpenDig is running in development, you can create or log into a test account at: <http://localhost:3000/auth/developer>. Simply enter sample data into the form.
+
+To set up authentication using OAuth2 providers such as Google and Office 365, follow the instructions in the [Authentication](docs/Authentication.md) setup guide.
+
 ## Project Structure
 
 - `app/` - Rails application code
