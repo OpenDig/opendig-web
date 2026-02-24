@@ -17,10 +17,12 @@ Rails.application.routes.draw do
   resources :registrar
   resources :bulk_uploads, only: %i[new create]
 
+  post '/admin/update_user', to: 'admin#update_user', as: :admin_update_user
   resources :admin, only: [] do
     collection do
       get 'manage_users'
     end
+
   end
 
   resources :reports, only: %i[index show]

@@ -12,27 +12,7 @@
     </thead>
     <tbody>
       <% @users.each do |user| %>
-        <tr>
-            <td class="border border-gray-300 p-2 text-center">
-            <span class="<%= user.name.blank? ? 'text-gray-400' : '' %>">
-              <%= user.name.blank? ? 'no name' : user.name %>
-            </span>
-            </td>
-          <td class="border border-gray-300 p-2">
-              <select class="px-2 py-1 border rounded">
-                <%# TODO: Selected the user to a role will change the role %>
-                <%# TODO: fix a bug where it does not show the correct roles, admin being showed even though not admin %>
-                <option <%= 'selected' if user.admin? %>>Admin</option>
-                <option <%= 'selected' if user.editor? %>>Editor</option>
-                <option <%= 'selected' if user.viewer? %>>Viewer</option>
-              </select>
-          </td>
-          <td class="border border-gray-300 p-2"><%= user.email %></td>
-          <td class="border border-gray-300 p-2">
-            <%# TODO implement "view log" %>
-            <a href="#" class="text-blue-600 hover:underline">View Log</a>
-          </td>
-        </tr>
+        <%= render partial: 'manage_users_row', locals: { user: user } %>
       <% end %>
     </tbody>
   </table>

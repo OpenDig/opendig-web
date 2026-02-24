@@ -1,0 +1,20 @@
+<%= form_with model: user, local: true, url: admin_update_user_path(user) do |f| %>
+    <tr>
+        <td class="border border-gray-300 p-2 text-center">
+        <span class="<%= user.name.blank? ? 'text-gray-400' : '' %>">
+        <%= user.name.blank? ? 'no name' : user.name %>
+        </span>
+        </td>
+    <td class="border border-gray-300 p-2">
+        <%= turbo_frame_tag "user_role_#{user.id}" do %>
+
+            <%= f.select :role, options_for_select(User.roles.keys.map { |role| [role.humanize, role] }, selected: user.role, onchange: "this.form.requestSubmit()") %>
+        <% end %>
+    </td>
+    <td class="border border-gray-300 p-2"><%= user.email %></td>
+    <td class="border border-gray-300 p-2">
+        <%# TODO implement "view log" %>
+        <a href="#" class="text-blue-600 hover:underline">View Log</a>
+    </td>
+    </tr>
+<% end %>
