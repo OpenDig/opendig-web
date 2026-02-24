@@ -88,9 +88,12 @@ class ApplicationController < ActionController::Base
 
   def require_role(role)
     require_authentication
+    return if performed? # Don't check role if authentication check failed
+
     unless current_user.role_at_least? role
       flash[:error] = "You must be a(n) #{role} to access this section"
       redirect_to root_path
+      nil
     end
   end
 
