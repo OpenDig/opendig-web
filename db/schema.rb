@@ -16,7 +16,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_01_16_013603) do
     t.string "provider"
     t.string "email"
     t.string "name"
-    t.integer "access_level"
+    t.integer "role"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

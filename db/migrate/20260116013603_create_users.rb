@@ -5,7 +5,7 @@ class CreateUsers < ActiveRecord::Migration[7.0]
       t.string :provider
       t.string :email
       t.string :name
-      t.integer :access_level
+      t.integer :role
 
       t.timestamps
     end
