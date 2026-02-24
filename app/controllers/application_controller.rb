@@ -93,4 +93,12 @@ class ApplicationController < ActionController::Base
       redirect_to root_path
     end
   end
+
+  User.roles.keys.each do |role|
+    define_method("require_#{role}") do
+      require_role(role)
+    end
+
+    helper_method "require_#{role}"
+  end
 end
