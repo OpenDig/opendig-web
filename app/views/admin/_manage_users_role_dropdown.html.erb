@@ -10,7 +10,7 @@
             {
                 onchange: "this.form.requestSubmit();",
                 disabled: user == current_user,
-                class: "px-2 py-1 border-2 rounded transition-colors duration-[2000ms] ease-out",
+                class: "px-2 py-1 border-2 rounded transition-colors duration-[2000ms] border-gray-300 ease-out",
                 data: {
                     controller: "role-feedback",
                     role_feedback_change_value: local_assigns[:change].to_s
