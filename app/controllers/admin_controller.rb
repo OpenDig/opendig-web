@@ -9,10 +9,12 @@ class AdminController < ApplicationController
     
     if @user.update(user_params)
       respond_to do |format|
-        format.html { render partial: 'admin/manage_users_role_dropdown', locals: { user: @user, notice: "User role updated successfully.", change_success: true }, layout: false }
+        format.html { render partial: 'admin/manage_users_role_dropdown', locals: { user: @user, change: :success }, layout: false }
       end
     else
-      head :unprocessable_entity
+      respond_to do |format|
+        format.html { render partial: 'admin/manage_users_role_dropdown', locals: { user: @user, change: :failure }, layout: false }
+      end
     end
   end
 
