@@ -1,5 +1,9 @@
 <%= turbo_frame_tag "user_role_#{user.id}" do %>
-    <%= form_with model: user, url: admin_update_user_path(user) do |f| %>
-        <%= f.select :role, options_for_select(User.roles.keys.map { |role| [role.humanize, role] }, selected: user.role), {}, { onchange: "this.form.requestSubmit()", disabled: user == current_user, class: "px-2 py-1 border rounded" } %>
+    <%= form_with model: user, url: admin_update_user_path(user), local: true do |f| %>
+        <%= f.select :role, options_for_select(User.roles.keys.map { |role| [role.humanize, role] }, selected: user.role), {}, { onchange: "this.form.requestSubmit();", disabled: user == current_user, class: "px-2 py-1 border rounded" } %>
+        <%= f.submit "Update", class: "hidden" %>
+    <% end %>
+    <% if change_success %>
+        <div class="text-green-600">Role updated</div>
     <% end %>
 <% end %>
