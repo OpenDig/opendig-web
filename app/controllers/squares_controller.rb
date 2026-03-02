@@ -1,7 +1,9 @@
 class SquaresController < ApplicationController
   before_action :set_area_and_squares
 
-  def index; end
+  def index
+    @favorite_squares = [] # Placeholder for favorite squares, to be implemented in the future
+  end
 
   def new; end
 
