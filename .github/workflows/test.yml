@@ -50,6 +50,10 @@ jobs:
           touch log/test.log
           chmod 0664 log/test.log
 
+      - name: Run linter
+        run: |
+          bundle exec rubocop
+
       - name: Run RSpec tests
         run: |
           bundle exec rails spec
