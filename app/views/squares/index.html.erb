@@ -27,8 +27,11 @@
       <p class="text-gray-400">Create a new square to get started</p>
     <% else %>
       <% @squares.each do |square| %>
-      <div class="border-b border-gray-200 px-1 last:border-0">
+      <div class="border-b border-gray-200 px-1 last:border-0 flex items-center justify-between">
         <p class="mb-2"><%= link_to "Square: #{square}", area_square_loci_path(@area, square), class: "text-blue-600 hover:underline" %></p>
+          <button class="favorite-star" data-square-key="<%= square %>" data-favorited="<%= @favorite_squares.any? { |fav| fav == square } %>">
+            <span class="text-xl <%= @favorite_squares.any? { |fav| fav == square } ? 'text-yellow-400' : 'text-gray-300' %>">★</span>
+          </button>
       </div>
       <% end %>
     <% end %>
@@ -41,7 +44,7 @@
   <%# force the size of the container to be predetermined by height with a min width set and scroll when it is too full to fit %>
     <% if @favorite_squares.empty? %>
       <div class="p-6 bg-white">
-        <p class="text-gray-400">Add a favorite square to see it here.</p>
+        <p class="text-gray-400">Click the star to favorite a square</p>
       </div>
     <% else %>
   <div class="flex flex-row gap-4 h-[200px] min-w-[600px] overflow-x-auto mb-8">

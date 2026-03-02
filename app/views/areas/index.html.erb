@@ -22,15 +22,18 @@
       </ol>
     </nav> %>
       <% if @areas.empty? %>
-        <p class="text-gray-400">Create a new area to get started</p>
+      <p class="text-gray-400">Create a new area to get started</p>
       <% else %>
-        <% @areas.each do |area| %>
-      <div class="border-b border-gray-200 px-1 last:border-0">
-        <p class="mb-2"><%= link_to "Area: #{area["key"]}", area_squares_path(area["key"]), class: "text-blue-600 hover:underline" %></p>
+      <% @areas.each do |area| %>
+      <div class="border-b border-gray-200 px-1 last:border-0 flex items-center justify-between">
+      <p class="mb-2"><%= link_to "Area: #{area["key"]}", area_squares_path(area["key"]), class: "text-blue-600 hover:underline" %></p>
+      <button class="favorite-star" data-area-key="<%= area["key"] %>" data-favorited="<%= @favorite_areas.any? { |fav| fav["key"] == area["key"] } %>">
+        <span class="text-xl <%= @favorite_areas.any? { |fav| fav["key"] == area["key"] } ? 'text-yellow-400' : 'text-gray-300' %>">★</span>
+      </button>
       </div>  
-        <% end %>
       <% end %>
-  </div>
+      <% end %>
+    </div>
 </div>
 </div>
 
@@ -39,7 +42,7 @@
   <%# force the size of the container to be predetermined by height with a min width set and scroll when it is too full to fit %>
     <% if @favorite_areas.empty? %>
       <div class="p-6 bg-white">
-        <p class="text-gray-400">Add a favorite area to see it here.</p>
+        <p class="text-gray-400">Click the star to favorite an area</p>
       </div>
     <% else %>
   <div class="flex flex-row gap-4 h-[200px] min-w-[600px] overflow-x-auto mb-8">
