@@ -30,13 +30,28 @@
           </div>
         </div>
         <!-- Navigation Links -->
-        <div class="hidden md:block">
+        <div class="hidden md:flex md:items-center md:space-x-4">
           <ul class="ml-10 flex items-baseline space-x-4">
             <li><%= link_to "Home", root_path, class: "text-gray-300 hover:text-white" %></li>
             <li><%= link_to "Registrar Tools", registrar_index_path, class: "text-gray-300 hover:text-white" %></li>
             <li><%= link_to "Bulk Uploader", new_bulk_upload_path, class: "text-gray-300 hover:text-white" %></li>
             <li><%#= link_to "Reports", registrar_index_path, class: "text-gray-300 hover:text-white" %></li>
           </ul>
+          <div class="relative ml-6">
+            <form id="menu-loci-search-form" class="w-64" action="<%= search_loci_path %>" method="get">
+              <label for="menu-loci-search-input" class="sr-only">Search loci</label>
+              <input
+                id="menu-loci-search-input"
+                name="q"
+                type="search"
+                placeholder="Search Loci"
+                value="<%= params[:q] %>"
+                autocomplete="off"
+                class="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-white placeholder-neutral-400 focus:border-white focus:outline-none"
+              >
+              <div id="menu-loci-search-results" class="absolute z-20 mt-2 hidden max-h-80 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg"></div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -60,5 +75,74 @@
     <%= yield %>
   </div>
 
+  <script>
+    (function() {
+      function initMenuLociSearch() {
+        var $form = $('#menu-loci-search-form');
+        var $input = $('#menu-loci-search-input');  
+        var $results = $('#menu-loci-search-results');
+        var debounceTimer;
+        var currentRequest;
+
+        if (!$form.length || !$input.length || !$results.length || $form.data('initialized')) return;
+        $form.data('initialized', true);
+
+        function hideResults() {
+          $results.addClass('hidden').empty();
+        }
+
+        function renderResults(loci) {
+          if (!loci.length) {
+            $results.removeClass('hidden').html('<div class="px-3 py-2 text-sm text-gray-500">No loci found</div>');
+            return;
+          }
+
+          var html = loci.map(function(locus) {
+            return '<a href="' + locus.url + '" class="block border-b border-gray-100 px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">' + locus.label + '</a>';
+          }).join('');
+
+          $results.removeClass('hidden').html(html);
+        }
+
+        function searchLoci() {
+          var query = $input.val().trim();
+          if (query.length < 2) {
+            hideResults();
+            return;
+          }
+
+          if (currentRequest) currentRequest.abort();
+
+          currentRequest = $.ajax({
+            url: '/loci/search.json',
+            method: 'GET',
+            data: { q: query },
+            success: function(data) {
+              renderResults(data);
+            },
+            error: function(xhr, status) {
+              if (status !== 'abort') hideResults();
+            }
+          });
+        }
+
+        $input.on('input', function() {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(searchLoci, 200);
+        });
+
+        $input.on('focus', function() {
+          if ($input.val().trim().length >= 2) searchLoci();
+        });
+
+        $(document).on('click', function(event) {
+          if (!$form[0].contains(event.target)) hideResults();
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', initMenuLociSearch);
+      document.addEventListener('turbo:load', initMenuLociSearch);
+    })();
+  </script>
 </body>
 </html>
