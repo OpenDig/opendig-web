@@ -9,11 +9,15 @@ class AdminController < ApplicationController
     
     if @user.update(user_params)
       respond_to do |format|
+        flash.now[:notice] = "User role updated successfully."
         format.html { render partial: 'admin/manage_users_role_dropdown', locals: { user: @user, change: :success }, layout: false }
+        format.turbo_stream
       end
     else
       respond_to do |format|
+        flash.now[:alert] = "Failed to update user role."
         format.html { render partial: 'admin/manage_users_role_dropdown', locals: { user: @user, change: :failure }, layout: false }
+        format.turbo_stream
       end
     end
   end
