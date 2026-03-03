@@ -1,4 +1,5 @@
 class AreasController < ApplicationController
+  before_action :require_editor, only: [:new, :create]
 
   def index
     @areas = @db.view('opendig/areas', {group: true})['rows']

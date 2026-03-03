@@ -84,3 +84,10 @@ group :development do
 end
 
 gem "tailwindcss-rails", "~> 2.0"
+
+# Omniauth for: Google, Github, Microsoft
+gem "omniauth"
+gem "omniauth-rails_csrf_protection"
+gem "omniauth-google-oauth2"
+gem "omniauth-github"
+gem "omniauth-microsoft-office365"

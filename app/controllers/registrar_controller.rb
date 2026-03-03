@@ -1,4 +1,5 @@
 class RegistrarController < ApplicationController
+  before_action :require_editor
   before_action :set_item, only: [:show, :edit, :update]
 
   def index

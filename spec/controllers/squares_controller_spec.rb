@@ -28,6 +28,10 @@ RSpec.describe SquaresController, type: :controller do
   end
 
   describe "GET new" do
+    before do
+      allow(controller).to receive(:require_editor)
+    end
+
     it "sets @area and @squares" do
       get :new, params: {area_id: area_id}
 
@@ -38,6 +42,10 @@ RSpec.describe SquaresController, type: :controller do
   end
 
   describe "POST create" do
+    before do
+      allow(controller).to receive(:require_editor)
+    end
+
     context "when creating a new square" do
       context "and save is successful" do
         it "creates the square, sets success flash, and redirects to area_squares_path" do

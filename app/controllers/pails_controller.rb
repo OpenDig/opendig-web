@@ -1,4 +1,6 @@
 class PailsController < ApplicationController
+  before_action :require_editor, except: [:index, :show]
+
   def index
     @area = params[:area_id]
     @square = params[:square_id]

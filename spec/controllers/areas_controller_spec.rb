@@ -18,6 +18,7 @@ RSpec.describe AreasController, type: :controller do
       allow(controller).to receive(:set_descriptions)
       allow(controller).to receive(:set_edit_mode)
       allow(controller).to receive(:check_editing_mode)
+      allow(controller).to receive(:require_editor)
       controller.instance_variable_set(:@db, db)
       controller.instance_variable_set(:@editing_enabled, true)
     end
