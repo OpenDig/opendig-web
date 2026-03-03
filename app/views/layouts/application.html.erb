@@ -57,20 +57,8 @@
     </div>
   </nav>
 
-  <div class="container flash">
-    <div class="row">
-      <div class="col">
-        <% flash.each do |name, msg| %>
-          <% unless flash_blacklist(name) %>
-            <%= content_tag(:div, class: flash_class(name)) do %>
-              <%= msg %>
-              <button type="button" class="close" data-bs-dismiss="alert">×</button>
-            <% end %>
-          <% end %>
-        <% end %>
-      </div>
-    </div>
-  </div>
+  <%= render partial: "layouts/flash" %>
+  
   <div class="container overflow-y-auto px-10 py-6 mx-auto">
     <%= yield %>
   </div>
