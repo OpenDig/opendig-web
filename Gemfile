@@ -70,6 +70,13 @@ group :development, :test do
   gem 'rspec-rails'
   gem "buildkite-test_collector"
   gem "rails-controller-testing"
+
+  # Lint dependencies
+  gem "rubocop", "~> 1.69", require: false
+  gem "rubocop-rspec", require: false
+  gem "rubocop-rails", require: false
+  gem "rubocop-rspec_rails", require: false
+  gem "rubocop-capybara", require: false
 end
 
 group :development do
@@ -84,3 +91,4 @@ group :development do
 end
 
 gem "tailwindcss-rails", "~> 2.0"
+
