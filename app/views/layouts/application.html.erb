@@ -35,7 +35,22 @@
             <li><%= link_to "Home", root_path, class: "text-gray-300 hover:text-white" %></li>
             <li><%= link_to "Registrar Tools", registrar_index_path, class: "text-gray-300 hover:text-white" %></li>
             <li><%= link_to "Bulk Uploader", new_bulk_upload_path, class: "text-gray-300 hover:text-white" %></li>
-            <li><%#= link_to "Reports", registrar_index_path, class: "text-gray-300 hover:text-white" %></li>
+            <%# if use log in then show log out else show login %>
+            <% if user_signed_in? %>
+              <li>
+                <%= 
+                button_to "Logout",
+                logout_path,
+                method: :delete,
+                form: { class: "inline" },
+                class: "text-gray-300 hover:text-white bg-transparent p-0 border-0",
+                data: { confirm: "Are you sure you want to log out?" } 
+                %>
+              </li>
+            <% else %>
+              <li><%= link_to "Login", login_path, class: "text-gray-300 hover:text-white" %></li>
+            <% end %>
+            <li><%# <%= link_to "Reports", reports_path, class: "text-gray-300 hover:text-white" %></li>
           </ul>
         </div>
       </div>

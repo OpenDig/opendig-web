@@ -83,6 +83,10 @@ RSpec.describe LociController, type: :controller do
   end
 
   describe "GET new" do
+    before do
+      allow(controller).to receive(:require_editor)
+    end
+
     it "sets @area, @square, and initializes @locus with locus_type" do
       get :new, params: {area_id: area_id, square_id: square_id, type: "context"}
 
@@ -101,6 +105,7 @@ RSpec.describe LociController, type: :controller do
 
   describe "GET edit" do
     before do
+      allow(controller).to receive(:require_editor)
       allow(db).to receive(:view).with('opendig/locus', key: [area_id, square_id, locus_code])
         .and_return({"rows" => [{"value" => locus_data}]})
     end
@@ -117,6 +122,10 @@ RSpec.describe LociController, type: :controller do
   end
 
   describe "POST create" do
+    before do
+      allow(controller).to receive(:require_editor)
+    end
+
     let(:new_locus_params) {
       {
         "area" => area_id,
@@ -151,6 +160,10 @@ RSpec.describe LociController, type: :controller do
   end
 
   describe "PUT/PATCH update" do
+    before do
+      allow(controller).to receive(:require_editor)
+    end
+
     let(:updated_params) {
       {
         "designation" => "updated designation",

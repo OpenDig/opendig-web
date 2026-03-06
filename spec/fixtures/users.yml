@@ -1,0 +1,17 @@
+viewer:
+  uid: 1
+  provider: 'test_provider'
+  email: 'viewer@example.com'
+  role: 'viewer'
+
+editor:
+  uid: 2
+  provider: 'test_provider'
+  email: 'editor@example.com'
+  role: 'editor'
+
+admin:
+  uid: 3
+  provider: 'test_provider'
+  email: 'admin@example.com'
+  role: 'admin'

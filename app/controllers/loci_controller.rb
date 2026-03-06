@@ -1,4 +1,5 @@
 class LociController < ApplicationController
+  before_action :require_editor, except: [:index, :show]
   before_action :set_locus, only: [:show, :edit, :update]
   def index
     @area = params[:area_id]

@@ -1,6 +1,8 @@
 require "rails_helper"
 
 RSpec.describe ApplicationController, type: :controller do
+  fixtures :users
+
   # Create a test controller to test ApplicationController functionality
   controller do
     def index
@@ -167,6 +169,48 @@ RSpec.describe ApplicationController, type: :controller do
         end
       end
     end
+
+    describe "check_session_timeout" do
+      before do
+        routes.draw do
+          get 'index' => 'anonymous#index'
+        end
+      end
+
+      it "resets session and sets alert flash if session has expired" do
+        past_time = 31.minutes.ago
+        session[:last_seen] = past_time
+
+        expect(session).to receive(:destroy)
+        get :index
+        expect(flash[:alert]).to eq("Your session has expired due to inactivity.")
+      end
+
+      it "does not reset session if session is still valid" do
+        recent_time = 10.minutes.ago
+        session[:last_seen] = recent_time
+
+        expect(session).not_to receive(:destroy)
+        get :index
+        expect(flash[:alert]).to be_nil
+      end
+    end
+
+    describe "update_session_timestamp" do
+      before do
+        routes.draw do
+          get 'index' => 'anonymous#index'
+        end
+      end
+
+      it "updates session[:last_seen] to current time" do
+        travel_to Time.current do
+          get :index
+
+          expect(session[:last_seen]).to be_within(1.second).of(Time.current)
+        end
+      end
+    end
   end
 
   describe "sanity check spec" do
@@ -179,4 +223,124 @@ RSpec.describe ApplicationController, type: :controller do
     end
   end
 
+  describe "authentication and authorization helper" do
+    describe "current_user" do
+      it "returns nil if no user is logged in" do
+        expect(controller.send :current_user).to be_nil
+      end
+
+      it "returns the current user if logged in" do
+        session[:user_id] = users(:viewer).id
+        expect(controller.send :current_user).to eq(users(:viewer))
+      end
+    end
+
+    describe "user_signed_in?" do
+      it "returns false if no user is logged in" do
+        expect(controller.send :user_signed_in?).to be_falsey
+      end
+
+      it "returns true if a user is logged in" do
+        session[:user_id] = users(:viewer).id
+        expect(controller.send :user_signed_in?).to be_truthy
+      end
+    end
+
+    describe "require_authentication" do
+      controller do
+        before_action :require_authentication, only: [:protected]
+
+        def protected
+          render plain: "protected"
+        end
+      end
+
+      before do
+        routes.draw do
+          get 'protected' => 'anonymous#protected'
+        end
+      end
+
+      it "redirects to root path with error flash if not authenticated" do
+        get :protected
+
+        expect(flash[:error]).to eq("You must be logged in to access this section")
+        expect(response).to redirect_to(controller.root_path)
+      end
+
+      it "allows access if authenticated" do
+        session[:user_id] = users(:viewer).id
+
+        get :protected
+
+        expect(response).to be_successful
+        expect(response.body).to eq("protected")
+      end
+    end
+
+    describe "require_role" do
+      controller do
+        before_action :require_admin, only: [:admin_only]
+        before_action :require_editor, only: [:edit_only]
+
+        def edit_only
+          render plain: "edit only"
+        end
+
+        def admin_only
+          render plain: "admin only"
+        end
+      end
+
+      before do
+        routes.draw do
+          get 'admin_only' => 'anonymous#admin_only'
+          get 'edit_only' => 'anonymous#edit_only'
+        end
+      end
+
+      it "redirects to root path with error flash if not authenticated" do
+        get :admin_only
+
+        expect(flash[:error]).to eq("You must be logged in to access this section")
+        expect(response).to redirect_to(controller.root_path)
+      end
+
+      it "redirects to root path with error flash if authenticated but insufficient role" do
+        session[:user_id] = users(:viewer).id
+
+        get :admin_only
+
+        expect(flash[:error]).to eq("You must be a(n) admin to access this section")
+        expect(response).to redirect_to(controller.root_path)
+      end
+
+      it "allows access if authenticated and has sufficient role" do
+        session[:user_id] = users(:admin).id
+
+        get :admin_only
+
+        expect(response).to be_successful
+        expect(response.body).to eq("admin only")
+      end
+
+      it "allows access to editor-only action for editor role" do
+        session[:user_id] = users(:editor).id
+
+        get :edit_only
+
+        expect(response).to be_successful
+        expect(response.body).to eq("edit only")
+      end
+
+      it "allows access to editor-only action for admin role" do
+        session[:user_id] = users(:admin).id
+
+        get :edit_only
+
+        expect(response).to be_successful
+        expect(response.body).to eq("edit only")
+      end
+    end
+  end
 end
