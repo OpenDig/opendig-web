@@ -8,6 +8,8 @@ require:
 
 AllCops:
   NewCops: enable
+  Exclude:
+    - 'test/**/*' # We're using RSpec
 
 # Project-specific customizations:
 Style/SymbolArray:
