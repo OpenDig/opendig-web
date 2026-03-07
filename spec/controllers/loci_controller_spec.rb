@@ -26,6 +26,96 @@ RSpec.describe LociController do
     controller.instance_variable_set(:@editing_enabled, true)
   end
 
+  describe 'before_action callbacks' do
+    describe 'set_locus' do
+      it 'loads the locus from the database' do
+        allow(db).to receive(:view).with('opendig/locus', key: [area_id, square_id, locus_code])
+                                   .and_return({ 'rows' => [{ 'value' => locus_data }] })
+
+        get :show, params: { area_id: area_id, square_id: square_id, id: locus_code }
+
+        expect(controller.instance_variable_get(:@area)).to eq(area_id)
+        expect(controller.instance_variable_get(:@square)).to eq(square_id)
+        expect(controller.instance_variable_get(:@locus_code)).to eq(locus_code)
+        expect(controller.instance_variable_get(:@locus)).to eq(locus_data)
+      end
+
+      context 'when locus is not found' do
+        it 'sets @locus to nil' do
+          allow(db).to receive(:view).with('opendig/locus', key: [nil, nil, nil])
+                                     .and_return({ 'rows' => [] })
+
+          controller.send(:set_locus)
+
+          expect(controller.instance_variable_get(:@locus)).to be_nil
+        end
+      end
+
+      it 'is called before show, edit, and update actions' do
+        controller.instance_variable_set(:@locus, {})
+        allow(db).to receive(:save_doc).and_return(false)
+        allow(controller).to receive(:set_locus)
+
+        get :show, params: { area_id: area_id, square_id: square_id, id: locus_code }
+        get :edit, params: { area_id: area_id, square_id: square_id, id: locus_code }
+        patch :update, params: { area_id: area_id, square_id: square_id, id: locus_code, locus: locus_data }
+        expect(controller).to have_received(:set_locus).exactly(3).times
+      end
+
+      it 'is not called before index, new, and create actions' do
+        controller.instance_variable_set(:@locus, {})
+        allow(db).to receive_messages(view: { 'rows' => [] }, save_doc: false)
+        allow(controller).to receive(:set_locus)
+
+        get :index, params: { area_id: area_id, square_id: square_id, id: locus_code }
+        put :new, params: { area_id: area_id, square_id: square_id, id: locus_code }
+        put :create, params: { area_id: area_id, square_id: square_id, id: locus_code }
+        expect(controller).not_to have_received(:set_locus)
+      end
+    end
+  end
+
+  describe 'private helpers' do
+    describe 'repair_nested_params' do
+      it 'converts indexed hashes to arrays' do
+        input = {
+          'finds' => {
+            '0' => { 'type' => 'pottery', 'count' => '5' },
+            '1' => { 'type' => 'bone', 'count' => '3' }
+          }
+        }
+        expected_output = {
+          'finds' => [
+            { 'type' => 'pottery', 'count' => '5' },
+            { 'type' => 'bone', 'count' => '3' }
+          ]
+        }
+
+        output = controller.send(:repair_nested_params, input)
+        expect(output).to eq(expected_output)
+      end
+
+      it 'does not modify non-indexed hashes' do
+        input = {
+          'finds' => {
+            'a' => { 'type' => 'pottery', 'count' => '5' },
+            'b' => { 'type' => 'bone', 'count' => '3' }
+          }
+        }
+
+        output = controller.send(:repair_nested_params, input)
+        expect(output).to eq(input)
+      end
+
+      it 'does not modify empty hashes' do
+        input = { 'finds' => {} }
+
+        output = controller.send(:repair_nested_params, input)
+        expect(output).to eq(input)
+      end
+    end
+  end
+
   describe 'GET index' do
     let(:loci_rows) do
       [

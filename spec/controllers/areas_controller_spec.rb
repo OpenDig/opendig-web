@@ -1,6 +1,42 @@
 require 'rails_helper'
 
 RSpec.describe AreasController do
+  describe 'before_action callbacks' do
+    let(:db) { instance_double(CouchRest::Database) }
+
+    describe 'load_areas' do
+      it 'loads areas from the database' do
+        controller.instance_variable_set(:@db, db)
+
+        allow(db).to receive(:view).with('opendig/areas', { group: true })
+                                   .and_return({ 'rows' => [{ 'key' => '24' }, { 'key' => '25' }] })
+
+        controller.send(:load_areas)
+        expect(controller.instance_variable_get(:@areas)).to eq(%w[24 25])
+      end
+    end
+
+    describe 'new_area_must_be_unique' do
+      it 'renders new with error if area already exists' do
+        controller.instance_variable_set(:@areas, %w[24 25])
+        controller.params = { area: '24' }
+
+        allow(controller).to receive(:render).with(:new)
+        controller.send(:new_area_must_be_unique)
+        expect(controller.flash.now[:error]).to eq('area 24 already exists!')
+      end
+
+      it 'does nothing if area is unique' do
+        controller.instance_variable_set(:@areas, %w[24 25])
+        controller.params = { area: '42' }
+
+        allow(controller).to receive(:render)
+        controller.send(:new_area_must_be_unique)
+        expect(controller).not_to have_received(:render)
+      end
+    end
+  end
+
   describe 'GET index' do
     it 'assigns @areas' do
       get :index

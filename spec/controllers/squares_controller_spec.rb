@@ -17,6 +17,48 @@ RSpec.describe SquaresController do
                                .and_return({ 'rows' => existing_squares })
   end
 
+  describe 'before_action callbacks' do
+    describe 'set_area_and_squares' do
+      it 'sets @area and @squares' do
+        get :index, params: { area_id: area_id }
+
+        expect(controller.instance_variable_get(:@area)).to eq(area_id)
+        expect(controller.instance_variable_get(:@squares)).to eq(%w[A B C])
+      end
+    end
+
+    describe 'new_square_must_be_unique' do
+      it 'renders new with error if square already exists' do
+        post :create, params: { area_id: area_id, square: 'A' }
+
+        expect(controller.flash.now[:error]).to eq("Square A in area #{area_id} already exists!")
+        expect(response).to render_template(:new)
+      end
+
+      it 'does nothing if square is unique' do
+        allow(controller).to receive(:render)
+        allow(db).to receive(:save_doc).and_return(false)
+        post :create, params: { area_id: area_id, square: 'D' }
+
+        expect(controller).to have_received(:render)
+      end
+    end
+  end
+
+  describe 'private helpers' do
+    describe 'save_doc' do
+      it 'saves a new square document to the database' do # rubocop:disable RSpec/ExampleLength
+        new_square = 'D'
+        allow(db).to receive(:save_doc)
+        controller.instance_variable_set(:@area, area_id)
+
+        controller.send(:save_doc, new_square)
+        expect(db).to have_received(:save_doc).with({ 'temp-doc' => true, 'square' => new_square,
+                                                      'area' => area_id })
+      end
+    end
+  end
+
   describe 'GET index' do
     it 'sets @area' do
       get :index, params: { area_id: area_id }
