@@ -22,6 +22,29 @@ Style/FrozenStringLiteralComment:
 Rails/I18nLocaleTexts:
   Enabled: false
 
+RSpec/NestedGroups:
+  Max: 4
+
+RSpec/MultipleExpectations:
+  Max: 2
+  Exclude:
+    - 'spec/controllers/loci_controller_spec.rb'
+    - 'spec/controllers/pails_controller_spec.rb'
+
+RSpec/ContextWording:
+  Exclude:
+    - 'spec/controllers/areas_controller_spec.rb'
+    - 'spec/controllers/pails_controller_spec.rb'
+    - 'spec/controllers/squares_controller_spec.rb'
+
+RSpec/ExampleLength:
+  Exclude:
+    - 'spec/controllers/loci_controller_spec.rb'
+    - 'spec/controllers/pails_controller_spec.rb'
+
+RSpec/MultipleMemoizedHelpers:
+  Max: 8
+
 # These are added here instead of in .rubocop_todo.yml so that they
 # won't be automatically removed when the TODO file is regenerated.
 #
