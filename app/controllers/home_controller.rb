@@ -1,7 +1,3 @@
-class HomeController < ApplicationController
-
-  def index
-    
-  end
-
+class HomeController < ApplicationController # rubocop:disable Style/Documentation
+  def index; end
 end

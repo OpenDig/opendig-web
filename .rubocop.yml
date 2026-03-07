@@ -16,6 +16,9 @@ Style/SymbolArray:
 Style/FrozenStringLiteralComment:
   Enabled: false
 
+Rails/I18nLocaleTexts:
+  Enabled: false
+
 # These are added here instead of in .rubocop_todo.yml so that they
 # won't be automatically removed when the TODO file is regenerated.
 #
