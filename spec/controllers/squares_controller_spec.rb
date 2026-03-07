@@ -36,11 +36,10 @@ RSpec.describe SquaresController do
       end
 
       it 'does nothing if square is unique' do
-        allow(controller).to receive(:render)
         allow(db).to receive(:save_doc).and_return(false)
         post :create, params: { area_id: area_id, square: 'D' }
 
-        expect(controller).to have_received(:render)
+        expect(response).to render_template(:new)
       end
     end
   end
