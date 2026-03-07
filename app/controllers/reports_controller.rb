@@ -9,15 +9,13 @@ class ReportsController < ApplicationController
 
   def show
     @season = params[:id].to_i
-    @report_type = { 'A' => 'artifacts', 'B' => 'objects', 'S' => 'samples', 'Z' => 'bones' }[params[:report_type]]
+    @report_type = @report_types.invert[params[:report_type]].downcase
 
     grab_report_data
     style = process_report_data
 
     respond_to do |format|
-      format.html do
-        render template: "reports/show_#{style}"
-      end
+      format.html { render template: "reports/show_#{style}" }
       format.pdf { render_pdf_report(style) }
     end
   end
