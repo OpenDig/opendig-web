@@ -1,8 +1,8 @@
+# BulkUploadsController manages bulk uploads of files to S3.
 class BulkUploadsController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create] # Skip CSRF protection for AJAX requests
 
-  def new
-  end
+  def new; end
 
   def create
     uploaded_files = params[:files]

@@ -1,10 +1,16 @@
-class ApplicationController < ActionController::Base
+class ApplicationController < ActionController::Base # rubocop:disable Style/Documentation
   before_action :set_db, :set_descriptions, :set_edit_mode
-  before_action :check_editing_mode, only: [:new, :edit, :create, :update, :destroy]
+  before_action :check_editing_mode, only: [:new, :edit, :create, :update, :destroy] # rubocop:disable Rails/LexicallyScopedActionFilter
 
-  http_basic_authenticate_with name: "#{ENV['EDIT_USER']}", password: "#{ENV['EDIT_PASSWORD']}" if Rails.env.production?
+  if Rails.env.production?
+    http_basic_authenticate_with(
+      name: ENV.fetch('EDIT_USER', nil).to_s,
+      password: ENV.fetch('EDIT_PASSWORD', nil).to_s
+    )
+  end
 
   private
+
   def set_db
     @db = Rails.application.config.couchdb
   end
@@ -18,9 +24,9 @@ class ApplicationController < ActionController::Base
   end
 
   def check_editing_mode
-    unless @editing_enabled
-      flash[:error] = "Editing is disabled"
-      redirect_to request.referer
-    end
+    return if @editing_enabled
+
+    flash[:error] = 'Editing is disabled'
+    redirect_to request.referer
   end
 end
