@@ -11,6 +11,9 @@ AllCops:
   Exclude:
     - 'test/**/*' # We're using RSpec
     - 'vendor/bundle/**/*' # GitHub Actions installs gems here
+    - 'tmp/**/*'
+    - 'minio-data/**/*'
+    - 'couchdb-data/**/*'
 
 # Project-specific customizations:
 Style/SymbolArray:
