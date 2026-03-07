@@ -70,6 +70,7 @@ GEM
       public_suffix (>= 2.0.2, < 5.0)
     anyway_config (2.3.0)
       ruby-next-core (>= 0.14.0)
+    ast (2.4.3)
     aws-eventstream (1.2.0)
     aws-partitions (1.613.0)
     aws-sdk-core (3.131.5)
@@ -144,9 +145,10 @@ GEM
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
     jmespath (1.6.1)
-    json (2.18.0)
+    json (2.18.1)
     jwt (3.1.2)
       base64
+    language_server-protocol (3.17.0.5)
     logger (1.7.0)
     loofah (2.19.1)
       crass (~> 1.0.2)
@@ -218,6 +220,11 @@ GEM
     omniauth-rails_csrf_protection (2.0.1)
       actionpack (>= 4.2)
       omniauth (~> 2.0)
+    parallel (1.27.0)
+    parser (3.3.10.2)
+      ast (~> 2.4.1)
+      racc
+    prism (1.9.0)
     public_suffix (4.0.7)
     puma (5.6.4)
       nio4r (~> 2.0)
@@ -260,6 +267,7 @@ GEM
       rake (>= 12.2)
       thor (~> 1.0)
       zeitwerk (~> 2.5)
+    rainbow (3.1.1)
     rake (13.0.6)
     redis (5.0.4)
       redis-client (>= 0.7.4)
@@ -286,7 +294,33 @@ GEM
       rspec-mocks (~> 3.11)
       rspec-support (~> 3.11)
     rspec-support (3.12.0)
+    rubocop (1.69.0)
+      json (~> 2.3)
+      language_server-protocol (>= 3.17.0)
+      parallel (~> 1.10)
+      parser (>= 3.3.0.2)
+      rainbow (>= 2.2.2, < 4.0)
+      regexp_parser (>= 2.4, < 3.0)
+      rubocop-ast (>= 1.36.1, < 2.0)
+      ruby-progressbar (~> 1.7)
+      unicode-display_width (>= 2.4.0, < 4.0)
+    rubocop-ast (1.49.0)
+      parser (>= 3.3.7.2)
+      prism (~> 1.7)
+    rubocop-capybara (2.21.0)
+      rubocop (~> 1.41)
+    rubocop-rails (2.29.1)
+      activesupport (>= 4.2.0)
+      rack (>= 1.1)
+      rubocop (>= 1.52.0, < 2.0)
+      rubocop-ast (>= 1.31.1, < 2.0)
+    rubocop-rspec (3.4.0)
+      rubocop (~> 1.61)
+    rubocop-rspec_rails (2.30.0)
+      rubocop (~> 1.61)
+      rubocop-rspec (~> 3, >= 3.0.1)
     ruby-next-core (0.15.2)
+    ruby-progressbar (1.13.0)
     rubyzip (2.3.2)
     sassc (2.4.0)
       ffi (~> 1.9)
@@ -334,6 +368,9 @@ GEM
       railties (>= 6.0.0)
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
+    unicode-display_width (3.2.0)
+      unicode-emoji (~> 4.1)
+    unicode-emoji (4.2.0)
     uri (1.1.1)
     version_gem (1.1.9)
     web-console (4.2.0)
@@ -384,6 +421,11 @@ DEPENDENCIES
   rails-controller-testing
   redis
   rspec-rails
+  rubocop (~> 1.69)
+  rubocop-capybara
+  rubocop-rails
+  rubocop-rspec
+  rubocop-rspec_rails
   sassc-rails
   selenium-webdriver
   simple_form
