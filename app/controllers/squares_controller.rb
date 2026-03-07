@@ -1,6 +1,5 @@
-# SquaresController manages the squares in an area. It allows users to view the squares in an area,
-# create new squares, and handles the logic for ensuring that duplicate squares are not created
-# within the same area.
+# SquaresController manages the squares in an area. It allows users to view and create squares
+# and ensures duplicate squares are not created within the same area.
 class SquaresController < ApplicationController
   before_action :set_area_and_squares
   before_action :new_square_must_be_unique, only: :create

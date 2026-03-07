@@ -1,5 +1,5 @@
 # RegistrarController manages the registration of finds to the database.
-# It allows users to view, edit, and update find records based on their
+# It allows users to view and edit find records based on their
 # season and registration status.
 class RegistrarController < ApplicationController
   before_action :set_item, only: [:show, :edit, :update]
