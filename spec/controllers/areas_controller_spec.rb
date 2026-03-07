@@ -17,17 +17,20 @@ RSpec.describe AreasController do
     end
 
     describe 'new_area_must_be_unique' do
-      it 'renders new with error if area already exists' do
+      before do
         controller.instance_variable_set(:@areas, %w[24 25])
+        controller.params = { area: '24' }
+      end
+
+      it 'renders new with error if area already exists' do
         allow(controller).to receive(:render)
 
-        post :create, params: { area: '24' }
+        controller.send(:new_area_must_be_unique)
         expect(controller.flash.now[:error]).to eq('area 24 already exists!')
         expect(controller).to have_received(:render).with(:new)
       end
 
       it 'does nothing if area is unique' do
-        controller.instance_variable_set(:@areas, %w[24 25])
         controller.params = { area: '42' }
 
         controller.send(:new_area_must_be_unique)
