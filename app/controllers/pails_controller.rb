@@ -43,13 +43,4 @@ class PailsController < ApplicationController
       render :edit
     end
   end
-
-  private
-
-  def set_locus
-    @area = params[:area_id]
-    @square = params[:square_id]
-    @locus_code = params[:id]
-    @locus = @db.view('opendig/locus', key: [@area, @square, @locus_code])['rows']&.first&.dig('value')
-  end
 end
