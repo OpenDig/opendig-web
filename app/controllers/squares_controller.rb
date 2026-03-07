@@ -36,9 +36,10 @@ class SquaresController < ApplicationController
   end
 
   def new_square_must_be_unique
-    return unless @squares.include? params[:square].upcase
+    square = params[:square].upcase
+    return unless @squares.include? square
 
-    flash.now[:error] = "Square #{params[:square]} in area #{@area} already exists!"
+    flash.now[:error] = "Square #{square} in area #{@area} already exists!"
     render :new
   end
 end
