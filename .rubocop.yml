@@ -5,3 +5,11 @@ require:
   - rubocop-rails
   - rubocop-rspec_rails
   - rubocop-capybara
+
+AllCops:
+  NewCops: enable
+
+# Project-specific overrides go here
+
+Style/SymbolArray:
+  Enabled: false
