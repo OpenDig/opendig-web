@@ -55,10 +55,6 @@ class LociController < ApplicationController
     @locus = @db.view('opendig/locus', key: [@area, @square, @locus_code])['rows']&.first&.dig('value')
   end
 
-  def locus_params
-    parameters.require(:locus).permit!
-  end
-
   def repair_nested_params(obj)
     obj.each do |key, value|
       if value.is_a?(ActionController::Parameters) || value.is_a?(Hash)
