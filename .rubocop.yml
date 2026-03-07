@@ -9,7 +9,14 @@ require:
 AllCops:
   NewCops: enable
 
-# Project-specific overrides go here
-
+# Project-specific customizations:
 Style/SymbolArray:
   Enabled: false
+
+# These are added here instead of in .rubocop_todo.yml so that they
+# won't be automatically removed when the TODO file is regenerated.
+#
+# Offenses that `rubocop --auto-gen-config` misses for some reason:
+Layout/FirstArrayElementIndentation:
+  Exclude:
+    - 'app/models/data_digger.rb'
