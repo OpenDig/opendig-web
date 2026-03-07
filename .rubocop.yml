@@ -10,6 +10,7 @@ AllCops:
   NewCops: enable
   Exclude:
     - 'test/**/*' # We're using RSpec
+    - 'vendor/bundle/**/*' # GitHub Actions installs gems here
 
 # Project-specific customizations:
 Style/SymbolArray:
