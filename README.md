@@ -7,19 +7,6 @@ A Rails 7 application for managing archaeological dig data. [Join the Discord!](
 
 ## Requirements
 
-### Dev container
-
-If you already have VS Code and Docker installed, you can click the badge above or [here](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/OpenDig/opendig-web) to get started. Clicking these links will cause VS Code to automatically install the Dev Containers extension if needed, clone the source code into a container volume, and set up the environment in a dev container for use.
-
-This makes development much simpler, but there are a couple caveats:
-
-1. The first load will take a couple minutes to build the container. Subsequent loads will be much faster.
-2. Running the app in this way prevents other Docker containers from loading environment variables through direnv. This doesn't cause any problems for development, but it's something to be aware of.
-3. Running the app in this way prevents you from reading the app logs through Docker [as specified below](#4-view-logs). Instead, find Rails logs in `log/development.log`.
-4. Closing the editor will close the Docker container the app runs in but it may not close the ancillary containers ([more info on them below](#2-start-docker-services)).
-
-### Manual setup
-
 Before getting started, ensure you have the following installed:
 
 - **Docker** (version 20.10 or later)
@@ -77,7 +64,20 @@ This command tells direnv that it's safe to load the `.envrc` file in this direc
 
 ## Getting Started
 
-### 1. Pre-fill CouchDB database (first-time setup only)
+### Dev container
+
+If you already have VS Code and Docker installed, you can click the badge above or [here](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/OpenDig/opendig-web) to get started. Clicking these links will cause VS Code to automatically install the Dev Containers extension if needed, clone the source code into a container volume, and set up the environment in a dev container for use.
+
+This makes development much simpler, but there are a couple caveats:
+
+1. The first load will take a couple minutes to build the container. Subsequent loads will be much faster.
+2. This project starts multiple containers. Running the app in a dev container prevents [the other Docker containers](#2-start-docker-services) from loading environment variables through direnv. This doesn't cause any problems for development, but it's something to be aware of.
+3. Running the app in a dev container prevents you from reading the app logs through Docker [as specified below](#4-view-logs). Instead, find Rails logs in `log/development.log`.
+4. Closing the editor will close the Docker container the app runs in but it may not close the other Docker containers.
+
+### Manual setup
+
+#### 1. Pre-fill CouchDB database (first-time setup only)
 
 For first-time setup, you need to unzip the initial CouchDB data to pre-fill the database:
 
@@ -87,7 +87,7 @@ unzip couchdb-data-start-data.zip -d couchdb-data
 
 **Note**: This step is only needed once. After the initial setup, the `couchdb-data/` directory will persist your data. If you need to reset the database, you can remove the `couchdb-data/` directory and unzip again.
 
-### 2. Start Docker services
+#### 2. Start Docker services
 
 The application uses Docker Compose to run all required services:
 
@@ -108,7 +108,7 @@ This will:
 - Start all dependent services (CouchDB, MinIO, imgproxy, Redis)
 - Run the Rails application using `bin/dev` (which uses foreman)
 
-### 3. Access the application
+#### 3. Access the application
 
 Once the containers are running, you can access:
 
@@ -116,7 +116,7 @@ Once the containers are running, you can access:
 - **MinIO Console**: http://localhost:9001 (admin/password)
 - **CouchDB**: http://localhost:5984 (admin/password)
 
-### 4. View logs
+#### 4. View logs
 
 To see logs from all services:
 
