@@ -5,3 +5,11 @@ require:
   - rubocop-rails
   - rubocop-rspec_rails
   - rubocop-capybara
+
+AllCops:
+  NewCops: enable
+
+# Offenses that `rubocop --auto-gen-config` doesn't pick up on for some reason
+Layout/FirstArrayElementIndentation:
+  Exclude:
+    - 'app/models/data_digger.rb'
