@@ -135,7 +135,7 @@ GEM
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
     jmespath (1.6.1)
-    json (2.18.1)
+    json (2.19.1)
     language_server-protocol (3.17.0.5)
     loofah (2.19.1)
       crass (~> 1.0.2)
@@ -223,7 +223,7 @@ GEM
       redis-client (>= 0.7.4)
     redis-client (0.8.0)
       connection_pool
-    regexp_parser (2.5.0)
+    regexp_parser (2.11.3)
     reline (0.3.2)
       io-console (~> 0.5)
     rexml (3.2.5)
@@ -244,14 +244,14 @@ GEM
       rspec-mocks (~> 3.11)
       rspec-support (~> 3.11)
     rspec-support (3.12.0)
-    rubocop (1.69.0)
+    rubocop (1.70.0)
       json (~> 2.3)
       language_server-protocol (>= 3.17.0)
       parallel (~> 1.10)
       parser (>= 3.3.0.2)
       rainbow (>= 2.2.2, < 4.0)
-      regexp_parser (>= 2.4, < 3.0)
-      rubocop-ast (>= 1.36.1, < 2.0)
+      regexp_parser (>= 2.9.3, < 3.0)
+      rubocop-ast (>= 1.36.2, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 2.4.0, < 4.0)
     rubocop-ast (1.49.0)
@@ -361,7 +361,7 @@ DEPENDENCIES
   rails-controller-testing
   redis
   rspec-rails
-  rubocop (~> 1.69)
+  rubocop (~> 1.70.0)
   rubocop-capybara
   rubocop-rails
   rubocop-rspec
