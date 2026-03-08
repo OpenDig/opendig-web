@@ -43,7 +43,16 @@
 			"extensions": [
 				"Shopify.ruby-lsp",
 				"kaiwood.endwise"
-			]
+			],
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"[ruby]": {
+					"editor.defaultFormatter": "Shopify.ruby-lsp",
+					"editor.tabSize": 2,
+					"editor.insertSpaces": true,
+					"editor.semanticHighlighting.enabled": true
+				}
+			}
 		}
 	}
 
