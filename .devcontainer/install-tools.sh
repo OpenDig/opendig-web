@@ -31,15 +31,11 @@ else
   rm .envrc.bak
   unset IMGPROXY_KEY
   unset IMGPROXY_SALT
-
-  # Ensure direnv knows to load the .envrc file
-  /bin/bash "cd $(pwd) && direnv allow"
-  # `postStartCommand` in `devcontainer.json` will have started the app already,
-  # but it hasn't loaded the proper configuration, so we'll need to do that now
-  pkill ruby
-  rm -f tmp/pids/server.pid
-  /bin/bash "cd $(pwd) && bin/dev"
 fi
+
+# Ensure direnv knows to load the .envrc file
+echo "Running \`direnv allow\`"
+/bin/bash -c "cd $(pwd) && direnv allow"
 
 if [ -d "couchdb-data" ]; then
   echo "Dev data already loaded"
