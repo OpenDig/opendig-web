@@ -72,7 +72,7 @@ group :development, :test do
   gem "rails-controller-testing"
 
   # Lint dependencies
-  gem "rubocop", "~> 1.69", require: false
+  gem "rubocop", "~> 1.70.0", require: false
   gem "rubocop-rspec", require: false
   gem "rubocop-rails", require: false
   gem "rubocop-rspec_rails", require: false
