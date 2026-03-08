@@ -1,8 +1,24 @@
 # OpenDig Web
 
+[![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/OpenDig/opendig-web)
+
+
 A Rails 7 application for managing archaeological dig data. [Join the Discord!](https://discord.gg/DJ7BZcQMsb)
 
 ## Requirements
+
+### Dev container
+
+If you already have VS Code and Docker installed, you can click the badge above or [here](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/OpenDig/opendig-web) to get started. Clicking these links will cause VS Code to automatically install the Dev Containers extension if needed, clone the source code into a container volume, and set up the environment in a dev container for use.
+
+This makes development much simpler, but there are a couple caveats:
+
+1. The first load will take a couple minutes to build the container. Subsequent loads will be much faster.
+2. Running the app in this way prevents other Docker containers from loading environment variables through direnv. This doesn't cause any problems for development, but it's something to be aware of.
+3. Running the app in this way prevents you from reading the app logs through Docker [as specified below](#4-view-logs). Instead, find Rails logs in `log/development.log`.
+4. Closing the editor will close the Docker container the app runs in but it may not close the ancillary containers ([more info on them below](#2-start-docker-services)).
+
+### Manual setup
 
 Before getting started, ensure you have the following installed:
 
@@ -114,6 +130,8 @@ To see logs from a specific service:
 docker compose logs -f app
 ```
 
+If running in a dev container, Rails writes logs to `log/development.log`.
+
 ## Development Workflow
 
 ### Running the application
@@ -135,6 +153,8 @@ Execute Rails commands inside the container:
 
 ```bash
 docker compose exec app bundle exec rails <command>
+# Or, in dev container:
+rails <command>
 ```
 
 For example:
@@ -142,6 +162,9 @@ For example:
 ```bash
 docker compose exec app bundle exec rails console
 docker compose exec app bundle exec rails db:migrate
+# Or, in dev container:
+rails console
+rails db:migrate
 ```
 
 ### Running tests
@@ -226,9 +249,9 @@ docker compose up -d
 
 ### Folder permissions issues
 
-If you see permission denied errors in the logs, you may need to setup and run the app in a fresh environment, such as a VM.
+If you see permission denied errors in the logs, you may need to setup and run the app in a fresh environment, such as a VM or container.
 
-At this time, Ubuntu and WSL2 should not have this issue.
+At this time, Ubuntu, WSL2 and VS Code Dev Containers should not have this issue.
 
 ## Additional Resources
 
