@@ -77,6 +77,13 @@ group :development, :test do
   gem "rubocop-rails", require: false
   gem "rubocop-rspec_rails", require: false
   gem "rubocop-capybara", require: false
+
+  # Ruby LSP (editor integration)
+  gem "ruby-lsp", require: false
+  gem "ruby-lsp-rails", require: false
+  gem "ruby-lsp-rspec", require: false
+  gem "ruby-lsp-brakeman", require: false
+  gem "ruby-lsp-doclinks", require: false
 end
 
 group :development do
