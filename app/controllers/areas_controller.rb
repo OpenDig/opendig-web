@@ -2,6 +2,7 @@ class AreasController < ApplicationController
 
   def index
     @areas = @db.view('opendig/areas', {group: true})['rows']
+    @favorite_areas = [] # Placeholder for favorite areas, to be implemented in the future
   end
 
   def new
