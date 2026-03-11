@@ -6,6 +6,17 @@ class LociController < ApplicationController
     @loci = @db.view('opendig/loci', {group: true, start_key: [@area, @square], end_key: [@area, @square, {}]})["rows"].map{|row| Locus.new(row["key"])}
   end
 
+  def search
+    query = params[:q].to_s.strip
+    @search_query = query
+    @search_results = query.present? ? loci_for_search(query) : []
+
+    respond_to do |format|
+      format.html
+      format.json { render json: @search_results }
+    end
+  end
+
   def show
   end
 
@@ -50,6 +61,34 @@ class LociController < ApplicationController
       @square = params[:square_id]
       @locus_code = params[:id]
       @locus = @db.view('opendig/locus', key: [@area, @square, @locus_code])["rows"]&.first&.dig("value")
+    end
+
+    def loci_for_search(query)
+      normalized_query = query.delete(' ').upcase
+      rows = @db.view('opendig/all_loci')["rows"]
+
+      rows.filter_map do |row|
+        label = row["key"].to_s
+        area, square, code = label.split('.')
+        next unless area.present? && square.present? && code.present? # skips bad data label
+
+        normalized_label = label.upcase
+        code_no_leading_zeros = code.sub(/\A0+/, '')
+        query_no_leading_zeros = normalized_query.sub(/\A0+/, '')
+
+        matches_label = normalized_label.include?(normalized_query)
+        matches_code = code.start_with?(normalized_query)
+        matches_unpadded_code = code_no_leading_zeros.present? && query_no_leading_zeros.present? && code_no_leading_zeros.start_with?(query_no_leading_zeros)
+        next unless matches_label || matches_code || matches_unpadded_code
+
+        {
+          label: label,
+          area: area,
+          square: square,
+          code: code,
+          url: area_square_locus_path(area, square, code)
+        }
+      end.first(50)
     end
 
     def locus_params
