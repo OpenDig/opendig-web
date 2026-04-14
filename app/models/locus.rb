@@ -1,7 +1,6 @@
 # doc.area, doc.square, doc.code, doc._id, doc.locus_type, doc.designation, doc.age
 
 class Locus
-
   attr_accessor :area, :square, :code, :id, :locus_type, :designation, :age
 
   def initialize(row)
@@ -13,7 +12,6 @@ class Locus
   end
 
   def self.all
-    Rails.application.config.couchdb.view('opendig/all_loci')['rows'].map{|locus| locus['key']}
+    Rails.application.config.couchdb.view('opendig/all_loci')['rows'].map { |locus| locus['key'] }
   end
-
 end

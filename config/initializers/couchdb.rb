@@ -25,47 +25,60 @@ host = ENV['COUCHDB_HOST'] || couchdb_config["host"]
 url = "#{protocol}://#{username}:#{password}@#{host}:#{port}/#{database}"
 Rails.application.config.couchdb = CouchRest.database!(url)
 
-def get_config
+def load_or_create_config
   doc_id = 'opendig_config'
   begin
-    doc = Rails.application.config.couchdb.get(doc_id) rescue nil
+    doc = begin
+      Rails.application.config.couchdb.get(doc_id)
+    rescue StandardError
+      nil
+    end
 
     if doc.nil?
       Rails.logger.info "No config doc found (#{doc_id}), creating default"
-      default = {'_id' => doc_id, 'version' => 0}
+      default = { '_id' => doc_id, 'version' => 0 }
       Rails.application.config.couchdb.save_doc(default)
       default
     else
       doc
     end
-  rescue => e
+  rescue StandardError => e
     Rails.logger.error "Error fetching config doc: #{e.class}: #{e.message}"
-    default = {'_id' => doc_id, 'version' => 0}
-    Rails.application.config.couchdb.save_doc(default) rescue nil
+    default = { '_id' => doc_id, 'version' => 0 }
+    begin
+      Rails.application.config.couchdb.save_doc(default)
+    rescue StandardError
+      nil
+    end
     default
   end
 end
 
 design = YAML.load_file("#{Rails.root}/config/views.yaml")
-config = get_config
+config = load_or_create_config
 config_version = (config[:version] || 0).to_i
 design_version = (design[:version] || 0).to_i
 
 if config_version != design_version
-  Rails.logger.info "Design docs out of date, updating"
-  if design_docs = Rails.application.config.couchdb.get('_design/opendig')
-    design_docs["views"] = design[:design][:views]
+  Rails.logger.info 'Design docs out of date, updating'
+  design_docs = Rails.application.config.couchdb.get('_design/opendig')
+  if design_docs
+    design_docs['views'] = design[:design][:views]
     design_docs.save
   else
     Rails.application.config.couchdb.save_doc(design[:design])
   end
 
   # bump and persist the config version so next boot knows it's up to date
-  cfg = Rails.application.config.couchdb.get('opendig_config') rescue nil
+  cfg = begin
+    Rails.application.config.couchdb.get('opendig_config')
+  rescue StandardError
+    nil
+  end
   if cfg
     cfg['version'] = design_version
     Rails.application.config.couchdb.save_doc(cfg)
   end
 else
-  Rails.logger.info "Design docs up to date"
+  Rails.logger.info 'Design docs up to date'
 end
