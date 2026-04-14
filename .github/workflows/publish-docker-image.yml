@@ -1,20 +1,15 @@
 name: Docker Image CI
 
 on:
-  # push:
-  #   branches: ["main"]
-  # pull_request:
-  #   branches: [ "main" ]
   workflow_run:
-    workflows: ["Tests & Linting"]
+    workflows: ["Tests"]
     types:
       - completed
 
 jobs:
-  #TO DO: deploy/build separate. Deploy only on original
   build:
-    # Do not attempt to deploy from forks
-    if: ${{ github.event.repository.fork == false }}
+    # Run only on merge to main branch of main repository
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && github.event.repository.fork == false
 
     runs-on: ubuntu-latest
 
@@ -31,7 +26,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4.5.0
         with:
-          images: neshmi/opendig-web
+          images: opendig/opendig-web
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4.1.0

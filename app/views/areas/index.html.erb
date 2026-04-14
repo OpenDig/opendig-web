@@ -12,29 +12,29 @@
       </div>
     </div>
 
-  <%# let text overflow and set the width to be predetermined %>
-  <div class="p-6 bg-white rounded border border-solid border-black-200 overflow-y-auto h-[600px] w-[300px]">
+    <%# let text overflow and set the width to be predetermined %>
+    <div class="p-6 bg-white rounded border border-solid border-black-200 overflow-y-auto h-[600px] w-[300px]">
 
-    <%# Is this breadcrumb needed on the first page? %>
-    <%# <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item active" aria-current="page">Home</li>
-      </ol>
-    </nav> %>
+      <%# Is this breadcrumb needed on the first page? %>
+      <%# <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active" aria-current="page">Home</li>
+        </ol>
+      </nav> %>
       <% if @areas.empty? %>
-      <p class="text-gray-400">Create a new area to get started</p>
+        <p class="text-gray-400">Create a new area to get started</p>
       <% else %>
-      <% @areas.each do |area| %>
-      <div class="border-b border-gray-200 px-1 last:border-0 flex items-center justify-between">
-      <p class="mb-2"><%= link_to "Area: #{area["key"]}", area_squares_path(area["key"]), class: "text-blue-600 hover:underline" %></p>
-      <button class="favorite-star" data-area-key="<%= area["key"] %>" data-favorited="<%= @favorite_areas.any? { |fav| fav["key"] == area["key"] } %>">
-        <span class="text-xl <%= @favorite_areas.any? { |fav| fav["key"] == area["key"] } ? 'text-yellow-400' : 'text-gray-300' %>">★</span>
-      </button>
-      </div>  
-      <% end %>
+        <% @areas.each do |area| %>
+          <div class="border-b border-gray-200 px-1 last:border-0 flex items-center justify-between">
+            <p class="mb-2"><%= link_to "Area: #{area["key"]}", area_squares_path(area["key"]), class: "text-blue-600 hover:underline" %></p>
+            <button class="favorite-star" data-area-key="<%= area["key"] %>" data-favorited="<%= @favorite_areas.any? { |fav| fav["key"] == area["key"] } %>">
+              <span class="text-xl <%= @favorite_areas.any? { |fav| fav["key"] == area["key"] } ? 'text-yellow-400' : 'text-gray-300' %>">★</span>
+            </button>
+          </div>  
+        <% end %>
       <% end %>
     </div>
-</div>
+  </div>
 </div>
 
 <div class="flex flex-col gap-4 mr-auto ml-4 py-10 px-4 overflow-x-auto">
@@ -45,19 +45,19 @@
         <p class="text-gray-400">Click the star to favorite an area</p>
       </div>
     <% else %>
-  <div class="flex flex-row gap-4 h-[200px] min-w-[600px] overflow-x-auto mb-8">
-      <% @favorite_areas.each do |area| %>
-      <div class="p-4 bg-white rounded border border-solid border-black-200 flex flex-col items-center flex-none w-[100rpx] h-[220px] overflow-hidden">
-        <img src="<%= asset_path("default.jpg") %>" alt="Default image" class="h-[100px] mb-3"/>
-        <p class="w-full text-center truncate">
-          <%= link_to "Area: #{area["key"]}", area_squares_path(area["key"]), class: "text-blue-600 hover:underline block" %>
-        </p>
-        <%# shrink text by 1/4 %>
-        <p class="text-xs text-blue-600 hover:underline">square</p>
-        <p class="text-xs text-blue-600 hover:underline">Loci</p>
+      <div class="flex flex-row gap-4 h-[200px] min-w-[600px] overflow-x-auto mb-8">
+        <% @favorite_areas.each do |area| %>
+          <div class="p-4 bg-white rounded border border-solid border-black-200 flex flex-col items-center flex-none w-[100rpx] h-[220px] overflow-hidden">
+            <img src="<%= asset_path("default.jpg") %>" alt="Default image" class="h-[100px] mb-3"/>
+            <p class="w-full text-center truncate">
+              <%= link_to "Area: #{area["key"]}", area_squares_path(area["key"]), class: "text-blue-600 hover:underline block" %>
+            </p>
+            <%# shrink text by 1/4 %>
+            <p class="text-xs text-blue-600 hover:underline">square</p>
+            <p class="text-xs text-blue-600 hover:underline">Loci</p>
+          </div>
+        <% end %>
       </div>
-      <% end %>
-  </div>
     <% end %>
 
   <h2 class="text-3xl">Recent</h2>

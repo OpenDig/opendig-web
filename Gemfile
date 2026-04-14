@@ -62,8 +62,22 @@ gem 'aws-sdk-s3'
 group :development, :test do
   gem 'debug'
   gem 'rails_live_reload'
-  gem 'rubocop', require: false
-  gem 'rubocop-rails', require: false
+
+  # Test dependencies (moved them here since Bundler wasn't loading them in CI)
+  # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
+  gem "capybara"
+  gem "selenium-webdriver"
+  gem "webdrivers"
+  gem 'rspec-rails'
+  gem "buildkite-test_collector"
+  gem "rails-controller-testing"
+
+  # Lint dependencies
+  gem "rubocop", "~> 1.69", require: false
+  gem "rubocop-rspec", require: false
+  gem "rubocop-rails", require: false
+  gem "rubocop-rspec_rails", require: false
+  gem "rubocop-capybara", require: false
 end
 
 group :development do
@@ -77,14 +91,5 @@ group :development do
   # gem "spring"
 end
 
-group :test do
-  # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
-  gem "capybara"
-  gem "selenium-webdriver"
-  gem "webdrivers"
-  gem 'rspec-rails'
-  gem "buildkite-test_collector"
-  gem "rails-controller-testing"
-end
-
 gem "tailwindcss-rails", "~> 2.0"
+

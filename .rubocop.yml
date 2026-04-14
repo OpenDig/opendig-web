@@ -36,3 +36,10 @@ Metrics/PerceivedComplexity:
 Metrics/CyclomaticComplexity:
   Exclude:
     - app/controllers/*
+inherit_from: .rubocop_todo.yml
+
+require:
+  - rubocop-rspec
+  - rubocop-rails
+  - rubocop-rspec_rails
+  - rubocop-capybara

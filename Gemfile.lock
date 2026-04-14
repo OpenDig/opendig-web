@@ -135,7 +135,7 @@ GEM
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
     jmespath (1.6.1)
-    json (2.18.0)
+    json (2.18.1)
     language_server-protocol (3.17.0.5)
     listen (3.10.0)
       logger
@@ -179,10 +179,10 @@ GEM
     nokogiri (1.14.0-x86_64-linux)
       racc (~> 1.4)
     parallel (1.27.0)
-    parser (3.3.10.1)
+    parser (3.3.10.2)
       ast (~> 2.4.1)
       racc
-    prism (1.8.0)
+    prism (1.9.0)
     public_suffix (4.0.7)
     puma (5.6.4)
       nio4r (~> 2.0)
@@ -270,11 +270,18 @@ GEM
     rubocop-ast (1.49.0)
       parser (>= 3.3.7.2)
       prism (~> 1.7)
+    rubocop-capybara (2.21.0)
+      rubocop (~> 1.41)
     rubocop-rails (2.29.1)
       activesupport (>= 4.2.0)
       rack (>= 1.1)
       rubocop (>= 1.52.0, < 2.0)
       rubocop-ast (>= 1.31.1, < 2.0)
+    rubocop-rspec (3.4.0)
+      rubocop (~> 1.61)
+    rubocop-rspec_rails (2.30.0)
+      rubocop (~> 1.61)
+      rubocop-rspec (~> 3, >= 3.0.1)
     ruby-next-core (0.15.2)
     ruby-progressbar (1.13.0)
     rubyzip (2.3.2)
@@ -368,8 +375,11 @@ DEPENDENCIES
   rails_live_reload
   redis
   rspec-rails
-  rubocop
+  rubocop (~> 1.69)
+  rubocop-capybara
   rubocop-rails
+  rubocop-rspec
+  rubocop-rspec_rails
   sassc-rails
   selenium-webdriver
   simple_form
