@@ -5,6 +5,11 @@ Rails.application.routes.draw do
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 
   resources :areas, only: %i[index new create] do
+    collection do
+      post :favorite
+      delete :unfavorite
+    end
+
     resources :squares, only: %i[index new create] do
       resources :pails, only: [:index]
       resources :finds, only: [:index]
