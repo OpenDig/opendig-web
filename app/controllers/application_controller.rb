@@ -48,7 +48,12 @@ class ApplicationController < ActionController::Base
 
   def current_user
     return nil unless session[:user_id]
-    @current_user ||= User.find(session[:user_id]) if session[:user_id]
+
+    if session[:user_id]
+      @current_user ||= User.find(session[:user_id])
+    else
+      @current_user = nil
+    end
   end
 
   def require_authentication
@@ -70,7 +75,7 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  User.roles.keys.each do |role|
+  User.roles.each do |role|
     define_method("require_#{role}") do
       require_role(role)
     end

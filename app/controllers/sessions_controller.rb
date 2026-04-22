@@ -8,11 +8,7 @@ class SessionsController < ApplicationController
     end
 
     auth = request.env['omniauth.auth']
-    user = User.find_or_create_by(uid: auth['uid'], provider: auth['provider']) do |u|
-      u.email = auth['info']['email']
-      u.name = auth['info']['name']
-      u.role ||= :viewer
-    end
+    user = User.from_omniauth(auth) # saves automatically
     session[:user_id] = user.id
     greeting = user.name ? '' : ". Welcome #{user.name}!"
     redirect_to root_path, notice: "Logged in with #{user.email}" + greeting
