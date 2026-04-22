@@ -14,16 +14,14 @@
 #     user.save # => (saves to CouchDB) true if valid, false if not
 #     user.valid? # => true/false based on validations
 #     user.errors.full_messages # => array of validation error messages if any
+#     [user.provider, user.uid, user.email, user.name, user.roles] # => access attributes
 class User < ApplicationRecord
-
   class << self
     def collection_name
       'authdb/users'
     end
 
     def from_omniauth(auth)
-      raise NotSaved, "Provider did not verify user email" unless auth.info.email_verified
-
       find_by(provider: auth.provider, uid: auth.uid) ||
         new({
               provider: auth.provider,
@@ -34,10 +32,14 @@ class User < ApplicationRecord
     end
 
     def from_document(doc)
-      new(doc.transform_keys(&:to_s).slice(*%w[provider uid email name role _rev]), persist: false)
+      new(doc.transform_keys(&:to_s).slice(*%w[provider uid email name roles _rev]), persist: false)
     end
 
-    def roles = %w[viewer lab_supervisor square_supervisor field_director dig_director superuser]
+    # Roles are defined here in order of increasing permissions. The default role is taken as the first role in the list.
+    # Keep that in mind if you update this list.
+    def roles = %w[viewer lab_supervisor square_supervisor field_supervisor dig_director superuser]
+
+    def default_role = roles.first
 
     def id_fields = %w[provider uid]
 
@@ -77,13 +79,12 @@ class User < ApplicationRecord
     end
   end
 
-  attr_accessor :provider, :uid, :email, :name, :role, :role_access, :_rev
+  attr_accessor :provider, :uid, :email, :name, :roles, :_rev
 
   validates :provider, presence: true
   validates :uid, presence: true
   validates :email, presence: true
   validates :name, presence: true
-  validates :role, presence: true, inclusion: { in: User.roles }
   validate :uid_and_provider_combined_must_be_unique
 
   def to_document
@@ -94,14 +95,14 @@ class User < ApplicationRecord
       provider: provider,
       email: email,
       name: name,
-      role: role
+      roles: roles.transform_keys(&:to_s)
     }.compact_blank.transform_keys(&:to_s)
   end
 
   def initialize(attributes = {}, persist: true)
-    super(attributes.transform_keys(&:to_s))
-    @role ||= "viewer"
-    @role_access ||= []
+    super(deep_stringify_keys(attributes))
+
+    @roles ||= { opendig: [User.default_role] }
     save! if persist
   end
 
@@ -130,7 +131,7 @@ class User < ApplicationRecord
 
   # Similar to Array#replace. Replaces this object's attributes with the attributes of the other user. Does not save to CouchDB.
   def replace(other)
-    [:uid, :provider, :email, :name, :role, :role_access].each do |field|
+    [:uid, :provider, :email, :name, :roles, :_rev].each do |field|
       # We use `send` over `instance_variable_` because ActiveModel
       # monkeypatches attribute accessors
       send(:"#{field}=", other.send(field))
@@ -146,11 +147,20 @@ class User < ApplicationRecord
   def ==(other)
     return false unless other.is_a? User
 
-    uid == other.uid
+    id == other.id
+  end
+
+  def role
+    roles[current_dig]&.first || 'viewer'
+  end
+
+  def role_scopes
+    role = roles[current_dig] || []
+    role[1..] || []
   end
 
   def role_at_least?(role)
-    role_before_type_cast >= User.roles[role]
+    User.roles.index(roles[current_dig]&.first || User.default_role) >= User.roles.index(role)
   end
 
   class NotSaved < StandardError; end
@@ -163,5 +173,18 @@ class User < ApplicationRecord
     return unless existing_users.any? { |user| user['provider'] == provider && user['uid'] == uid }
 
     errors.add(:base, "A user with provider '#{provider}' and uid '#{uid}' already exists.")
+  end
+
+  def deep_stringify_keys(hash)
+    hash.transform_keys(&:to_s).transform_values do |value|
+      value.is_a?(Hash) ? deep_stringify_keys(value) : value
+    end
+  end
+
+  # Not sure how handling multiple digs will work ATP.
+  # This is good enough to get per-dig permissions going.
+  # Needs refactoring later.
+  def current_dig
+    "opendig"
   end
 end

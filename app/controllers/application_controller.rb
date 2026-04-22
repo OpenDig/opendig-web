@@ -35,7 +35,7 @@ class ApplicationController < ActionController::Base
 
   def check_session_timeout
     timeout_minutes = 30.minutes
-    
+
     if session[:last_seen].present? && (Time.current - Time.parse(session[:last_seen].to_s)) > timeout_minutes
       reset_session
       flash[:alert] = "Your session has expired due to inactivity."
@@ -49,6 +49,7 @@ class ApplicationController < ActionController::Base
   def current_user
     return nil unless session[:user_id]
 
+    # Cache current user so we aren't looking them up multiple times per request
     if session[:user_id]
       @current_user ||= User.find(session[:user_id])
     else
@@ -61,7 +62,7 @@ class ApplicationController < ActionController::Base
 
     flash[:error] = "You must be logged in to access this section"
     redirect_to root_path
-    return
+    false
   end
 
   def require_role(role)
@@ -69,10 +70,11 @@ class ApplicationController < ActionController::Base
     return if performed? # Don't check role if authentication check failed
 
     unless current_user.role_at_least? role
-      flash[:error] = "You must be a(n) #{role} to access this section"
+      flash[:error] = "You must be a(n) #{role.humanize.downcase} to access this section"
       redirect_to root_path
-      return
+      return false
     end
+    true
   end
 
   User.roles.each do |role|

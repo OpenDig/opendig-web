@@ -1,5 +1,5 @@
 class PailsController < ApplicationController
-  before_action :require_editor, except: [:index, :show]
+  before_action :require_lab_supervisor, except: [:index, :show]
 
   def index
     @area = params[:area_id]

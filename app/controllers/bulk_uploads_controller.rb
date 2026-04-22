@@ -1,6 +1,6 @@
 class BulkUploadsController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create] # Skip CSRF protection for AJAX requests
-  before_action :require_editor
+  before_action :require_dig_director
 
   def new
   end
