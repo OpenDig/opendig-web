@@ -1,6 +1,3 @@
-# OmniAuth.config.full_host = Rails.env.production? ? 'https://domain.com' : 'http://localhost:3000'
-# OmniAuth.config.allowed_request_methods = %i[get]
-
 Rails.application.config.middleware.use OmniAuth::Builder do
   provider :google_oauth2, ENV['GOOGLE_CLIENT_ID'], ENV['GOOGLE_CLIENT_SECRET'], {
     scope: 'openid,email,profile',
@@ -17,9 +14,9 @@ Rails.application.config.middleware.use OmniAuth::Builder do
 
   if Rails.env.development?
     provider :developer,
-      fields: [:name, :email, :role],
-      uid_field: :email
-    
+             fields: [:name, :email, :role],
+             uid_field: :email
+
     configure do |config|
       config.allowed_request_methods = [:get, :post]
     end
