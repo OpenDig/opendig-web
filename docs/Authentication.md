@@ -4,7 +4,7 @@
 
 OpenDig integrates with various identity providers using [OmniAuth](https://github.com/omniauth/omniauth) to allow users to sign in and out of the application. The following sections describe how to configure these integrations. OpenDig itself is configured through environment variables set in the `.envrc` file. For more information about `.envrc`, see [README.md](../README.md) and [.envrc.example](../.envrc.example).
 
-In development, OpenDig also supports quickly creating developer accounts using OmniAuth's built-in developer strategy. Simply navigate to <http://localhost:3000/auth/developer> to create an account for manual testing.
+In development, OpenDig also supports quickly creating developer accounts using OmniAuth's built-in developer strategy. Simply choose the "Developer" option on the login page or navigate to <http://localhost:3000/auth/developer> to create an account for manual testing.
 
 Currently supported IDPs: [Google](#google), [GitHub](#github), [Microsoft](#microsoft-office-365organizationboth)
 
