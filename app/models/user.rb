@@ -8,6 +8,7 @@
 #
 # Keep in mind that this is an ActiveModel object rather than ActiveRecord,
 # so we have to do object management and mapping ourselves.
+#
 # Usage:
 #
 #     user = User.from_omniauth(auth_hash)
@@ -15,7 +16,9 @@
 #     user.valid? # => true/false based on validations
 #     user.errors.full_messages # => array of validation error messages if any
 #     [user.provider, user.uid, user.email, user.name, user.roles] # => access attributes
-class User < ApplicationRecord
+class User
+  include ActiveModel::Model
+
   class << self
     def collection_name
       'authdb/users'
@@ -32,7 +35,7 @@ class User < ApplicationRecord
     end
 
     def from_document(doc)
-      new(doc.transform_keys(&:to_s).slice(*%w[provider uid email name roles _rev]), persist: false)
+      new(doc.transform_keys(&:to_s).slice(*data_fields), persist: false)
     end
 
     # Roles are defined here in order of increasing permissions. The default role is taken as the first role in the list.
@@ -42,6 +45,9 @@ class User < ApplicationRecord
     def default_role = roles.first
 
     def id_fields = %w[provider uid]
+
+    # `attr_accessor` pulls from this list. To add a new attribute, update it here.
+    def data_fields = id_fields + %w[email name roles _rev]
 
     def where(provider: nil, uid: nil)
       start_key = if provider
@@ -79,7 +85,8 @@ class User < ApplicationRecord
     end
   end
 
-  attr_accessor :provider, :uid, :email, :name, :roles, :_rev
+  # To add a new attribute, add it to `User.data_fields` above
+  attr_accessor(*User.data_fields)
 
   validates :provider, presence: true
   validates :uid, presence: true
@@ -88,15 +95,12 @@ class User < ApplicationRecord
   validate :uid_and_provider_combined_must_be_unique
 
   def to_document
-    {
-      _id: "#{provider}_#{uid}",
-      _rev: _rev,
-      uid: uid,
-      provider: provider,
-      email: email,
-      name: name,
-      roles: roles.transform_keys(&:to_s)
-    }.compact_blank.transform_keys(&:to_s)
+    deep_stringify_keys(                      # CouchDB and this model expect string keys
+      User.data_fields
+          .index_with { |field| send(field) } # Stored fields (calls attribute accessors)
+          .merge(_id: "#{provider}_#{uid}")   # Computed fields
+          .compact_blank
+    )
   end
 
   def initialize(attributes = {}, persist: true)
@@ -132,7 +136,7 @@ class User < ApplicationRecord
   # Similar to Array#replace. Replaces this object's attributes with the attributes of the other user. Does not save to CouchDB.
   def replace(other)
     [:uid, :provider, :email, :name, :roles, :_rev].each do |field|
-      # We use `send` over `instance_variable_` because ActiveModel
+      # We use `send` over `instance_variable_set` because ActiveModel
       # monkeypatches attribute accessors
       send(:"#{field}=", other.send(field))
     end
@@ -151,7 +155,7 @@ class User < ApplicationRecord
   end
 
   def role
-    roles[current_dig]&.first || 'viewer'
+    roles[current_dig]&.first || User.default_role
   end
 
   def role_scopes
@@ -168,7 +172,8 @@ class User < ApplicationRecord
   private
 
   def uid_and_provider_combined_must_be_unique
-    # Query CouchDB directly since `where` calls `new` and `new` triggers validations which loops infinitely
+    # Query CouchDB directly since `where` calls `new` and `new` triggers validations
+    # which would cause infinite recursion
     existing_users = Rails.application.config.authdb.view(self.class.collection_name, { key: [provider, uid] })['rows']
     return unless existing_users.any? { |user| user['provider'] == provider && user['uid'] == uid }
 

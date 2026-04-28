@@ -28,11 +28,11 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # 30-minute sliding expiration
   def update_session_timestamp
     session[:last_seen] = Time.current
   end
 
+  # 30-minute sliding expiration
   def check_session_timeout
     timeout_minutes = 30.minutes
 

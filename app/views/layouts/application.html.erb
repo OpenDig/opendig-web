@@ -37,13 +37,12 @@
             <li><%= link_to "Bulk Uploader", new_bulk_upload_path, class: "text-gray-300 hover:text-white" %></li>
             <% if user_signed_in? %>
               <li>
-                <%= 
-                button_to "Logout",
-                logout_path,
-                method: :delete,
-                form: { class: "inline" },
-                class: "text-gray-300 hover:text-white bg-transparent p-0 border-0",
-                data: { confirm: "Are you sure you want to log out?" } 
+                <%= button_to "Logout",
+                              logout_path,
+                              method: :delete,
+                              form: { class: "inline" },
+                              class: "text-gray-300 hover:text-white bg-transparent p-0 border-0",
+                              data: { confirm: "Are you sure you want to log out?" } 
                 %>
               </li>
             <% else %>
