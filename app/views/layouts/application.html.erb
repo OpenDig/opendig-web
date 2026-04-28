@@ -35,6 +35,7 @@
             <li><%= link_to "Home", root_path, class: "text-gray-300 hover:text-white" %></li>
             <li><%= link_to "Registrar Tools", registrar_index_path, class: "text-gray-300 hover:text-white" %></li>
             <li><%= link_to "Bulk Uploader", new_bulk_upload_path, class: "text-gray-300 hover:text-white" %></li>
+            <li><%#= link_to "Reports", registrar_index_path, class: "text-gray-300 hover:text-white" %></li>
             <% if user_signed_in? %>
               <li>
                 <%= button_to "Logout",

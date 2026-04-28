@@ -10,7 +10,7 @@ class SessionsController < ApplicationController
     auth = request.env['omniauth.auth']
     user = User.from_omniauth(auth) # saves automatically
     session[:user_id] = user.id
-    greeting = user.name.blank? ? '' : ". Welcome #{user.name}!"
+    greeting = user.name.blank? ? '!' : ". Welcome #{user.name}!"
     redirect_to root_path, notice: "Logged in with #{user.email}" + greeting
   end
 

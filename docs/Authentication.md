@@ -6,6 +6,8 @@ OpenDig integrates with various identity providers using [OmniAuth](https://gith
 
 In development, OpenDig also supports quickly creating developer accounts using OmniAuth's built-in developer strategy. Simply choose the "Developer" option on the login page or navigate to <http://localhost:3000/auth/developer> to create an account for manual testing.
 
+Since identity providers may make changes to their configuration process at any time, each section includes links to the relevant documentation.
+
 Currently supported IDPs: [Google](#google), [GitHub](#github), [Microsoft](#microsoft-office-365organizationboth)
 
 ## Google
@@ -21,7 +23,7 @@ Relevant documentation at [support.google.com](https://support.google.com/cloud/
     * Navigate to "OAuth consent screen" and fill out the form
     * Navigate to "Data Access" and select "Add or remove scopes"
     * Select these scopes: `.../auth/userinfo.profile`, `.../auth/userinfo.email`, and `openid`
-        * These are the scopes OpenDig uses to authenticate a user. Authentication with Google will likely not work without them
+        * These are the scopes OpenDig uses to authenticate a user. Authentication with Google may not work without them
     * Click "Save"
 3. Set up credentials for your OpenDig instance
     * Navigate to "Overview" and click on "Create OAuth client"
@@ -55,7 +57,7 @@ Relevant documentation at [learn.microsoft.com](https://learn.microsoft.com/en-u
     * Select your app
     * In the "API permissions" pane, add these permissions: `offline_access` and `openid`. `User.Read` should be selected by default
         * These can be found under "Microsoft Graph" > "Delegated permissions" > "OpenId permissions"
-        * These are the permissions OpenDig uses to authenticate a user. Authentication with Microsoft will likely not work without them
+        * These are the permissions OpenDig uses to authenticate a user. Authentication with Microsoft may not work without them
 3. Set up credentials for your OpenDig instance
     * Navigate to "App registrations" > "All apps"
     * Select your app
