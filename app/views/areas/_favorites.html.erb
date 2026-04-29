@@ -10,7 +10,7 @@
         <div class="p-4 bg-white rounded border border-solid border-black-200 flex flex-col items-center flex-none w-[100rpx] h-[220px] overflow-hidden">
           <img src="<%= asset_path("default.jpg") %>" alt="Default image" class="h-[100px] mb-3"/>
           <p class="w-full text-center truncate">
-            <%= link_to "Area: #{area_key}", area_squares_path(area_key), class: "text-blue-600 hover:underline block" %>
+            <%= link_to "Area: #{area_key}", area_squares_path(area_key), class: "text-blue-600 hover:underline block", data: { turbo_frame: "_top" } %>
           </p>
           <%# shrink text by 1/4 %>
           <p class="text-xs text-blue-600 hover:underline">square</p>
