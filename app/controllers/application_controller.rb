@@ -26,4 +26,57 @@ class ApplicationController < ActionController::Base
     flash[:error] = 'Editing is disabled'
     redirect_to request.referer
   end
+
+  def toggle_favorite(category, resource_id)
+    load_favorites
+
+    @favorited = favorited?(category => resource_id)
+    if @favorited
+      remove_favorite category => resource_id
+    else
+      add_favorite category => resource_id
+    end
+    @favorited = !@favorited # Toggle before responding to ensure the view reflects the new state
+  end
+
+  def favorite_params
+    params.require(:favorite).permit(:category, :resource_id)
+  end
+
+  def load_favorites
+    @favorites = JSON.parse(cookies.permanent[:favorites] || "{}")
+  end
+
+  def save_favorites(favorites = @favorites || {})
+    cookies.permanent[:favorites] = favorites.to_json
+    load_favorites
+  end
+
+  def add_favorite(**categories)
+    Rails.logger.info "  Adding favorite: #{categories.inspect}"
+
+    categories.each do |category, resource_id|
+      @favorites[category.to_s] ||= []
+      @favorites[category.to_s] << resource_id unless @favorites[category.to_s].include?(resource_id)
+    end
+
+    save_favorites
+  end
+
+  def remove_favorite(**categories)
+    Rails.logger.info "  Removing favorite: #{categories.inspect}"
+
+    categories.each do |category, resource_id|
+      @favorites[category.to_s] ||= []
+      @favorites[category.to_s].delete(resource_id)
+    end
+
+    save_favorites
+  end
+
+  def favorited?(**categories)
+    categories.all? do |category, resource_id|
+      @favorites[category.to_s]&.include?(resource_id.to_s)
+    end
+  end
 end

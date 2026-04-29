@@ -6,7 +6,7 @@ Rails.application.routes.draw do
 
   resources :areas, only: %i[index new create] do
     collection do
-      post :toggle_favorite
+      post :favorite_toggle
     end
 
     resources :squares, only: %i[index new create] do

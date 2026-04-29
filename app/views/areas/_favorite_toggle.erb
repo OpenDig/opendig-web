@@ -1,6 +1,6 @@
 <%= turbo_frame_tag "favorite-toggle-#{area_key}" do %>
     <% form_with(
-        url: toggle_favorite_areas_path,
+        url: favorite_toggle_areas_path,
         method: :post,
         data: { turbo_frame: "favorite-toggle-#{area_key}" },
         class: "favorite-form",
