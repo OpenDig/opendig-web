@@ -19,7 +19,7 @@ Buildkite::TestCollector.configure(hook: :rspec)
 RSpec.configure do |config|
 
   config.before(:suite) do
-    # Load test fixtures to main DB (user fixtures are loaded separately with `load_user_fixtures` in the relevant specs)
+    # Load test fixtures to main DB (user fixtures are loaded separately in the relevant specs)
     Dir.glob(File.join(Rails.root, "spec", "fixtures", "*.json")).each do |file|
       CouchDB.main_db.save_doc(JSON.parse(File.read(file)))
     end

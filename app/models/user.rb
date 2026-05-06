@@ -41,7 +41,6 @@ class User
     end
 
     # Roles are defined here in order of increasing permissions. The default role is taken as the first role in the list.
-    # Keep that in mind if you update this list.
     def roles = %w[viewer lab_supervisor square_supervisor area_supervisor dig_director superuser]
 
     def default_role = roles.first
@@ -105,7 +104,7 @@ class User
   validate :roles_must_have_valid_structure
 
   def to_document
-    deep_stringify_keys(                      # CouchDB and this model expect string keys
+    deep_stringify_keys(                      # CouchDB expects string keys
       User.data_fields
           .index_with { |field| send(field) } # Stored fields (calls attribute accessors)
           .merge(_id: id.values.join('__'))   # Computed fields
@@ -149,7 +148,7 @@ class User
     end
   end
 
-  # Sync with CouchDB--update this object so that it's in line with CouchDB.
+  # Update this object so that it's in line with CouchDB
   def synchronize!
     updated_record = self.class.find_by(provider: provider, uid: uid)
     replace updated_record if updated_record
