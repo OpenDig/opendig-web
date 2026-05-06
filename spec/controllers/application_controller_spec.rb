@@ -325,16 +325,7 @@ RSpec.describe ApplicationController, type: :controller do
         expect(response.body).to eq("square supervisor only")
       end
 
-      it "allows access to square_supervisor-only action for square_supervisor role" do
-        session[:user_id] = users[:square_supervisor].id
-
-        get :square_supervisor_only
-
-        expect(response).to be_successful
-        expect(response.body).to eq("square supervisor only")
-      end
-
-      it "allows access to square_supervisor-only action for superuser role" do
+      it "allows access if authenticated and has role with higher privileges" do
         session[:user_id] = users[:superuser].id
 
         get :square_supervisor_only

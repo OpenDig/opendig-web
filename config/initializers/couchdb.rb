@@ -27,6 +27,10 @@ class CouchDB
       @auth_db
     end
 
+    def dbs
+      [main_db, auth_db]
+    end
+
     def set_env!(env = Rails.env)
       @env = env
     end
