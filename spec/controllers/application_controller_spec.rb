@@ -231,23 +231,23 @@ RSpec.describe ApplicationController, type: :controller do
   describe "authentication and authorization helper" do
     describe "current_user" do
       it "returns nil if no user is logged in" do
-        expect(controller.send :current_user).to be_nil
+        expect(controller.send(:current_user)).to be_nil
       end
 
       it "returns the current user if logged in" do
         session[:user_id] = users[:viewer].id
-        expect(controller.send :current_user).to eq(users[:viewer])
+        expect(controller.send(:current_user)).to eq(users[:viewer])
       end
     end
 
     describe "user_signed_in?" do
       it "returns false if no user is logged in" do
-        expect(controller.send :user_signed_in?).to be_falsey
+        expect(controller.send(:user_signed_in?)).to be_falsey
       end
 
       it "returns true if a user is logged in" do
         session[:user_id] = users[:viewer].id
-        expect(controller.send :user_signed_in?).to be_truthy
+        expect(controller.send(:user_signed_in?)).to be_truthy
       end
     end
 

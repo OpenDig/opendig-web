@@ -37,7 +37,7 @@ class ApplicationController < ActionController::Base
   def check_session_timeout
     timeout_minutes = 30.minutes
 
-    if session[:last_seen].present? && (Time.current - Time.parse(session[:last_seen].to_s)) > timeout_minutes
+    if session[:last_seen].present? && (Time.current - Time.zone.parse(session[:last_seen].to_s)) > timeout_minutes
       reset_session
       flash[:alert] = "Your session has expired due to inactivity."
     end

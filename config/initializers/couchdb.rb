@@ -14,30 +14,20 @@ class CouchDB
   # Singleton pattern (these are class methods)
   class << self
     def main_db
-      unless @main_db&.env == env
-        @main_db = CouchDB.new(env: env)
-      end
+      @main_db = CouchDB.new(env: env) unless @main_db&.env == env
       @main_db
     end
 
     def auth_db
-      unless @auth_db&.env == env
-        @auth_db = CouchDB.new(env: env, design_docs_path: 'config/auth_views.yaml', label: 'users', config_doc_id: 'authdb_config', design_doc_id: '_design/authdb')
-      end
+      @auth_db = CouchDB.new(env: env, design_docs_path: 'config/auth_views.yaml', label: 'users', config_doc_id: 'authdb_config', design_doc_id: '_design/authdb') unless @auth_db&.env == env
       @auth_db
     end
 
-    def dbs
-      [main_db, auth_db]
-    end
+    def dbs = [main_db, auth_db]
 
-    def set_env!(env = Rails.env)
-      @env = env
-    end
+    def set_env!(env = Rails.env) = @env = env
 
-    def env
-      @env || Rails.env
-    end
+    def env = @env || Rails.env
   end
 
   attr_reader :client, :config, :label, :env

@@ -75,11 +75,9 @@ class User
     # Find a specific user
     def find_by(provider: nil, uid: nil)
       result = where(provider: provider, uid: uid).first
-      if result&.id == { "provider" => provider, "uid" => uid }
-        result
-      else
-        nil
-      end
+      return unless result&.id == { "provider" => provider, "uid" => uid }
+
+      result
     end
 
     def find_or_create_by(**options)
@@ -116,7 +114,7 @@ class User
     super(deep_stringify_keys(attributes.merge(kwargs)))
 
     @roles ||= { 'opendig' => [User.default_role] }
-    
+
     # CouchDB expects 'save' actions for existing documents to have a `_rev` attached.
     # `synchronize!` will pick this up if that is the case. This enables `User.new` to
     # be idempotent for existing users.
@@ -204,13 +202,9 @@ class User
   end
 
   def roles_must_have_valid_structure
-    unless roles.keys.include?(current_dig)
-      errors.add(:roles, "must include the current dig")
-    end
+    errors.add(:roles, "must include the current dig") unless roles.keys.include?(current_dig)
 
-    unless roles.values.all? { |value| value.is_a?(Array) && User.roles.include?(value.first.to_s) }
-      errors.add(:roles, "must include only allowed roles")
-    end
+    errors.add(:roles, "must include only allowed roles") unless roles.values.all? { |value| value.is_a?(Array) && User.roles.include?(value.first.to_s) }
   end
 
   def deep_stringify_keys(hash)

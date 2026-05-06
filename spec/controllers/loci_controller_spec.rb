@@ -162,6 +162,8 @@ RSpec.describe LociController, type: :controller do
   describe "PUT/PATCH update" do
     before do
       allow(controller).to receive(:require_lab_supervisor)
+      allow(db).to receive(:view).with('opendig/locus', key: [area_id, square_id, locus_code])
+        .and_return({"rows" => [{"value" => locus_data}]})
     end
 
     let(:updated_params) {
@@ -170,11 +172,6 @@ RSpec.describe LociController, type: :controller do
         "age" => "medieval"
       }
     }
-
-    before do
-      allow(db).to receive(:view).with('opendig/locus', key: [area_id, square_id, locus_code])
-        .and_return({"rows" => [{"value" => locus_data}]})
-    end
 
     context "when save is successful" do
       it "merges params, saves the locus, sets success flash, and redirects" do
