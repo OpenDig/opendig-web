@@ -13,18 +13,18 @@ end
 class CouchDB
   # Singleton pattern--unique instances per env
   class <<self
-    def couchdb
-      unless @couchdb&.env == env
-        @couchdb = CouchDB.new(env: env)
+    def main_db
+      unless @main_db&.env == env
+        @main_db = CouchDB.new(env: env)
       end
-      @couchdb
+      @main_db
     end
 
-    def authdb
-      unless @authdb&.env == env
-        @authdb = CouchDB.new(env: env, design_docs_path: 'config/auth_views.yaml', label: 'users', config_doc_id: 'authdb_config', design_doc_id: '_design/authdb')
+    def auth_db
+      unless @auth_db&.env == env
+        @auth_db = CouchDB.new(env: env, design_docs_path: 'config/auth_views.yaml', label: 'users', config_doc_id: 'authdb_config', design_doc_id: '_design/authdb')
       end
-      @authdb
+      @auth_db
     end
 
     def set_env!(env = Rails.env)
@@ -32,12 +32,6 @@ class CouchDB
     end
 
     def env = @env || Rails.env
-
-    # Ensure that the app uses the correct database per environment
-    def install!(target = Rails::Application::Configuration)
-      target.send(:define_method, :couchdb) { CouchDB.couchdb }
-      target.send(:define_method, :authdb) { CouchDB.authdb }
-    end
   end
 
   attr_reader :client, :config, :label, :env
@@ -51,8 +45,8 @@ class CouchDB
       design_doc_id: '_design/opendig',
       env: self.class.env
     }
-    params = default_params.merge(params)
-    @config = YAML.load_file("#{Rails.root}/#{params[:config_path]}")[params[:env]]
+    params = default_params.merge(params).with_indifferent_access
+    @config = YAML.load_file("#{Rails.root}/#{params[:config_path]}")[params[:env]].with_indifferent_access
     @config_doc_id = params[:config_doc_id]
     @design_doc_id = params[:design_doc_id]
     @label = params[:label]
@@ -62,6 +56,7 @@ class CouchDB
     @config["port"]     = @config["port"] || nil
     @config["username"] = ENV['COUCHDB_USER'] || @config["username"]
     @config["password"] = ENV['COUCHDB_PASSWORD'] || @config["password"]
+    @config["params"]   = params
 
     # Brief explanation of db naming:
     # 1. If prefix, suffix, or db_name are explicitly provided in config, use them directly.
@@ -81,8 +76,8 @@ class CouchDB
     #   suffix: production
     #
     # You can have two separate databases (opendig_development and opendig_auth_development) by using the 'main' and 'auth' labels when initializing CouchDB instances:
-    # `Rails.application.config.couchdb = CouchDB.new(label: 'main')`
-    # `Rails.application.config.authdb = CouchDB.new(label: 'auth')`
+    # `Rails.application.config.main_db = CouchDB.new(label: 'main')`
+    # `Rails.application.config.auth_db = CouchDB.new(label: 'auth')`
     # Whereas in production these will connect to opendig_production and opendig_auth_production respectively.
     prefix   = (@config["prefix"].is_a?(Hash) ? @config.dig("prefix", @label) : @config["prefix"]) || nil
     suffix   = (@config["suffix"].is_a?(Hash) ? @config.dig("suffix", @label) : @config["suffix"]) || nil
@@ -91,12 +86,16 @@ class CouchDB
 
     url = "#{protocol}://#{@config['username']}:#{@config['password']}@#{@config['host']}:#{@config['port']}/#{database}"
     @client = CouchRest.database!(url)
-    if delete_db
-      @client.delete! rescue nil
-      @client = CouchRest.database!(url)
-    end
+    clear_db! if delete_db
 
-    update_design_docs!(params[:design_docs_path])
+    update_design_docs!(@config[:params][:design_docs_path])
+  end
+
+  def clear_db!
+    @client.delete! rescue nil
+    @client = CouchRest.database!(@client.uri)
+    update_design_docs!(@config[:params][:design_docs_path])
+    self
   end
 
   def get_config
@@ -155,5 +154,3 @@ class CouchDB
     client.respond_to?(method_name) || super
   end
 end
-
-CouchDB.install!

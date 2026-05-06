@@ -24,10 +24,6 @@ class User
       'authdb/users'
     end
 
-    def authdb
-      CouchDB.authdb
-    end
-
     def from_omniauth(auth)
       auth = auth.with_indifferent_access
       find_by(provider: auth[:provider], uid: auth[:uid]) ||
@@ -61,7 +57,7 @@ class User
                     []
                   end
       end_key = start_key + [{}]
-      rows = authdb.view(collection_name, { start_key: start_key, end_key: end_key, reduce: false })['rows']
+      rows = CouchDB.auth_db.view(collection_name, { start_key: start_key, end_key: end_key, reduce: false })['rows']
       rows.map { |row| from_document(row['value']) }
     end
 
@@ -136,7 +132,7 @@ class User
     validate!
 
     synchronize! unless @initially_persisted # For idempotence--same reasoning as in `User.new`
-    response = self.class.authdb.save_doc(to_document)
+    response = CouchDB.auth_db.save_doc(to_document)
     synchronize!
 
     if response['ok']
@@ -196,7 +192,7 @@ class User
   def uid_and_provider_combined_must_be_unique
     # Query CouchDB directly since `where` calls `new` and `new` triggers validations
     # which would cause infinite recursion
-    existing_users = self.class.authdb.view(self.class.collection_name, { key: [provider, uid] })['rows']
+    existing_users = CouchDB.auth_db.view(self.class.collection_name, { key: [provider, uid] })['rows']
     return unless existing_users.any? { |user| user['provider'] == provider && user['uid'] == uid }
 
     errors.add(:base, "A user with provider '#{provider}' and uid '#{uid}' already exists.")

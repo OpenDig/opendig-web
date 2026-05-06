@@ -10,8 +10,8 @@ class ApplicationController < ActionController::Base
 
   private
   def set_db
-    @db = Rails.application.config.couchdb
-    @auth_db = Rails.application.config.authdb
+    @db = CouchDB.main_db
+    @auth_db = CouchDB.auth_db
   end
 
   def set_descriptions

@@ -23,7 +23,7 @@ class Registrar
 
   def self.all_by_season(season)
     rows = []
-    Rails.application.config.couchdb.view('opendig/registrar', {keys: [season], reduce: false})['rows'].map do |row|
+    CouchDB.main_db.view('opendig/registrar', {keys: [season], reduce: false})['rows'].map do |row|
       rows << Registrar.new(row['value'])
     end
     rows

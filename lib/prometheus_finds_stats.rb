@@ -115,7 +115,7 @@ module PrometheusFindsStats
   end
 
   def self.gather_stats
-    @db = Rails.application.config.couchdb
+    @db = CouchDB.main_db
 
     loop do
         @items = Registrar.all_by_season(2022)

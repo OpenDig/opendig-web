@@ -22,12 +22,12 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     Dir.glob(File.join(Rails.root, "spec", "fixtures", "*.json")).each do |file|
-      Rails.application.config.couchdb.save_doc(JSON.parse(File.read(file)))
+      CouchDB.main_db.save_doc(JSON.parse(File.read(file)))
     end
   end
 
   config.after(:suite) do
-    db = Rails.application.config.couchdb
+    db = CouchDB.main_db
     begin
       rows = db.all_docs(include_docs: true)['rows'] || []
       docs_to_delete = rows.map { |r| r['doc'] }.compact.reject do |doc|

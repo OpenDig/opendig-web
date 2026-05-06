@@ -44,7 +44,7 @@ RSpec.describe User, type: :model do
     end
 
     it "errors when trying to save with invalid attributes" do
-      allow(Rails.application.config.authdb).to receive(:save_doc).and_return({ 'ok' => true })
+      allow(CouchDB.auth_db).to receive(:save_doc).and_return({ 'ok' => true })
 
       user = User.new(provider: "test_provider", email: "test@example.com", name: "Test User", persist: false)
       expect { user.save! }.to raise_error(ActiveModel::ValidationError)
@@ -53,7 +53,7 @@ RSpec.describe User, type: :model do
 
   describe ".from_omniauth" do
     it "creates a new user when one does not exist" do
-      allow(Rails.application.config.authdb).to receive(:save_doc).and_return({ 'ok' => true })
+      allow(CouchDB.auth_db).to receive(:save_doc).and_return({ 'ok' => true })
       auth_data = {provider: "test_provider", uid: "12345", info: { email: "test@example.com", name: "Test User" }}
       user = User.from_omniauth(auth_data)
 

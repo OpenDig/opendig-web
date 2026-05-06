@@ -29,8 +29,8 @@ RSpec.describe ApplicationController, type: :controller do
   end
 
   let(:mock_descriptions) { {"pottery" => "Ceramic vessels"} }
-  let(:test_db) { Rails.application.config.couchdb }
-  let(:test_auth_db) { Rails.application.config.authdb }
+  let(:test_db) { CouchDB.main_db }
+  let(:test_auth_db) { CouchDB.auth_db }
   let(:users) { load_user_fixtures }
 
   before do
@@ -221,10 +221,10 @@ RSpec.describe ApplicationController, type: :controller do
   describe "sanity check spec" do
     it "has all the documents" do
       # Temporarily remove the mock to access the real database
-      allow(Rails.application.config).to receive(:couchdb).and_call_original
+      allow(CouchDB).to receive(:main_db).and_call_original
 
       # five docs, plus the design doc and config doc
-      expect(Rails.application.config.couchdb.all_docs["rows"].count).to eq(7)
+      expect(CouchDB.main_db.all_docs["rows"].count).to eq(7)
     end
   end
 
