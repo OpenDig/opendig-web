@@ -12,7 +12,7 @@ end
 
 class CouchDB
   # Singleton pattern (these are class methods)
-  class <<self
+  class << self
     def main_db
       unless @main_db&.env == env
         @main_db = CouchDB.new(env: env)
@@ -35,7 +35,9 @@ class CouchDB
       @env = env
     end
 
-    def env = @env || Rails.env
+    def env
+      @env || Rails.env
+    end
   end
 
   attr_reader :client, :config, :label, :env
@@ -127,7 +129,7 @@ class CouchDB
     design_version = (design[:version] || 0).to_i
 
     if config_version != design_version
-      Rails.logger.info "Design docs out of date, updating"
+      Rails.logger.info "Design docs out of date for #{@label} db, updating"
       if design_docs = @client.get(@design_doc_id)
         design_docs["views"] = design[:design][:views]
         design_docs.save
@@ -142,7 +144,7 @@ class CouchDB
         @client.save_doc(cfg)
       end
     else
-      Rails.logger.info "Design docs up to date"
+      Rails.logger.info "Design docs up to date for #{@label} db"
     end
   end
 
