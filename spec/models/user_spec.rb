@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe User, type: :model do
-  users = load_user_fixtures
+  let(:users) { load_user_fixtures }
 
   context "when a new user is created" do
     it "is valid with valid attributes" do
@@ -138,21 +138,25 @@ RSpec.describe User, type: :model do
 
   describe "#save!" do
     it "saves the user to the database" do
-      user = User.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", persist: false)
+      user = User.new(uid: "unique_uid", provider: "test_provider", email: "test@example.com", name: "Test User", persist: false)
+      expect { user.save! }.to change { User.find_all.size }.by(1)
       expect(user.save!).to be_truthy
     end
 
     it "does not save the user if it is invalid" do
       user = User.new(provider: "test_provider", uid: "12345", persist: false)
       expect(user).to_not be_valid
-      expect { user.save! }.to raise_error(ActiveModel::ValidationError)
+      expect { user.save! }.to raise_error(ActiveModel::ValidationError).and not_change { User.find_all.size }
     end
   end
 
   describe "#synchronize!" do
     it "updates the user to match the database record" do
-      user = User.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", persist: false)
+      user = User.new(uid: users[:viewer].uid, provider: users[:viewer].provider, email: "test@example.com", name: "Test User", persist: false)
       expect(user.synchronize!).to be_truthy
+      expect(user.email).to eq(users[:viewer].email)
+      expect(user.name).to eq(users[:viewer].name)
+      expect(user).to eq(users[:viewer])
     end
   end
 

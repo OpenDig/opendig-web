@@ -23,7 +23,8 @@ RSpec.describe SessionsController, type: :controller do
         'info' => {
           'name' => users[:viewer].name,
           'email' => users[:viewer].email
-        }
+        },
+        'roles' => users[:viewer].roles
       }
 
       expect {

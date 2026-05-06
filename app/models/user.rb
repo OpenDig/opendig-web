@@ -116,7 +116,7 @@ class User
   def initialize(attributes = {}, persist: true, **kwargs)
     super(deep_stringify_keys(attributes.merge(kwargs)))
 
-    @roles ||= { opendig: [User.default_role] }
+    @roles ||= { 'opendig' => [User.default_role] }
     
     # CouchDB expects 'save' actions for existing documents to have a `_rev` attached.
     # `synchronize!` will pick this up if that is the case. This enables `User.new` to
@@ -159,7 +159,7 @@ class User
 
   # Similar to Array#replace. Replaces this object's attributes with the attributes of the other user. Does not save to CouchDB.
   def replace(other)
-    %i[uid provider email name roles _rev].each do |field|
+    self.class.data_fields.each do |field|
       # We use `send` over `instance_variable_set` because ActiveModel
       # monkeypatches attribute accessors
       send(:"#{field}=", other.send(field))

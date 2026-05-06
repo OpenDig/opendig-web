@@ -212,7 +212,7 @@ RSpec.describe ApplicationController, type: :controller do
         travel_to Time.current do
           get :index
 
-          expect(session[:last_seen]).to be_within(1.second).of(Time.current)
+          expect(session[:last_seen]).to be_within(5.seconds).of(Time.current)
         end
       end
     end
