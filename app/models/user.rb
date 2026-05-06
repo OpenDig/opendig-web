@@ -19,6 +19,7 @@
 class User
   include ActiveModel::Model
 
+  # Class methods
   class << self
     def collection_name
       'authdb/users'
@@ -63,7 +64,7 @@ class User
 
     # Expects either:
     # 1. A hash of the form {"provider" => string, "uid" => string}
-    # 2. A string of the form "provider_uid"
+    # 2. A string of the form "provider__uid" (note the double underscore)
     def find(id)
       if id.is_a? Hash
         find_by(**id.transform_keys(&:to_sym))
@@ -72,6 +73,7 @@ class User
       end
     end
 
+    # Find a specific user
     def find_by(provider: nil, uid: nil)
       result = where(provider: provider, uid: uid).first
       if result&.id == { "provider" => provider, "uid" => uid }
@@ -121,6 +123,8 @@ class User
       synchronize!
       save!
     end
+
+    # Whether the user has already been saved or was loaded directly from CouchDB
     @initially_persisted = persist || attributes.keys.include?('_rev')
   end
 
@@ -191,7 +195,7 @@ class User
 
   def uid_and_provider_combined_must_be_unique
     # Query CouchDB directly since `where` calls `new` and `new` triggers validations
-    # which would cause infinite recursion
+    # Using `where` would cause infinite recursion
     existing_users = CouchDB.auth_db.view(self.class.collection_name, { key: [provider, uid] })['rows']
     return unless existing_users.any? { |user| user['provider'] == provider && user['uid'] == uid }
 

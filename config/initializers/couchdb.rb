@@ -11,7 +11,7 @@ class HTTPClient
 end
 
 class CouchDB
-  # Singleton pattern--unique instances per env
+  # Singleton pattern (these are class methods)
   class <<self
     def main_db
       unless @main_db&.env == env
@@ -58,7 +58,7 @@ class CouchDB
     @config["password"] = ENV['COUCHDB_PASSWORD'] || @config["password"]
     @config["params"]   = params
 
-    # Brief explanation of db naming:
+    # Explanation of db naming:
     # 1. If prefix, suffix, or db_name are explicitly provided in config, use them directly.
     # 2. If db_name is not provided, construct it from prefix and suffix.
     # 3. Prefix, suffix, and db_name can each be either a string or a hash keyed by label to allow multiple db configs in the same file.
@@ -67,7 +67,7 @@ class CouchDB
     # default:
     #   prefix:
     #     main: opendig
-    #     auth: opendig_auth
+    #     users: opendig_users
     # development:
     #   <<: *default
     #   suffix: development
@@ -75,10 +75,10 @@ class CouchDB
     #   <<: *default
     #   suffix: production
     #
-    # You can have two separate databases (opendig_development and opendig_auth_development) by using the 'main' and 'auth' labels when initializing CouchDB instances:
+    # You can have two separate databases, for instance opendig_development and opendig_auth_development, by using the 'main' and 'auth' labels when initializing CouchDB instances:
     # `Rails.application.config.main_db = CouchDB.new(label: 'main')`
     # `Rails.application.config.auth_db = CouchDB.new(label: 'auth')`
-    # Whereas in production these will connect to opendig_production and opendig_auth_production respectively.
+    # Whereas in production these will automatically connect to opendig_production and opendig_auth_production respectively.
     prefix   = (@config["prefix"].is_a?(Hash) ? @config.dig("prefix", @label) : @config["prefix"]) || nil
     suffix   = (@config["suffix"].is_a?(Hash) ? @config.dig("suffix", @label) : @config["suffix"]) || nil
     database = (@config["db_name"].is_a?(Hash) ? @config.dig("db_name", @label) : @config["db_name"]) || "#{prefix}_#{suffix}"
