@@ -56,7 +56,7 @@ class User
                     []
                   end
       end_key = start_key + [{}]
-      rows = Rails.application.config.authdb.view(collection_name, { start_key: start_key, end_key: end_key, reduce: false })['rows']
+      rows = @authdb.view(collection_name, { start_key: start_key, end_key: end_key, reduce: false })['rows']
       rows.map { |row| from_document(row['value']) }
     end
 
@@ -174,7 +174,7 @@ class User
   def uid_and_provider_combined_must_be_unique
     # Query CouchDB directly since `where` calls `new` and `new` triggers validations
     # which would cause infinite recursion
-    existing_users = Rails.application.config.authdb.view(self.class.collection_name, { key: [provider, uid] })['rows']
+    existing_users = @authdb.view(self.class.collection_name, { key: [provider, uid] })['rows']
     return unless existing_users.any? { |user| user['provider'] == provider && user['uid'] == uid }
 
     errors.add(:base, "A user with provider '#{provider}' and uid '#{uid}' already exists.")

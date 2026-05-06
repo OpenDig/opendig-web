@@ -11,6 +11,7 @@ class ApplicationController < ActionController::Base
   private
   def set_db
     @db = Rails.application.config.couchdb
+    @auth_db = Rails.application.config.authdb
   end
 
   def set_descriptions
