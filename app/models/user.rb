@@ -100,7 +100,9 @@ class User
   validates :uid, presence: true
   validates :email, presence: true
   validates :name, presence: true
+  validates :roles, presence: true
   validate :uid_and_provider_combined_must_be_unique
+  validate :roles_must_have_valid_structure
 
   def to_document
     deep_stringify_keys(                      # CouchDB and this model expect string keys
@@ -177,7 +179,7 @@ class User
   end
 
   def role
-    roles[current_dig]&.first || User.default_role
+    roles[current_dig]&.first.to_s || User.default_role
   end
 
   def role_scopes
@@ -186,7 +188,7 @@ class User
   end
 
   def role_at_least?(role)
-    User.roles.index(roles[current_dig]&.first.to_s || User.default_role) >= User.roles.index(role.to_s)
+    User.roles.index(self.role) >= User.roles.index(role.to_s)
   end
 
   class NotSaved < StandardError; end
@@ -200,6 +202,16 @@ class User
     return unless existing_users.any? { |user| user['provider'] == provider && user['uid'] == uid }
 
     errors.add(:base, "A user with provider '#{provider}' and uid '#{uid}' already exists.")
+  end
+
+  def roles_must_have_valid_structure
+    unless roles.keys.include?(current_dig)
+      errors.add(:roles, "must include the current dig")
+    end
+
+    unless roles.values.all? { |value| value.is_a?(Array) && User.roles.include?(value.first.to_s) }
+      errors.add(:roles, "must include only allowed roles")
+    end
   end
 
   def deep_stringify_keys(hash)

@@ -5,28 +5,42 @@ RSpec.describe User, type: :model do
 
   context "when a new user is created" do
     it "is valid with valid attributes" do
-      user = User.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", persist: false)
+      user = User.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", roles: { 'opendig' => ['viewer'] }, persist: false)
       expect(user).to be_valid
     end
 
     it "is not valid without a uid" do
-      user = User.new(provider: "test_provider", email: "test@example.com", name: "Test User", persist: false)
+      user = User.new(provider: "test_provider", email: "test@example.com", name: "Test User", roles: { 'opendig' => ['viewer'] }, persist: false)
       expect(user).to_not be_valid
     end
 
     it "is not valid without a provider" do
-      user = User.new(uid: "12345", email: "test@example.com", name: "Test User", persist: false)
+      user = User.new(uid: "12345", email: "test@example.com", name: "Test User", roles: { 'opendig' => ['viewer'] }, persist: false)
       expect(user).to_not be_valid
     end
 
     it "is not valid without an email" do
-      user = User.new(uid: "12345", provider: "test_provider", name: "Test User", persist: false)
+      user = User.new(uid: "12345", provider: "test_provider", name: "Test User", roles: { 'opendig' => ['viewer'] }, persist: false)
       expect(user).to_not be_valid
     end
 
     it "is not valid without a name" do
-      user = User.new(uid: "12345", provider: "test_provider", email: "test@example.com", persist: false)
+      user = User.new(uid: "12345", provider: "test_provider", email: "test@example.com", roles: { 'opendig' => ['viewer'] }, persist: false)
       expect(user).to_not be_valid
+    end
+
+    it "is not valid with an invalid role structure" do
+      user = User.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", roles: { 'opendig' => 'viewer' }, persist: false)
+      expect(user).to_not be_valid
+      user = User.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", roles: { 'opendig' => ['invalid_role'] }, persist: false)
+      expect(user).to_not be_valid
+      user = User.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", roles: { 'otherdig' => ['viewer'] }, persist: false)
+      expect(user).to_not be_valid
+    end
+
+    it "loads default role if none provided" do
+      user = User.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", persist: false)
+      expect(user.roles).to eq({ 'opendig' => [User.default_role] })
     end
 
     it "loads the original user when attempting to create a duplicate user" do
@@ -38,7 +52,7 @@ RSpec.describe User, type: :model do
     end
 
     it "saves successfully with valid attributes" do
-      user = User.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", persist: false)
+      user = User.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", roles: { 'opendig' => ['viewer'] }, persist: false)
       expect(user).to be_valid
       expect(user.save!).to be_truthy
     end
@@ -47,6 +61,7 @@ RSpec.describe User, type: :model do
       allow(CouchDB.auth_db).to receive(:save_doc).and_return({ 'ok' => true })
 
       user = User.new(provider: "test_provider", email: "test@example.com", name: "Test User", persist: false)
+      expect(user).to_not be_valid
       expect { user.save! }.to raise_error(ActiveModel::ValidationError)
     end
   end
