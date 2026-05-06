@@ -33,6 +33,7 @@ class CouchDB
 
     def env = @env || Rails.env
 
+    # Ensure that the app uses the correct database per environment
     def install!(target = Rails::Application::Configuration)
       target.send(:define_method, :couchdb) { CouchDB.couchdb }
       target.send(:define_method, :authdb) { CouchDB.authdb }

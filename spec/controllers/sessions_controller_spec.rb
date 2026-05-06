@@ -28,11 +28,12 @@ RSpec.describe SessionsController, type: :controller do
 
       expect {
         get :create, params: { provider: 'test_provider' }
-      }.to change(User.find_all, :size).by(1)
+      }.to change { User.find_all.size }.by(1)
 
-      user = User.find_all.last
+      auth = request.env['omniauth.auth']
+      user = User.find_by(provider: auth['provider'], uid: auth['uid'])
       expect(user.uid).to eq(request.env['omniauth.auth']['uid'])
-      expect(user.provider).to eq('test_provider')
+      expect(user.provider).to eq(auth['provider'])
       expect(user.email).to eq(users[:viewer].email)
     end
 

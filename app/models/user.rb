@@ -24,6 +24,10 @@ class User
       'authdb/users'
     end
 
+    def authdb
+      CouchDB.authdb
+    end
+
     def from_omniauth(auth)
       auth = auth.with_indifferent_access
       find_by(provider: auth[:provider], uid: auth[:uid]) ||
@@ -132,7 +136,7 @@ class User
     validate!
 
     synchronize! unless @initially_persisted # For idempotence--same reasoning as in `User.new`
-    response = authdb.save_doc(to_document)
+    response = self.class.authdb.save_doc(to_document)
     synchronize!
 
     if response['ok']
@@ -153,7 +157,7 @@ class User
 
   # Similar to Array#replace. Replaces this object's attributes with the attributes of the other user. Does not save to CouchDB.
   def replace(other)
-    [:uid, :provider, :email, :name, :roles, :_rev].each do |field|
+    %i[uid provider email name roles _rev].each do |field|
       # We use `send` over `instance_variable_set` because ActiveModel
       # monkeypatches attribute accessors
       send(:"#{field}=", other.send(field))
@@ -192,7 +196,7 @@ class User
   def uid_and_provider_combined_must_be_unique
     # Query CouchDB directly since `where` calls `new` and `new` triggers validations
     # which would cause infinite recursion
-    existing_users = authdb.view(self.class.collection_name, { key: [provider, uid] })['rows']
+    existing_users = self.class.authdb.view(self.class.collection_name, { key: [provider, uid] })['rows']
     return unless existing_users.any? { |user| user['provider'] == provider && user['uid'] == uid }
 
     errors.add(:base, "A user with provider '#{provider}' and uid '#{uid}' already exists.")
@@ -208,8 +212,6 @@ class User
   # This is good enough to get per-dig permissions going.
   # Needs refactoring later.
   def current_dig
-    "opendig"
+    'opendig'
   end
-
-  def authdb = CouchDB.authdb
 end
