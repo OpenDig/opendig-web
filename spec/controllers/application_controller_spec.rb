@@ -1,8 +1,6 @@
 require "rails_helper"
 
 RSpec.describe ApplicationController, type: :controller do
-  fixtures :users
-
   # Create a test controller to test ApplicationController functionality
   controller do
     def index
@@ -30,11 +28,12 @@ RSpec.describe ApplicationController, type: :controller do
     end
   end
 
-  let(:mock_db) { instance_double(CouchRest::Database) }
   let(:mock_descriptions) { {"pottery" => "Ceramic vessels"} }
+  let(:test_db) { Rails.application.config.couchdb }
+  let(:test_auth_db) { Rails.application.config.authdb }
+  let(:users) { load_user_fixtures }
 
   before do
-    allow(Rails.application.config).to receive(:couchdb).and_return(mock_db)
     allow(Rails.application.config).to receive(:descriptions).and_return(mock_descriptions)
   end
 
@@ -43,7 +42,13 @@ RSpec.describe ApplicationController, type: :controller do
       it "sets @db from Rails configuration" do
         get :index
 
-        expect(assigns(:db)).to eq(mock_db)
+        expect(assigns(:db)).to eq(test_db)
+      end
+
+      it "sets @auth_db from Rails configuration" do
+        get :index
+
+        expect(assigns(:auth_db)).to eq(test_auth_db)
       end
     end
 
@@ -230,8 +235,8 @@ RSpec.describe ApplicationController, type: :controller do
       end
 
       it "returns the current user if logged in" do
-        session[:user_id] = users(:viewer).id
-        expect(controller.send :current_user).to eq(users(:viewer))
+        session[:user_id] = users[:viewer].id
+        expect(controller.send :current_user).to eq(users[:viewer])
       end
     end
 
@@ -241,7 +246,7 @@ RSpec.describe ApplicationController, type: :controller do
       end
 
       it "returns true if a user is logged in" do
-        session[:user_id] = users(:viewer).id
+        session[:user_id] = users[:viewer].id
         expect(controller.send :user_signed_in?).to be_truthy
       end
     end
@@ -269,7 +274,7 @@ RSpec.describe ApplicationController, type: :controller do
       end
 
       it "allows access if authenticated" do
-        session[:user_id] = users(:viewer).id
+        session[:user_id] = users[:viewer].id
 
         get :protected
 
@@ -280,66 +285,62 @@ RSpec.describe ApplicationController, type: :controller do
 
     describe "require_role" do
       controller do
-        before_action :require_admin, only: [:admin_only]
-        before_action :require_editor, only: [:edit_only]
+        before_action :require_square_supervisor, only: [:square_supervisor_only]
+        before_action :require_superuser, only: [:superuser_only]
 
-        def edit_only
-          render plain: "edit only"
-        end
+        def square_supervisor_only = render plain: "square supervisor only"
 
-        def admin_only
-          render plain: "admin only"
-        end
+        def superuser_only = render plain: "superuser only"
       end
 
       before do
         routes.draw do
-          get 'admin_only' => 'anonymous#admin_only'
-          get 'edit_only' => 'anonymous#edit_only'
+          get 'square_supervisor_only' => 'anonymous#square_supervisor_only'
+          get 'superuser_only' => 'anonymous#superuser_only'
         end
       end
 
       it "redirects to root path with error flash if not authenticated" do
-        get :admin_only
+        get :square_supervisor_only
 
         expect(flash[:error]).to eq("You must be logged in to access this section")
         expect(response).to redirect_to(controller.root_path)
       end
 
       it "redirects to root path with error flash if authenticated but insufficient role" do
-        session[:user_id] = users(:viewer).id
+        session[:user_id] = users[:viewer].id
 
-        get :admin_only
+        get :square_supervisor_only
 
-        expect(flash[:error]).to eq("You must be a(n) admin to access this section")
+        expect(flash[:error]).to eq("You must be a(n) square supervisor to access this section")
         expect(response).to redirect_to(controller.root_path)
       end
 
       it "allows access if authenticated and has sufficient role" do
-        session[:user_id] = users(:admin).id
+        session[:user_id] = users[:square_supervisor].id
 
-        get :admin_only
+        get :square_supervisor_only
 
         expect(response).to be_successful
-        expect(response.body).to eq("admin only")
+        expect(response.body).to eq("square supervisor only")
       end
 
-      it "allows access to editor-only action for editor role" do
-        session[:user_id] = users(:editor).id
+      it "allows access to square_supervisor-only action for square_supervisor role" do
+        session[:user_id] = users[:square_supervisor].id
 
-        get :edit_only
+        get :square_supervisor_only
 
         expect(response).to be_successful
-        expect(response.body).to eq("edit only")
+        expect(response.body).to eq("square supervisor only")
       end
 
-      it "allows access to editor-only action for admin role" do
-        session[:user_id] = users(:admin).id
+      it "allows access to square_supervisor-only action for superuser role" do
+        session[:user_id] = users[:superuser].id
 
-        get :edit_only
+        get :square_supervisor_only
 
         expect(response).to be_successful
-        expect(response.body).to eq("edit only")
+        expect(response.body).to eq("square supervisor only")
       end
     end
   end

@@ -1,5 +1,5 @@
 class AreasController < ApplicationController
-  before_action :require_field_supervisor, only: [:new, :create]
+  before_action :require_area_supervisor, only: [:new, :create]
 
   def index
     @areas = @db.view('opendig/areas', {group: true})['rows']

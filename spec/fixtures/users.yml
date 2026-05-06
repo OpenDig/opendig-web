@@ -2,16 +2,70 @@ viewer:
   uid: 1
   provider: 'test_provider'
   email: 'viewer@example.com'
-  role: 'viewer'
+  name: 'Test Viewer'
+  roles:
+    opendig:
+      - 'viewer'
 
-editor:
+lab_supervisor:
   uid: 2
   provider: 'test_provider'
-  email: 'editor@example.com'
-  role: 'editor'
+  email: 'lab_supervisor@example.com'
+  name: 'Test Lab Supervisor'
+  roles:
+    opendig:
+      - 'lab_supervisor'
 
-admin:
+square_supervisor:
   uid: 3
   provider: 'test_provider'
-  email: 'admin@example.com'
-  role: 'admin'
+  email: 'square_supervisor@example.com'
+  name: 'Test Square Supervisor'
+  roles:
+    opendig:
+      - 'square_supervisor'
+
+area_supervisor:
+  uid: 4
+  provider: 'test_provider'
+  email: 'area_supervisor@example.com'
+  name: 'Test Area Supervisor'
+  roles:
+    opendig:
+      - 'area_supervisor'
+
+dig_director:
+  uid: 5
+  provider: 'test_provider'
+  email: 'dig_director@example.com'
+  name: 'Test Dig Director'
+  roles:
+    opendig:
+      - 'dig_director'
+
+superuser:
+  uid: 6
+  provider: 'test_provider'
+  email: 'superuser@example.com'
+  name: 'Test Superuser'
+  roles:
+    opendig:
+      - 'superuser'
+
+google_oauth2:
+  uid: 7
+  provider: 'google_oauth2'
+  email: 'test@gmail.com'
+  name: 'Test Google User'
+
+github:
+  uid: 8
+  provider: 'github'
+  email: 'test@example.com'
+  name: 'Test GitHub User'
+
+microsoft_office365:
+  uid: 9
+  provider: 'microsoft_office365'
+  email: 'test@microsoft.com'
+  name: 'Test Microsoft User'

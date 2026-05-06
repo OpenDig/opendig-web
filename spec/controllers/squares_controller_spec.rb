@@ -29,7 +29,7 @@ RSpec.describe SquaresController, type: :controller do
 
   describe "GET new" do
     before do
-      allow(controller).to receive(:require_editor)
+      allow(controller).to receive(:require_square_supervisor)
     end
 
     it "sets @area and @squares" do
@@ -43,7 +43,7 @@ RSpec.describe SquaresController, type: :controller do
 
   describe "POST create" do
     before do
-      allow(controller).to receive(:require_editor)
+      allow(controller).to receive(:require_square_supervisor)
     end
 
     context "when creating a new square" do

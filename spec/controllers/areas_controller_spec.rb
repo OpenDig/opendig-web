@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe AreasController, type: :controller do
 
   describe "GET index" do
-    it "assigns @areas" do
+    it "loads @areas from the database" do
       get :index
       expect(assigns(:areas).map{|a| a['key']}).to eq(["24", "25", "42", "55"])
     end
@@ -18,7 +18,7 @@ RSpec.describe AreasController, type: :controller do
       allow(controller).to receive(:set_descriptions)
       allow(controller).to receive(:set_edit_mode)
       allow(controller).to receive(:check_editing_mode)
-      allow(controller).to receive(:require_editor)
+      allow(controller).to receive(:require_area_supervisor)
       controller.instance_variable_set(:@db, db)
       controller.instance_variable_set(:@editing_enabled, true)
     end

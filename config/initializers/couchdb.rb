@@ -11,27 +11,56 @@ class HTTPClient
 end
 
 class CouchDB
-  attr_reader :client, :config, :label
+  # Singleton pattern--unique instances per env
+  class <<self
+    def couchdb
+      unless @couchdb&.env == env
+        @couchdb = CouchDB.new(env: env)
+      end
+      @couchdb
+    end
 
-  def initialize(**params)
+    def authdb
+      unless @authdb&.env == env
+        @authdb = CouchDB.new(env: env, design_docs_path: 'config/auth_views.yaml', label: 'users', config_doc_id: 'authdb_config', design_doc_id: '_design/authdb')
+      end
+      @authdb
+    end
+
+    def set_env!(env = Rails.env)
+      @env = env
+    end
+
+    def env = @env || Rails.env
+
+    def install!(target = Rails::Application::Configuration)
+      target.send(:define_method, :couchdb) { CouchDB.couchdb }
+      target.send(:define_method, :authdb) { CouchDB.authdb }
+    end
+  end
+
+  attr_reader :client, :config, :label, :env
+
+  def initialize(delete_db: false, dry_run: false, **params)
     default_params = {
       design_docs_path: 'config/views.yaml',
       config_path: 'config/couchdb.yml',
       label: 'main',
       config_doc_id: 'opendig_config',
       design_doc_id: '_design/opendig',
-      env: Rails.env
+      env: self.class.env
     }
     params = default_params.merge(params)
     @config = YAML.load_file("#{Rails.root}/#{params[:config_path]}")[params[:env]]
     @config_doc_id = params[:config_doc_id]
     @design_doc_id = params[:design_doc_id]
     @label = params[:label]
+    @env = params[:env]
     protocol = @config["protocol"]
-    host     = ENV['COUCHDB_HOST'] || @config["host"]
-    port     = @config["port"] || nil
-    username = ENV['COUCHDB_USER'] || @config["username"]
-    password = ENV['COUCHDB_PASSWORD'] || @config["password"]
+    @config["host"]     = ENV['COUCHDB_HOST'] || @config["host"]
+    @config["port"]     = @config["port"] || nil
+    @config["username"] = ENV['COUCHDB_USER'] || @config["username"]
+    @config["password"] = ENV['COUCHDB_PASSWORD'] || @config["password"]
 
     # Brief explanation of db naming:
     # 1. If prefix, suffix, or db_name are explicitly provided in config, use them directly.
@@ -57,9 +86,14 @@ class CouchDB
     prefix   = (@config["prefix"].is_a?(Hash) ? @config.dig("prefix", @label) : @config["prefix"]) || nil
     suffix   = (@config["suffix"].is_a?(Hash) ? @config.dig("suffix", @label) : @config["suffix"]) || nil
     database = (@config["db_name"].is_a?(Hash) ? @config.dig("db_name", @label) : @config["db_name"]) || "#{prefix}_#{suffix}"
+    return if dry_run # skip actual DB connection if just testing config loading
 
-    url = "#{protocol}://#{username}:#{password}@#{host}:#{port}/#{database}"
+    url = "#{protocol}://#{@config['username']}:#{@config['password']}@#{@config['host']}:#{@config['port']}/#{database}"
     @client = CouchRest.database!(url)
+    if delete_db
+      @client.delete! rescue nil
+      @client = CouchRest.database!(url)
+    end
 
     update_design_docs!(params[:design_docs_path])
   end
@@ -108,9 +142,9 @@ class CouchDB
     end
   end
 
-  def method_missing(method_name, *args, &block)
+  def method_missing(method_name, *args, **kwargs, &block)
     if client.respond_to?(method_name)
-      client.send(method_name, *args, &block)
+      client.send(method_name, *args, **kwargs, &block)
     else
       super
     end
@@ -121,5 +155,4 @@ class CouchDB
   end
 end
 
-Rails.application.config.couchdb = CouchDB.new
-Rails.application.config.authdb = CouchDB.new(design_docs_path: 'config/auth_views.yaml', label: 'users', config_doc_id: 'authdb_config', design_doc_id: '_design/authdb')
+CouchDB.install!
