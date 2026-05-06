@@ -4,7 +4,9 @@ default: &default
   port: 5984
   username: admin
   password: password
-  prefix: opendig
+  prefix:
+    main: opendig
+    users: opendig_users
 
 development:
   <<: *default

@@ -28,11 +28,12 @@ RSpec.describe ApplicationController, type: :controller do
     end
   end
 
-  let(:mock_db) { instance_double(CouchRest::Database) }
   let(:mock_descriptions) { {"pottery" => "Ceramic vessels"} }
+  let(:test_db) { CouchDB.main_db }
+  let(:test_auth_db) { CouchDB.auth_db }
+  let(:users) { load_user_fixtures }
 
   before do
-    allow(Rails.application.config).to receive(:couchdb).and_return(mock_db)
     allow(Rails.application.config).to receive(:descriptions).and_return(mock_descriptions)
   end
 
@@ -41,7 +42,13 @@ RSpec.describe ApplicationController, type: :controller do
       it "sets @db from Rails configuration" do
         get :index
 
-        expect(assigns(:db)).to eq(mock_db)
+        expect(assigns(:db)).to eq(test_db)
+      end
+
+      it "sets @auth_db from Rails configuration" do
+        get :index
+
+        expect(assigns(:auth_db)).to eq(test_auth_db)
       end
     end
 
@@ -167,16 +174,165 @@ RSpec.describe ApplicationController, type: :controller do
         end
       end
     end
+
+    describe "check_session_timeout" do
+      before do
+        routes.draw do
+          get 'index' => 'anonymous#index'
+        end
+      end
+
+      it "resets session and sets alert flash if session has expired" do
+        past_time = 31.minutes.ago
+        session[:last_seen] = past_time
+
+        expect(session).to receive(:destroy)
+        get :index
+        expect(flash[:alert]).to eq("Your session has expired due to inactivity.")
+      end
+
+      it "does not reset session if session is still valid" do
+        recent_time = 10.minutes.ago
+        session[:last_seen] = recent_time
+
+        expect(session).not_to receive(:destroy)
+        get :index
+        expect(flash[:alert]).to be_nil
+      end
+    end
+
+    describe "update_session_timestamp" do
+      before do
+        routes.draw do
+          get 'index' => 'anonymous#index'
+        end
+      end
+
+      it "updates session[:last_seen] to current time" do
+        travel_to Time.current do
+          get :index
+
+          expect(session[:last_seen]).to be_within(5.seconds).of(Time.current)
+        end
+      end
+    end
   end
 
   describe "sanity check spec" do
     it "has all the documents" do
       # Temporarily remove the mock to access the real database
-      allow(Rails.application.config).to receive(:couchdb).and_call_original
+      allow(CouchDB).to receive(:main_db).and_call_original
 
       # five docs, plus the design doc and config doc
-      expect(Rails.application.config.couchdb.all_docs["rows"].count).to eq(7)
+      expect(CouchDB.main_db.all_docs["rows"].count).to eq(7)
     end
   end
 
+  describe "authentication and authorization helper" do
+    describe "current_user" do
+      it "returns nil if no user is logged in" do
+        expect(controller.send(:current_user)).to be_nil
+      end
+
+      it "returns the current user if logged in" do
+        session[:user_id] = users[:viewer].id
+        expect(controller.send(:current_user)).to eq(users[:viewer])
+      end
+    end
+
+    describe "user_signed_in?" do
+      it "returns false if no user is logged in" do
+        expect(controller.send(:user_signed_in?)).to be_falsey
+      end
+
+      it "returns true if a user is logged in" do
+        session[:user_id] = users[:viewer].id
+        expect(controller.send(:user_signed_in?)).to be_truthy
+      end
+    end
+
+    describe "require_authentication" do
+      controller do
+        before_action :require_authentication, only: [:protected]
+
+        def protected
+          render plain: "protected"
+        end
+      end
+
+      before do
+        routes.draw do
+          get 'protected' => 'anonymous#protected'
+        end
+      end
+
+      it "redirects to root path with error flash if not authenticated" do
+        get :protected
+
+        expect(flash[:error]).to eq("You must be logged in to access this section")
+        expect(response).to redirect_to(controller.root_path)
+      end
+
+      it "allows access if authenticated" do
+        session[:user_id] = users[:viewer].id
+
+        get :protected
+
+        expect(response).to be_successful
+        expect(response.body).to eq("protected")
+      end
+    end
+
+    describe "require_role" do
+      controller do
+        before_action :require_square_supervisor, only: [:square_supervisor_only]
+        before_action :require_superuser, only: [:superuser_only]
+
+        def square_supervisor_only = render plain: "square supervisor only"
+
+        def superuser_only = render plain: "superuser only"
+      end
+
+      before do
+        routes.draw do
+          get 'square_supervisor_only' => 'anonymous#square_supervisor_only'
+          get 'superuser_only' => 'anonymous#superuser_only'
+        end
+      end
+
+      it "redirects to root path with error flash if not authenticated" do
+        get :square_supervisor_only
+
+        expect(flash[:error]).to eq("You must be logged in to access this section")
+        expect(response).to redirect_to(controller.root_path)
+      end
+
+      it "redirects to root path with error flash if authenticated but insufficient role" do
+        session[:user_id] = users[:viewer].id
+
+        get :square_supervisor_only
+
+        expect(flash[:error]).to eq("You must be a(n) square supervisor to access this section")
+        expect(response).to redirect_to(controller.root_path)
+      end
+
+      it "allows access if authenticated and has sufficient role" do
+        session[:user_id] = users[:square_supervisor].id
+
+        get :square_supervisor_only
+
+        expect(response).to be_successful
+        expect(response.body).to eq("square supervisor only")
+      end
+
+      it "allows access if authenticated and has role with higher privileges" do
+        session[:user_id] = users[:superuser].id
+
+        get :square_supervisor_only
+
+        expect(response).to be_successful
+        expect(response.body).to eq("square supervisor only")
+      end
+    end
+  end
 end

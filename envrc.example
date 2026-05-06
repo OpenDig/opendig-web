@@ -1,0 +1,17 @@
+export AWS_ACCESS_KEY_ID= # retrieve from Minio
+export AWS_SECRET_ACCESS_KEY= # retrieve from Minio
+export EDIT_PASSWORD=editor
+export EDIT_USER=editor
+export IMGPROXY_KEY= # Hex-encoded string
+export IMGPROXY_SALT= # Hex-encoded string
+export IMGPROXY_URL=http://imgproxy:8080
+
+# Omniauth credentials
+export GOOGLE_CLIENT_ID= # retrieve from Google Cloud Console
+export GOOGLE_CLIENT_SECRET= # retrieve from Google Cloud Console
+export MICROSOFT_CLIENT_ID= # retrieve from Microsoft Entra admin center
+export MICROSOFT_CLIENT_SECRET= # retrieve from Microsoft Entra admin center
+export GITHUB_CLIENT_ID= # retrieve from GitHub developer settings
+export GITHUB_CLIENT_SECRET= # retrieve from GitHub developer settings
+
+export RAILS_ENV=development

@@ -40,9 +40,7 @@ Edit the `.envrc` file with your configuration. The file includes:
   - `IMGPROXY_SALT`: 128-character string
   - `IMGPROXY_URL`: http://imgproxy:8080
 
-AWS credentials for development can be found/updated in the `docker-compose.yml` file.
-
-Generate hex encoded strings using the following example (from https://docs.imgproxy.net/configuration/options)
+Generated a hex encoded string using the following example (from https://docs.imgproxy.net/configuration/options)
 
 ```bash
 echo $(xxd -g 2 -l 64 -p /dev/random | tr -d '\n')
@@ -149,6 +147,12 @@ docker compose exec app bundle exec rails db:migrate
 ```bash
 bin/spec
 ```
+
+### Logging in
+
+When OpenDig is running in development, you can create or log into a test account by selecting the "Developer" option on the login page or navigating to <http://localhost:3000/auth/developer>. Simply enter sample data into the form.
+
+To set up authentication using OAuth2 providers such as Google and Office 365, follow the instructions in the [Authentication](docs/Authentication.md) setup guide.
 
 ## Project Structure
 

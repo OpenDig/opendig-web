@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <title>OpenDig</title>
+  <%= javascript_importmap_tags %>
+  <%= turbo_include_tags %>
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -12,8 +14,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flickity/3.0.0/flickity.pkgd.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-  <%= javascript_importmap_tags %>
  </head>
 
 <body>
@@ -33,30 +33,33 @@
         <div class="hidden md:block">
           <ul class="ml-10 flex items-baseline space-x-4">
             <li><%= link_to "Home", root_path, class: "text-gray-300 hover:text-white" %></li>
-            <li><%= link_to "Registrar Tools", registrar_index_path, class: "text-gray-300 hover:text-white" %></li>
-            <li><%= link_to "Bulk Uploader", new_bulk_upload_path, class: "text-gray-300 hover:text-white" %></li>
-            <li><%#= link_to "Reports", registrar_index_path, class: "text-gray-300 hover:text-white" %></li>
+            <% if user_signed_in? %>
+              <% if current_user.role_at_least? :dig_director %>
+                <li><%= link_to("Registrar Tools", registrar_index_path, class: "text-gray-300 hover:text-white") %></li>
+                <li><%= link_to("Bulk Uploader", new_bulk_upload_path, class: "text-gray-300 hover:text-white") %></li>
+              <% end %>
+              <!-- <li><#= link_to "Reports", registrar_index_path, class: "text-gray-300 hover:text-white" %></li> -->
+              <li>
+                <%= button_to "Logout",
+                              logout_path,
+                              method: :delete,
+                              form: { class: "inline" },
+                              class: "text-gray-300 hover:text-white bg-transparent p-0 border-0",
+                              data: { confirm: "Are you sure you want to log out?" } 
+                %>
+              </li>
+            <% else %>
+              <li><%= link_to "Login", login_path, class: "text-gray-300 hover:text-white" %></li>
+            <% end %>
           </ul>
         </div>
       </div>
     </div>
   </nav>
 
-  <div class="container flash">
-    <div class="row">
-      <div class="col">
-        <% flash.each do |name, msg| %>
-          <% unless flash_blacklist(name) %>
-            <%= content_tag(:div, class: flash_class(name)) do %>
-              <%= msg %>
-              <button type="button" class="close" data-bs-dismiss="alert">×</button>
-            <% end %>
-          <% end %>
-        <% end %>
-      </div>
-    </div>
-  </div>
-  <div class="container overflow-y-auto px-10 py-6">
+  <%= render partial: "layouts/flash" %>
+  
+  <div class="container overflow-y-auto px-10 py-6 mx-auto">
     <%= yield %>
   </div>
 
