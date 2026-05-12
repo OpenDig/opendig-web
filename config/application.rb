@@ -22,5 +22,8 @@ module OpendigWeb7
     config.autoload_paths += Dir["#{Rails.root}/lib/**/"] if Rails.env == 'development'
     config.assets.css_compressor = nil
 
+    config.generators do |g|
+      g.test_framework :rspec
+    end
   end
 end
