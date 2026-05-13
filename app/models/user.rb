@@ -1,7 +1,7 @@
 # Roles:
 # - Superuser (full admin)
 # - Dig director (admin for particular dig)
-# - Field director (editor for particular dig)
+# - Area director (editor for particular area)
 # - Square supervisor (editor for particular square)
 # - Lab supervisor (editor for particular lab)
 # - Viewer (same as unregistered user, but with an account)
@@ -213,10 +213,7 @@ class User
     end
   end
 
-  # Not sure how handling multiple digs will work ATP.
-  # This is good enough to get per-dig permissions going.
-  # Needs refactoring later.
   def current_dig
-    'opendig'
+    'opendig' # Placeholder until we have multi-dig support
   end
 end

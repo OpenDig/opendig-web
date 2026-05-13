@@ -66,7 +66,7 @@ class ApplicationController < ActionController::Base
     false
   end
 
-  def require_role(role)
+  def require_role(role, scope: nil)
     require_authentication
     return if performed? # Don't check role if authentication check failed
 
@@ -75,14 +75,30 @@ class ApplicationController < ActionController::Base
       redirect_to root_path
       return false
     end
+
+    if scope && !current_user.role_scopes.include?(scope)
+      flash[:error] = "You do not have access to this section"
+      redirect_to root_path
+      return false
+    end
+
     true
   end
 
-  User.roles.each do |role|
-    define_method("require_#{role}") do
-      require_role(role)
-    end
+  def require_superuser = require_role :superuser
 
-    helper_method "require_#{role}"
+  def require_dig_director = require_role :dig_director, scope: current_dig
+
+  def require_area_supervisor(area_id) = require_role :area_supervisor, scope: area_id
+
+  def require_square_supervisor(square_id) = require_role :square_supervisor, scope: square_id
+
+  def require_lab_supervisor = require_role :lab_supervisor
+
+  # Not sure how handling multiple digs will work ATP.
+  # This is good enough to get per-dig permissions going.
+  # Needs refactoring later.
+  def current_dig
+    'opendig'
   end
 end

@@ -1,6 +1,6 @@
 class SquaresController < ApplicationController
-  before_action :require_square_supervisor, except: [:index]
   before_action :set_area_and_squares
+  before_action -> { require_area_supervisor(@area) }, except: [:index]
 
   def index
   end
