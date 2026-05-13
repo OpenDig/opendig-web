@@ -47,14 +47,16 @@ class User
 
     def role_scopes_for(role)
       case role.to_s
+      when 'dig_director'
+        # TODO: pull list of all digs from somewhere.
+        # This depends on how multiple-dig support is implemented.
+        { 'OpenDig' => 'opendig' }
       when 'area_supervisor'
-        # TODO: Get list of areas
-        { 'Test area 1' => '1', 'Test area 2' => '2' }
+        CouchDB.main_db.view('opendig/areas', { group: true })['rows'].map { |row| ["Area #{row['key']}", row['key']] }.to_h
       when 'square_supervisor'
-        # TODO: Get list of squares
-        { 'Test square 1.1' => '1.1', 'Test square 1.2' => '1.2', 'Test square 2.1' => '2.1' }
+        CouchDB.main_db.view('opendig/squares', { group: true })['rows'].map { |row| ["Square #{row['key'].join('.')}", row['key'].join('.')] }.to_h
       end
-      # All other roles don't need specific scopes
+      # No other roles need specific scopes
     end
 
     def id_fields = %w[provider uid]
