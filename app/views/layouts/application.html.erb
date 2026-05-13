@@ -39,6 +39,9 @@
                 <li><%= link_to("Bulk Uploader", new_bulk_upload_path, class: "text-gray-300 hover:text-white") %></li>
               <% end %>
               <!-- <li><#= link_to "Reports", registrar_index_path, class: "text-gray-300 hover:text-white" %></li> -->
+              <% if current_user.role_at_least? :superuser %>
+                <li><%= link_to("User Management", manage_users_admin_index_path, class: "text-gray-300 hover:text-white") %></li>
+              <% end %>
               <li>
                 <%= button_to "Logout",
                               logout_path,

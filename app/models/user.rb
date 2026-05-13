@@ -45,6 +45,18 @@ class User
 
     def default_role = roles.first
 
+    def role_scopes_for(role)
+      case role.to_s
+      when 'area_supervisor'
+        # TODO: Get list of areas
+        { 'Test area 1' => '1', 'Test area 2' => '2' }
+      when 'square_supervisor'
+        # TODO: Get list of squares
+        { 'Test square 1.1' => '1.1', 'Test square 1.2' => '1.2', 'Test square 2.1' => '2.1' }
+      end
+      # All other roles don't need specific scopes
+    end
+
     def id_fields = %w[provider uid]
 
     # `attr_accessor` pulls from this list. To add a new attribute, update it here.
@@ -131,6 +143,10 @@ class User
     as_json(only: self.class.id_fields)
   end
 
+  def id_as_string
+    id.values.join('__')
+  end
+
   def save!
     validate!
 
@@ -154,6 +170,12 @@ class User
     !!updated_record
   end
 
+  def update(attributes, **kwargs)
+    update!(attributes, **kwargs)
+  rescue NotSaved, ActiveModel::ValidationError
+    false
+  end
+
   # Similar to Array#replace. Replaces this object's attributes with the attributes of the other user. Does not save to CouchDB.
   def replace(other)
     self.class.data_fields.each do |field|
@@ -161,6 +183,28 @@ class User
       # monkeypatches attribute accessors
       send(:"#{field}=", other.send(field))
     end
+  end
+
+  def update!(attributes, **kwargs)
+    attributes = deep_stringify_keys(attributes.merge(kwargs))
+
+    # Process custom fields
+    role = attributes.fetch('role', nil)
+    scopes = attributes.fetch('scopes', nil)&.compact_blank
+    if role
+      Rails.logger.info "    Found role assignment: #{role} with scopes: #{scopes}"
+      attributes['roles'] ||= {}
+      attributes['roles'][current_dig] = [role]
+      # Don't carry over scopes if role is changing
+      attributes['roles'][current_dig] += scopes || [] if role.to_s == self.role.to_s
+      Rails.logger.info "    Updated roles: #{attributes['roles']}"
+    end
+
+    attributes.slice!(*User.data_fields)
+    attributes.each { |field, value| send(:"#{field}=", value) }
+    save!
+
+    self
   end
 
   def save

@@ -15,9 +15,10 @@
       <% @users.each do |user| %>
         <tr>
           <td class="border border-gray-300 p-2 text-center">
-            <span class="<%= user.name.blank? ? 'text-gray-400' : '' %>">
-              <%= user.name.blank? ? 'no name' : user.name %>
-            </span>
+            <span><%= user.name %></span>
+            <% if user == current_user %>
+                <span class="text-sm text-gray-500">(You)</span>
+            <% end %>
           </td>
           <td class="border border-gray-300 p-2 w-[100px] md:w-[300px]">
             <%= render partial: 'admin/manage_users_role_form', locals: { user: user, open: false } %>
