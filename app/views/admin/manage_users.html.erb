@@ -8,26 +8,29 @@
         <th class="border border-gray-300 p-2 text-center">User</th>
         <th class="border border-gray-300 p-2 text-center">Role</th>
         <th class="border border-gray-300 p-2 text-center">Email</th>
+        <!-- TODO implement "view log"
         <th class="border border-gray-300 p-2 text-center">Access Log</th>
+        -->
       </tr>
     </thead>
     <tbody>
       <% @users.each do |user| %>
         <tr>
-          <td class="border border-gray-300 p-2 text-center">
+          <td class="border border-gray-300 p-2 text-center w-1/3">
             <span><%= user.name %></span>
             <% if user == current_user %>
                 <span class="text-sm text-gray-500">(You)</span>
             <% end %>
           </td>
-          <td class="border border-gray-300 p-2 w-[100px] md:w-[300px]">
+          <td class="border border-gray-300 p-2 w-1/3">
             <%= render partial: 'admin/manage_users_role_form', locals: { user: user, open: false } %>
           </td>
           <td class="border border-gray-300 p-2"><%= user.email %></td>
+          <!-- TODO implement "view log"
           <td class="border border-gray-300 p-2">
-            <%# TODO implement "view log" %>
             <a href="#" class="text-blue-600 hover:underline">View Log</a>
           </td>
+          -->
         </tr>
       <% end %>
     </tbody>
