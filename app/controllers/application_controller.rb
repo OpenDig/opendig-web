@@ -85,23 +85,4 @@ class ApplicationController < ActionController::Base
 
     helper_method "require_#{role}"
   end
-
-  def require_role(role)
-    require_authentication
-    return if performed? # Don't check role if authentication check failed
-
-    unless current_user.role_at_least? role
-      flash[:error] = "You must be a(n) #{role} to access this section"
-      redirect_to root_path
-      nil
-    end
-  end
-
-  User.roles.keys.each do |role|
-    define_method("require_#{role}") do
-      require_role(role)
-    end
-
-    helper_method "require_#{role}"
-  end
 end

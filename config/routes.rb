@@ -20,7 +20,7 @@ Rails.application.routes.draw do
   patch '/admin/update_user/:id', to: 'admin#update_user', as: :admin_update_user
   resources :admin, only: [] do
     collection do
-      get 'manage_users'
+      get 'manage_users', as: :manage_users
     end
   end
 
