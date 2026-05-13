@@ -19,8 +19,8 @@
               <%= user.name.blank? ? 'no name' : user.name %>
             </span>
           </td>
-          <td class="border border-gray-300 p-2">
-            <%= render partial: 'admin/manage_users_role_dropdown', locals: { user: user, change: :none } %>
+          <td class="border border-gray-300 p-2 w-[100px] md:w-[300px]">
+            <%= render partial: 'admin/manage_users_role_form', locals: { user: user, open: false } %>
           </td>
           <td class="border border-gray-300 p-2"><%= user.email %></td>
           <td class="border border-gray-300 p-2">

@@ -1,5 +1,5 @@
-<%= turbo_stream.replace "user_role_#{@user.id}" do %>
-  <%= render "manage_users_role_dropdown", user: @user %>
+<%= turbo_stream.replace "user_role_#{@user.id_as_string}" do %>
+  <%= render "manage_users_role_form", user: @user, open: true %>
 <% end %>
 
 <%= turbo_stream.replace "flash" do %>
