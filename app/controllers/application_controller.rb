@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
 
   http_basic_authenticate_with name: "#{ENV['EDIT_USER']}", password: "#{ENV['EDIT_PASSWORD']}" if Rails.env.production?
 
-  helper_method :current_user, :user_signed_in?, :require_authentication, :require_role
+  helper_method :current_user, :user_signed_in?, :require_authentication, :user_role?, :require_role, :require_superuser, :require_dig_director, :require_area_supervisor, :require_square_supervisor, :require_lab_supervisor, :current_dig
 
   private
   def set_db
@@ -66,17 +66,30 @@ class ApplicationController < ActionController::Base
     false
   end
 
+  def user_role?(role, scope: nil)
+    role = role.to_s
+    scope = scope.is_a?(Array) ? scope.map(&:to_s) : scope.to_s if scope
+    Rails.logger.debug "Checking if user has role #{role} with scope #{scope}"
+    return true if role.to_s == 'viewer'
+    return false unless user_signed_in?
+    return false unless current_user.role_at_least? role
+    return current_user.role_scopes.include?(scope) if scope && current_user.role == role
+
+    true
+  end
+
   def require_role(role, scope: nil)
     require_authentication
     return if performed? # Don't check role if authentication check failed
 
+    role = role.to_s
     unless current_user.role_at_least? role
       flash[:error] = "You must be a(n) #{role.humanize.downcase} to access this section"
       redirect_to root_path
       return false
     end
 
-    if scope && !current_user.role_scopes.include?(scope)
+    if scope && current_user.role == role && !current_user.role_scopes.include?(scope)
       flash[:error] = "You do not have access to this section"
       redirect_to root_path
       return false

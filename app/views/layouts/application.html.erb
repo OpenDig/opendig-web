@@ -34,7 +34,7 @@
           <ul class="ml-10 flex items-baseline space-x-4">
             <li><%= link_to "Home", root_path, class: "text-gray-300 hover:text-white" %></li>
             <% if user_signed_in? %>
-              <% if current_user.role_at_least? :dig_director %>
+              <% if user_role?(:dig_director, scope: current_dig) %>
                 <li><%= link_to("Registrar Tools", registrar_index_path, class: "text-gray-300 hover:text-white") %></li>
                 <li><%= link_to("Bulk Uploader", new_bulk_upload_path, class: "text-gray-300 hover:text-white") %></li>
               <% end %>
