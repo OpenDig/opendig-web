@@ -10,6 +10,9 @@ Rails.application.routes.draw do
     end
 
     resources :squares, only: %i[index new create] do
+      collection do
+        post :favorite_toggle
+      end
       resources :pails, only: [:index]
       resources :finds, only: [:index]
       resources :loci, only: %i[index show edit new create update]

@@ -1,0 +1,3 @@
+<%= turbo_stream.replace("favorite-toggle-#{@square_key}", partial: 'squares/favorite_toggle', locals: { square_key: @square_key, favorited: @favorited }) %>
+<%= turbo_stream.replace("favorites", partial: 'squares/favorites') %>
+
