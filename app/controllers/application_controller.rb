@@ -69,11 +69,15 @@ class ApplicationController < ActionController::Base
   def user_role?(role, scope: nil)
     role = role.to_s
     scope = scope.is_a?(Array) ? scope.map(&:to_s) : scope.to_s if scope
-    Rails.logger.debug "Checking if user has role #{role} with scope #{scope}"
     return true if role.to_s == 'viewer'
     return false unless user_signed_in?
     return false unless current_user.role_at_least? role
-    return current_user.role_scopes.include?(scope) if scope && current_user.role == role
+    if scope && current_user.role == role
+      return current_user.role_scopes.include?(scope)
+    elsif scope
+      # User has a higher role so we need to check if they have access to a larger scope
+      return current_user.role_scopes.any? { |s| scope.start_with?(s) }
+    end
 
     true
   end
@@ -83,6 +87,7 @@ class ApplicationController < ActionController::Base
     return if performed? # Don't check role if authentication check failed
 
     role = role.to_s
+    scope = scope.is_a?(Array) ? scope.map(&:to_s) : scope.to_s if scope
     unless current_user.role_at_least? role
       flash[:error] = "You must be a(n) #{role.humanize.downcase} to access this section"
       redirect_to root_path

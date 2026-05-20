@@ -1,5 +1,4 @@
 require 'rails_helper'
-require 'securerandom'
 
 RSpec.describe SessionsController, type: :controller do
   let(:users) { load_user_fixtures }
@@ -28,7 +27,7 @@ RSpec.describe SessionsController, type: :controller do
     end
 
     it "creates a new user if one doesn't exist" do
-      request.env['omniauth.auth'] = viewer_auth_hash.merge({ 'uid' => SecureRandom.uuid })
+      request.env['omniauth.auth'] = viewer_auth_hash.merge({ 'uid' => 'random' })
 
       expect { get :create, params: { provider: 'test_provider' } }.to change { User.find_all.size }.by(1)
 

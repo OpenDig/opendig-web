@@ -61,9 +61,7 @@ RSpec.configure do |config|
 end
 
 def load_user_fixtures
-  fixtures = YAML.load_file(Rails.root.join("spec/fixtures/users.yml"))
-
-  fixtures.transform_values do |attrs|
-    User.new(attrs) # These are persisted to the test database
+  @load_user_fixtures ||= YAML.load_file(Rails.root.join("spec/fixtures/users.yml")).transform_values do |attrs|
+    User.new(attrs, persist: false) # Load into memory only (much faster than saving to DB)
   end.to_h.with_indifferent_access
 end

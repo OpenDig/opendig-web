@@ -2,8 +2,9 @@ require "rails_helper"
 
 RSpec.describe SquaresController, type: :controller do
   let(:db) { instance_double(CouchRest::Database) }
-  let(:area_id) { "24" }
+  let(:area_id) { "1" }
   let(:existing_squares) { [{"key" => [area_id, "A"]}, {"key" => [area_id, "B"]}, {"key" => [area_id, "C"]}] }
+  let(:users) { load_user_fixtures }
 
   before do
     allow(controller).to receive(:set_db)
@@ -12,6 +13,7 @@ RSpec.describe SquaresController, type: :controller do
     allow(controller).to receive(:check_editing_mode)
     controller.instance_variable_set(:@db, db)
     controller.instance_variable_set(:@editing_enabled, true)
+    session[:user_id] = users[:area_supervisor].id
 
     allow(db).to receive(:view).with('opendig/squares', {group: true, start_key: [area_id], end_key: [area_id, {}]})
       .and_return({"rows" => existing_squares})
@@ -28,10 +30,6 @@ RSpec.describe SquaresController, type: :controller do
   end
 
   describe "GET new" do
-    before do
-      allow(controller).to receive(:require_square_supervisor)
-    end
-
     it "sets @area and @squares" do
       get :new, params: {area_id: area_id}
 

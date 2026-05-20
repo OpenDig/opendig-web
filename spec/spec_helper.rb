@@ -23,6 +23,12 @@ RSpec.configure do |config|
     Dir.glob(File.join(Rails.root, "spec", "fixtures", "*.json")).each do |file|
       CouchDB.main_db.save_doc(JSON.parse(File.read(file)))
     end
+
+    Dir.glob(File.join(Rails.root, "spec", "fixtures", "users.yml")).each do |file|
+      YAML.load_file(file).each_value do |attrs|
+        User.new(attrs) # Load into test DB once before suite runs
+      end
+    end
   end
 
   config.after(:suite) do

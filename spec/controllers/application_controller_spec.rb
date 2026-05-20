@@ -285,7 +285,7 @@ RSpec.describe ApplicationController, type: :controller do
 
     describe "require_role" do
       controller do
-        before_action :require_square_supervisor, only: [:square_supervisor_only]
+        before_action -> { require_square_supervisor(%w[1 1]) }, only: [:square_supervisor_only]
         before_action :require_superuser, only: [:superuser_only]
 
         def square_supervisor_only = render plain: "square supervisor only"
