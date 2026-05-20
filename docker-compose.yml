@@ -24,7 +24,7 @@ services:
       - minio
       - imgproxy
       - redis
-    command: sh -c "bin/rails server -b 0.0.0.0 -p 3000"
+    command: "/app/bin/dev"
     platform: linux/amd64
   db:
     image: couchdb:latest

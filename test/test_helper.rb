@@ -1,7 +1,6 @@
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
-require "buildkite/test_collector/minitest_plugin"
 
 class ActiveSupport::TestCase
   # Run tests in parallel with specified workers
