@@ -180,8 +180,8 @@ class User
   end
 
   def role_scopes
-    # Special case--dig directors have digs as role scopes, but they're specified at the top level of the roles hash rather than in an array like scopes for other roles since roles overall are scoped per dig.
-    return [current_dig] if role == 'dig_director'
+    # Special case--dig directors and superusers have digs as role scopes, but they're specified at the top level of the roles hash rather than in an array like scopes for other roles since roles overall are scoped per dig.
+    return [current_dig] if %w[dig_director superuser].include? role
 
     role = roles[current_dig] || []
     role[1..] || []

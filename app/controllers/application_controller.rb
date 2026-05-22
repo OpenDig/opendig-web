@@ -76,7 +76,18 @@ class ApplicationController < ActionController::Base
       return current_user.role_scopes.include?(scope)
     elsif scope
       # User has a higher role so we need to check if they have access to a larger scope
-      return current_user.role_scopes.any? { |s| scope.start_with?(s) }
+      return current_user.role_scopes.any? do |user_scope|
+        case [scope.class, user_scope.class]
+        when [String, String]
+          # scope is an area and user_scope is a dig
+          current_dig == user_scope
+        when [Array, String]
+          # scope is a square and user_scope is either a dig or an area
+          scope.first.start_with?(user_scope) || current_dig == user_scope
+        else
+          false
+        end
+      end
     end
 
     true

@@ -334,5 +334,70 @@ RSpec.describe ApplicationController, type: :controller do
         expect(response.body).to eq("square supervisor only")
       end
     end
+
+    describe "user_role?" do
+      it "returns true for viewer role regardless of authentication" do
+        expect(controller.send(:user_role?, :viewer)).to be_truthy
+      end
+
+      it "returns false for non-viewer role if not authenticated" do
+        expect(controller.send(:user_role?, :square_supervisor)).to be_falsey
+      end
+
+      it "returns true if user has the specified role" do
+        session[:user_id] = users[:square_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor)).to be_truthy
+      end
+
+      it "returns true if user has a higher role than the specified role" do
+        session[:user_id] = users[:superuser].id
+
+        expect(controller.send(:user_role?, :square_supervisor)).to be_truthy
+      end
+
+      it "returns false if user does not have the specified role or a higher role" do
+        session[:user_id] = users[:viewer].id
+
+        expect(controller.send(:user_role?, :square_supervisor)).to be_falsey
+      end
+
+      it "returns true if user has the specified role and scope" do
+        session[:user_id] = users[:square_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor, scope: %w[1 1])).to be_truthy
+      end
+
+      it "returns false if user has the specified role but not the specified scope" do
+        session[:user_id] = users[:square_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor, scope: %w[1 2])).to be_falsey
+      end
+
+      it "returns true if user has a higher role than the specified role and has a matching scope" do
+        session[:user_id] = users[:area_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor, scope: %w[1 1])).to be_truthy
+      end
+
+      it "returns false if user has a higher role than the specified role but does not have a matching scope" do
+        session[:user_id] = users[:area_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor, scope: %w[2 1])).to be_falsey
+      end
+
+      it "returns true if user has a higher role than the specified role and has a matching dig scope" do
+        session[:user_id] = users[:dig_director].id
+
+        expect(controller.send(:user_role?, :area_supervisor, scope: "1")).to be_truthy
+      end
+
+      it "returns false if user has a higher role than the specified role but does not have a matching dig scope" do
+        session[:user_id] = users[:dig_director].id
+        allow(controller).to receive(:current_dig).and_return("other_dig")
+
+        expect(controller.send(:user_role?, :area_supervisor, scope: "1")).to be_falsey
+      end
+    end
   end
 end
