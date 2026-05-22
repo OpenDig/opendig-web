@@ -111,7 +111,7 @@ class User
   end
 
   def initialize(attributes = {}, persist: true, **kwargs)
-    super(deep_stringify_keys(attributes.merge(kwargs)))
+    super(deep_stringify_keys(attributes).merge(deep_stringify_keys(kwargs)))
 
     @roles ||= { 'opendig' => [User.default_role] }
 
@@ -141,14 +141,15 @@ class User
     if response['ok']
       true
     else
-      errors.add(:base, "Failed to save user: #{response['error']}")
-      raise NotSaved, "Failed to save user: #{response['error']}"
+      msg = "Failed to save user: #{response['error']}"
+      errors.add(:base, msg)
+      raise NotSaved, msg
     end
   end
 
   # Update this object so that it's in line with CouchDB
   def synchronize!
-    updated_record = self.class.find_by(provider: provider, uid: uid)
+    updated_record = self.class.find(id)
     replace updated_record if updated_record
     validate!
     !!updated_record
