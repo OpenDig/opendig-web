@@ -12,14 +12,25 @@ RSpec.describe AreasController, type: :controller do
   describe "POST create" do
     let(:db) { instance_double(CouchRest::Database) }
     let(:existing_areas) { [{"key" => "24"}, {"key" => "25"}, {"key" => "42"}, {"key" => "55"}] }
+    let(:users) { load_user_fixtures }
 
     before do
       allow(controller).to receive(:set_db)
       allow(controller).to receive(:set_descriptions)
       allow(controller).to receive(:set_edit_mode)
       allow(controller).to receive(:check_editing_mode)
+      allow(controller).to receive(:require_area_supervisor)
       controller.instance_variable_set(:@db, db)
       controller.instance_variable_set(:@editing_enabled, true)
+      session[:user_id] = users[:dig_director].id
+    end
+
+    it "fails without a sufficiently privileged user" do
+      session[:user_id] = users[:viewer].id
+      controller.send :current_user # Clear cached user
+      post :create, params: {area: "98"}
+
+      expect(flash[:error]).to eq("You must be a(n) dig director to access this section")
     end
 
     context "when creating a new area" do

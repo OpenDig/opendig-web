@@ -5,3 +5,7 @@ require:
   - rubocop-rails
   - rubocop-rspec_rails
   - rubocop-capybara
+
+Metrics/ClassLength:
+  Exclude:
+    - app/models/user.rb

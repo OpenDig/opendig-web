@@ -2,8 +2,8 @@ require "rails_helper"
 
 RSpec.describe LociController, type: :controller do
   let(:db) { instance_double(CouchRest::Database) }
-  let(:area_id) { "24" }
-  let(:square_id) { "A" }
+  let(:area_id) { "1" }
+  let(:square_id) { "1" }
   let(:locus_code) { "001" }
   let(:locus_data) {
     {
@@ -16,6 +16,7 @@ RSpec.describe LociController, type: :controller do
       "age" => "modern"
     }
   }
+  let(:users) { load_user_fixtures }
 
   before do
     allow(controller).to receive(:set_db)
@@ -24,6 +25,7 @@ RSpec.describe LociController, type: :controller do
     allow(controller).to receive(:check_editing_mode)
     controller.instance_variable_set(:@db, db)
     controller.instance_variable_set(:@editing_enabled, true)
+    session[:user_id] = users[:square_supervisor].id
   end
 
   describe "GET index" do
@@ -83,6 +85,14 @@ RSpec.describe LociController, type: :controller do
   end
 
   describe "GET new" do
+    it "fails without a sufficiently privileged user" do
+      session[:user_id] = users[:viewer].id
+      controller.send :current_user # Clear cached user
+      get :new, params: {area_id: area_id, square_id: square_id}
+
+      expect(flash[:error]).to eq("You must be a(n) square supervisor to access this section")
+    end
+
     it "sets @area, @square, and initializes @locus with locus_type" do
       get :new, params: {area_id: area_id, square_id: square_id, type: "context"}
 
@@ -101,6 +111,7 @@ RSpec.describe LociController, type: :controller do
 
   describe "GET edit" do
     before do
+      allow(controller).to receive(:require_lab_supervisor)
       allow(db).to receive(:view).with('opendig/locus', key: [area_id, square_id, locus_code])
         .and_return({"rows" => [{"value" => locus_data}]})
     end
@@ -117,6 +128,10 @@ RSpec.describe LociController, type: :controller do
   end
 
   describe "POST create" do
+    before do
+      allow(controller).to receive(:require_lab_supervisor)
+    end
+
     let(:new_locus_params) {
       {
         "area" => area_id,
@@ -151,17 +166,18 @@ RSpec.describe LociController, type: :controller do
   end
 
   describe "PUT/PATCH update" do
+    before do
+      allow(controller).to receive(:require_lab_supervisor)
+      allow(db).to receive(:view).with('opendig/locus', key: [area_id, square_id, locus_code])
+        .and_return({"rows" => [{"value" => locus_data}]})
+    end
+
     let(:updated_params) {
       {
         "designation" => "updated designation",
         "age" => "medieval"
       }
     }
-
-    before do
-      allow(db).to receive(:view).with('opendig/locus', key: [area_id, square_id, locus_code])
-        .and_return({"rows" => [{"value" => locus_data}]})
-    end
 
     context "when save is successful" do
       it "merges params, saves the locus, sets success flash, and redirects" do

@@ -3,10 +3,12 @@
     <div class="flex items-center mb-4">
       <h1 class="text-3xl">Areas</h1>
       <div class="ml-auto">
-        <%= link_to new_area_path do %>
-          <button type="button" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded">
-            New area
-          </button>
+        <% if user_role?(:dig_director, scope: current_dig) %>
+          <%= link_to new_area_path do %>
+            <button type="button" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded">
+              New area
+            </button>
+          <% end %>
         <% end %>
       </div>
     </div>

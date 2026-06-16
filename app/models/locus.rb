@@ -13,7 +13,7 @@ class Locus
   end
 
   def self.all
-    Rails.application.config.couchdb.view('opendig/all_loci')['rows'].map{|locus| locus['key']}
+    CouchDB.main_db.view('opendig/all_loci')['rows'].map{|locus| locus['key']}
   end
 
 end

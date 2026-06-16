@@ -38,7 +38,7 @@ class Photo
   end
 
   def self.visible_loci(number)
-    db = Rails.application.config.couchdb
+    db = CouchDB.main_db
 
     Rails.cache.fetch "daily_photos/visible_loci_#{number}" do
       db.view('opendig/photos', key: number, include_docs: false).dig('rows').map do |row|

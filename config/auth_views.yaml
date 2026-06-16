@@ -1,0 +1,9 @@
+---
+:version: 1
+:design:
+  "_id": _design/authdb
+  :views:
+    :config:
+      :map: "function(doc){if (doc.type == 'config') emit(doc, doc);}"
+    :users:
+      :map: "function(doc){if (doc.uid) emit([doc.provider, doc.uid], doc);}"
