@@ -381,7 +381,6 @@ GEM
       actionpack (>= 5.2)
       activesupport (>= 5.2)
       sprockets (>= 3.0.0)
-    sqlite3 (1.4.4)
     stimulus-rails (1.0.4)
       railties (>= 6.0.0)
     tailwindcss-rails (2.0.21-aarch64-linux)
@@ -430,6 +429,8 @@ PLATFORMS
   aarch64-linux-musl
   arm64-darwin-21
   arm64-darwin-22
+  arm64-darwin-25
+  arm64-darwin-27
   x86_64-darwin-21
   x86_64-linux
   x86_64-linux-musl
@@ -470,7 +471,6 @@ DEPENDENCIES
   selenium-webdriver
   simple_form
   sprockets-rails
-  sqlite3
   stimulus-rails
   tailwindcss-rails (~> 2.0)
   turbo-rails

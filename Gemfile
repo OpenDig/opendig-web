@@ -24,8 +24,6 @@ gem "stimulus-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
 
-gem "sqlite3"
-
 # CouchRest
 gem 'couchrest'
 
@@ -85,13 +83,6 @@ group :development, :test do
   gem "ruby-lsp-rspec", require: false
   gem "ruby-lsp-brakeman", require: false
   gem "ruby-lsp-doclinks", require: false
-  # Test dependencies
-  gem "capybara"
-  gem "selenium-webdriver"
-  gem "webdrivers"
-  gem 'rspec-rails'
-  gem "buildkite-test_collector"
-  gem "rails-controller-testing"
 end
 
 group :development do

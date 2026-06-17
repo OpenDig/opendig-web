@@ -72,6 +72,6 @@ A typical request path looks like this:
 ## Important Architectural Notes
 
 - Most domain objects are plain Ruby classes or raw CouchDB docs, not ActiveRecord models.
-- The `sqlite3` gem is present, but the central project data model is not built around a relational database.
+- The app boots without Active Record or `sqlite3`; persistence is centered on CouchDB via CouchRest plus file-backed data sources.
 - Reports are partly file-backed, so production bugs may come from CSV content rather than controller logic alone.
 - CouchDB views are auto-synced during app boot, which is unusual if you are coming from a standard Rails + SQL background.
