@@ -4,11 +4,14 @@ class ApplicationController < ActionController::Base
   before_action :check_session_timeout
   before_action :update_session_timestamp
 
-  http_basic_authenticate_with name: "#{ENV['EDIT_USER']}", password: "#{ENV['EDIT_PASSWORD']}" if Rails.env.production?
+  if Rails.env.production?
+    http_basic_authenticate_with name: (ENV['EDIT_USER']).to_s, password: (ENV['EDIT_PASSWORD']).to_s
+  end
 
-  helper_method :current_user, :user_signed_in?, :require_authentication, :require_role
+  helper_method :current_user, :user_signed_in?, :require_authentication, :user_role?, :require_role, :require_superuser, :require_dig_director, :require_area_supervisor, :require_square_supervisor, :require_lab_supervisor, :current_dig
 
   private
+
   def set_db
     @db = CouchDB.main_db
     @auth_db = CouchDB.auth_db
@@ -23,10 +26,10 @@ class ApplicationController < ActionController::Base
   end
 
   def check_editing_mode
-    unless @editing_enabled
-      flash[:error] = "Editing is disabled"
-      redirect_to request.referer
-    end
+    return if @editing_enabled
+
+    flash[:error] = 'Editing is disabled'
+    redirect_to request.referer
   end
 
   def update_session_timestamp
@@ -66,23 +69,68 @@ class ApplicationController < ActionController::Base
     false
   end
 
-  def require_role(role)
+  def user_role?(role, scope: nil)
+    role = role.to_s
+    scope = scope.is_a?(Array) ? scope.map(&:to_s) : scope.to_s if scope
+    return true if role.to_s == 'viewer'
+    return false unless user_signed_in?
+    return false unless current_user.role_at_least? role
+    if scope && current_user.role == role
+      return current_user.role_scopes.include?(scope)
+    elsif scope
+      # User has a higher role so we need to check if they have access to a larger scope
+      return current_user.role_scopes.any? do |user_scope|
+        case [scope.class, user_scope.class]
+        when [String, String]
+          # scope is an area and user_scope is a dig
+          current_dig == user_scope
+        when [Array, String]
+          # scope is a square and user_scope is either a dig or an area
+          scope.first.start_with?(user_scope) || current_dig == user_scope
+        else
+          false
+        end
+      end
+    end
+
+    true
+  end
+
+  def require_role(role, scope: nil)
     require_authentication
     return if performed? # Don't check role if authentication check failed
 
+    role = role.to_s
+    scope = scope.is_a?(Array) ? scope.map(&:to_s) : scope.to_s if scope
     unless current_user.role_at_least? role
       flash[:error] = "You must be a(n) #{role.humanize.downcase} to access this section"
       redirect_to root_path
       return false
     end
+
+    if scope && current_user.role == role && !current_user.role_scopes.include?(scope)
+      flash[:error] = "You do not have access to this section"
+      redirect_to root_path
+      return false
+    end
+
     true
   end
 
-  User.roles.each do |role|
-    define_method("require_#{role}") do
-      require_role(role)
-    end
+  def require_superuser = require_role :superuser
 
-    helper_method "require_#{role}"
+  def require_dig_director = require_role :dig_director, scope: current_dig
+
+  def require_area_supervisor(area_id) = require_role :area_supervisor, scope: area_id
+
+  def require_square_supervisor(square_id) = require_role :square_supervisor, scope: square_id
+
+  def require_lab_supervisor = require_role :lab_supervisor
+
+  # Not sure how handling multiple digs will work ATP.
+  # This is good enough to get per-dig permissions going.
+  # Needs refactoring later.
+  def current_dig
+    'opendig'
   end
 end

@@ -63,6 +63,15 @@ group :development, :test do
   gem 'debug'
   gem 'rails_live_reload'
 
+  # Test dependencies (moved them here since Bundler wasn't loading them in CI)
+  # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
+  gem "capybara"
+  gem "selenium-webdriver"
+  gem "webdrivers"
+  gem 'rspec-rails'
+  gem "buildkite-test_collector"
+  gem "rails-controller-testing"
+
   # Lint dependencies
   gem "rubocop", "~> 1.69", require: false
   gem "rubocop-rspec", require: false

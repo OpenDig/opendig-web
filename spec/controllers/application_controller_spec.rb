@@ -1,30 +1,30 @@
-require "rails_helper"
+require 'rails_helper'
 
 RSpec.describe ApplicationController, type: :controller do
   # Create a test controller to test ApplicationController functionality
   controller do
     def index
-      render plain: "index"
+      render plain: 'index'
     end
 
     def new
-      render plain: "new"
+      render plain: 'new'
     end
 
     def create
-      render plain: "create"
+      render plain: 'create'
     end
 
     def edit
-      render plain: "edit"
+      render plain: 'edit'
     end
 
     def update
-      render plain: "update"
+      render plain: 'update'
     end
 
     def destroy
-      render plain: "destroy"
+      render plain: 'destroy'
     end
   end
 
@@ -37,9 +37,9 @@ RSpec.describe ApplicationController, type: :controller do
     allow(Rails.application.config).to receive(:descriptions).and_return(mock_descriptions)
   end
 
-  describe "before_action callbacks" do
-    describe "set_db" do
-      it "sets @db from Rails configuration" do
+  describe 'before_action callbacks' do
+    describe 'set_db' do
+      it 'sets @db from Rails configuration' do
         get :index
 
         expect(assigns(:db)).to eq(test_db)
@@ -52,17 +52,17 @@ RSpec.describe ApplicationController, type: :controller do
       end
     end
 
-    describe "set_descriptions" do
-      it "sets @descriptions from Rails configuration" do
+    describe 'set_descriptions' do
+      it 'sets @descriptions from Rails configuration' do
         get :index
 
         expect(assigns(:descriptions)).to eq(mock_descriptions)
       end
     end
 
-    describe "set_edit_mode" do
-      context "when EDITING_ENABLED is set" do
-        it "sets @editing_enabled to the ENV value" do
+    describe 'set_edit_mode' do
+      context 'when EDITING_ENABLED is set' do
+        it 'sets @editing_enabled to the ENV value' do
           allow(ENV).to receive(:[]).with('EDITING_ENABLED').and_return('true')
 
           get :index
@@ -71,8 +71,8 @@ RSpec.describe ApplicationController, type: :controller do
         end
       end
 
-      context "when EDITING_ENABLED is not set" do
-        it "sets @editing_enabled to false" do
+      context 'when EDITING_ENABLED is not set' do
+        it 'sets @editing_enabled to false' do
           allow(ENV).to receive(:[]).with('EDITING_ENABLED').and_return(nil)
 
           get :index
@@ -82,7 +82,7 @@ RSpec.describe ApplicationController, type: :controller do
       end
     end
 
-    describe "check_editing_mode" do
+    describe 'check_editing_mode' do
       before do
         routes.draw do
           get 'index' => 'anonymous#index'
@@ -94,79 +94,79 @@ RSpec.describe ApplicationController, type: :controller do
         end
       end
 
-      context "when editing is enabled" do
+      context 'when editing is enabled' do
         before do
           allow(ENV).to receive(:[]).with('EDITING_ENABLED').and_return('true')
         end
 
-        it "allows access to new action" do
+        it 'allows access to new action' do
           get :new
           expect(response).to be_successful
         end
 
-        it "allows access to create action" do
+        it 'allows access to create action' do
           post :create
           expect(response).to be_successful
         end
 
-        it "allows access to edit action" do
+        it 'allows access to edit action' do
           get :edit
           expect(response).to be_successful
         end
 
-        it "allows access to update action" do
+        it 'allows access to update action' do
           patch :update
           expect(response).to be_successful
         end
 
-        it "allows access to destroy action" do
+        it 'allows access to destroy action' do
           delete :destroy
           expect(response).to be_successful
         end
       end
 
-      context "when editing is disabled" do
+      context 'when editing is disabled' do
         before do
           allow(ENV).to receive(:[]).with('EDITING_ENABLED').and_return(nil)
           request.env['HTTP_REFERER'] = '/previous_page'
         end
 
-        it "redirects from new action with error flash" do
+        it 'redirects from new action with error flash' do
           get :new
 
-          expect(flash[:error]).to eq("Editing is disabled")
+          expect(flash[:error]).to eq('Editing is disabled')
           expect(response).to redirect_to('/previous_page')
         end
 
-        it "redirects from create action with error flash" do
+        it 'redirects from create action with error flash' do
           post :create
 
-          expect(flash[:error]).to eq("Editing is disabled")
+          expect(flash[:error]).to eq('Editing is disabled')
           expect(response).to redirect_to('/previous_page')
         end
 
-        it "redirects from edit action with error flash" do
+        it 'redirects from edit action with error flash' do
           get :edit
 
-          expect(flash[:error]).to eq("Editing is disabled")
+          expect(flash[:error]).to eq('Editing is disabled')
           expect(response).to redirect_to('/previous_page')
         end
 
-        it "redirects from update action with error flash" do
+        it 'redirects from update action with error flash' do
           patch :update
 
-          expect(flash[:error]).to eq("Editing is disabled")
+          expect(flash[:error]).to eq('Editing is disabled')
           expect(response).to redirect_to('/previous_page')
         end
 
-        it "redirects from destroy action with error flash" do
+        it 'redirects from destroy action with error flash' do
           delete :destroy
 
-          expect(flash[:error]).to eq("Editing is disabled")
+          expect(flash[:error]).to eq('Editing is disabled')
           expect(response).to redirect_to('/previous_page')
         end
 
-        it "allows access to index action (not restricted)" do
+        it 'allows access to index action (not restricted)' do
           get :index
 
           expect(response).to be_successful
@@ -218,8 +218,8 @@ RSpec.describe ApplicationController, type: :controller do
     end
   end
 
-  describe "sanity check spec" do
-    it "has all the documents" do
+  describe 'sanity check spec' do
+    it 'has all the documents' do
       # Temporarily remove the mock to access the real database
       allow(CouchDB).to receive(:main_db).and_call_original
 
@@ -285,7 +285,7 @@ RSpec.describe ApplicationController, type: :controller do
 
     describe "require_role" do
       controller do
-        before_action :require_square_supervisor, only: [:square_supervisor_only]
+        before_action -> { require_square_supervisor(%w[1 1]) }, only: [:square_supervisor_only]
         before_action :require_superuser, only: [:superuser_only]
 
         def square_supervisor_only = render plain: "square supervisor only"
@@ -332,6 +332,71 @@ RSpec.describe ApplicationController, type: :controller do
 
         expect(response).to be_successful
         expect(response.body).to eq("square supervisor only")
+      end
+    end
+
+    describe "user_role?" do
+      it "returns true for viewer role regardless of authentication" do
+        expect(controller.send(:user_role?, :viewer)).to be_truthy
+      end
+
+      it "returns false for non-viewer role if not authenticated" do
+        expect(controller.send(:user_role?, :square_supervisor)).to be_falsey
+      end
+
+      it "returns true if user has the specified role" do
+        session[:user_id] = users[:square_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor)).to be_truthy
+      end
+
+      it "returns true if user has a higher role than the specified role" do
+        session[:user_id] = users[:superuser].id
+
+        expect(controller.send(:user_role?, :square_supervisor)).to be_truthy
+      end
+
+      it "returns false if user does not have the specified role or a higher role" do
+        session[:user_id] = users[:viewer].id
+
+        expect(controller.send(:user_role?, :square_supervisor)).to be_falsey
+      end
+
+      it "returns true if user has the specified role and scope" do
+        session[:user_id] = users[:square_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor, scope: %w[1 1])).to be_truthy
+      end
+
+      it "returns false if user has the specified role but not the specified scope" do
+        session[:user_id] = users[:square_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor, scope: %w[1 2])).to be_falsey
+      end
+
+      it "returns true if user has a higher role than the specified role and has a matching scope" do
+        session[:user_id] = users[:area_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor, scope: %w[1 1])).to be_truthy
+      end
+
+      it "returns false if user has a higher role than the specified role but does not have a matching scope" do
+        session[:user_id] = users[:area_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor, scope: %w[2 1])).to be_falsey
+      end
+
+      it "returns true if user has a higher role than the specified role and has a matching dig scope" do
+        session[:user_id] = users[:dig_director].id
+
+        expect(controller.send(:user_role?, :area_supervisor, scope: "1")).to be_truthy
+      end
+
+      it "returns false if user has a higher role than the specified role but does not have a matching dig scope" do
+        session[:user_id] = users[:dig_director].id
+        allow(controller).to receive(:current_dig).and_return("other_dig")
+
+        expect(controller.send(:user_role?, :area_supervisor, scope: "1")).to be_falsey
       end
     end
   end

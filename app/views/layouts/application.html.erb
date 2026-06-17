@@ -25,7 +25,7 @@
           <div class="flex-shrink-0">
             <!-- Your Logo or Branding Goes Here -->
             <a href="/">
-              <img src="/path/to/logo.png" alt="Logo" class="h-8">
+              <img src="<%= asset_path("logo.svg") %>" alt="Logo" class="h-8">
             </a>
           </div>
         </div>
@@ -34,7 +34,7 @@
           <ul class="ml-10 flex items-baseline space-x-4">
             <li><%= link_to "Home", root_path, class: "text-gray-300 hover:text-white" %></li>
             <% if user_signed_in? %>
-              <% if current_user.role_at_least? :dig_director %>
+              <% if user_role?(:dig_director, scope: current_dig) %>
                 <li><%= link_to("Registrar Tools", registrar_index_path, class: "text-gray-300 hover:text-white") %></li>
                 <li><%= link_to("Bulk Uploader", new_bulk_upload_path, class: "text-gray-300 hover:text-white") %></li>
               <% end %>
@@ -60,9 +60,21 @@
     </div>
   </nav>
 
-  <%= render partial: "layouts/flash" %>
-  
-  <div class="container overflow-y-auto px-10 py-6 mx-auto">
+  <div class="container mx-auto flash">
+    <div class="row">
+      <div class="col">
+        <% flash.each do |name, msg| %>
+          <% unless flash_blacklist(name) %>
+            <%= content_tag(:div, class: flash_class(name)) do %>
+              <%= msg %>
+              <button type="button" class="close" data-bs-dismiss="alert">×</button>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  <div class="container mx-auto overflow-y-auto px-10 py-6">
     <%= yield %>
   </div>
 

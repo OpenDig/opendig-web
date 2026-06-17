@@ -22,8 +22,7 @@ square_supervisor:
   email: 'square_supervisor@example.com'
   name: 'Test Square Supervisor'
   roles:
-    opendig:
-      - 'square_supervisor'
+    opendig: ['square_supervisor', ['1', '1']]
 
 area_supervisor:
   uid: 4
@@ -31,8 +30,7 @@ area_supervisor:
   email: 'area_supervisor@example.com'
   name: 'Test Area Supervisor'
   roles:
-    opendig:
-      - 'area_supervisor'
+    opendig: ['area_supervisor', '1']
 
 dig_director:
   uid: 5

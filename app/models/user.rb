@@ -1,7 +1,7 @@
 # Roles:
 # - Superuser (full admin)
 # - Dig director (admin for particular dig)
-# - Field director (editor for particular dig)
+# - Area director (editor for particular area)
 # - Square supervisor (editor for particular square)
 # - Lab supervisor (editor for particular lab)
 # - Viewer (same as unregistered user, but with an account)
@@ -125,7 +125,7 @@ class User
   end
 
   def initialize(attributes = {}, persist: true, **kwargs)
-    super(deep_stringify_keys(attributes.merge(kwargs)))
+    super(deep_stringify_keys(attributes).merge(deep_stringify_keys(kwargs)))
 
     @roles ||= { 'opendig' => [User.default_role] }
 
@@ -159,14 +159,15 @@ class User
     if response['ok']
       true
     else
-      errors.add(:base, "Failed to save user: #{response['error']}")
-      raise NotSaved, "Failed to save user: #{response['error']}"
+      msg = "Failed to save user: #{response['error']}"
+      errors.add(:base, msg)
+      raise NotSaved, msg
     end
   end
 
   # Update this object so that it's in line with CouchDB
   def synchronize!
-    updated_record = self.class.find_by(provider: provider, uid: uid)
+    updated_record = self.class.find(id)
     replace updated_record if updated_record
     validate!
     !!updated_record
@@ -226,6 +227,9 @@ class User
   end
 
   def role_scopes
+    # Special case--dig directors and superusers have digs as role scopes, but they're specified at the top level of the roles hash rather than in an array like scopes for other roles since roles overall are scoped per dig.
+    return [current_dig] if %w[dig_director superuser].include? role
+
     role = roles[current_dig] || []
     role[1..] || []
   end
@@ -259,10 +263,7 @@ class User
     end
   end
 
-  # Not sure how handling multiple digs will work ATP.
-  # This is good enough to get per-dig permissions going.
-  # Needs refactoring later.
   def current_dig
-    'opendig'
+    'opendig' # Placeholder until we have multi-dig support
   end
 end

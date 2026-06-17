@@ -3,7 +3,7 @@ require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
 # Prevent database truncation if the environment is production
-abort("The Rails environment is running in production mode!") if Rails.env.production?
+abort('The Rails environment is running in production mode!') if Rails.env.production?
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 
@@ -61,9 +61,7 @@ RSpec.configure do |config|
 end
 
 def load_user_fixtures
-  fixtures = YAML.load_file(Rails.root.join("spec/fixtures/users.yml"))
-
-  fixtures.transform_values do |attrs|
-    User.new(attrs) # These are persisted to the test database
+  @load_user_fixtures ||= YAML.load_file(Rails.root.join("spec/fixtures/users.yml")).transform_values do |attrs|
+    User.new(attrs, persist: false) # Load into memory only (much faster than saving to DB)
   end.to_h.with_indifferent_access
 end

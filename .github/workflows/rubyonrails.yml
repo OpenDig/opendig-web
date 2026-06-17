@@ -1,4 +1,4 @@
-name: Tests
+name: Tests & Linting
 
 on:
   push:
@@ -6,26 +6,25 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-24.04
-    container: ubuntu:24.04
+    runs-on: ubuntu-latest
 
     services:
       couchdb:
         image: couchdb:3.4
         env:
-          COUCHDB_USER: ${{ env.COUCHDB_USER }}
-          COUCHDB_PASSWORD: ${{ env.COUCHDB_PASSWORD }}
+          COUCHDB_USER: admin
+          COUCHDB_PASSWORD: password
         ports:
           - 5984:5984
         options: >-
-          --health-cmd "curl -f http://localhost:5984/_up || exit 1"
+          --health-cmd "curl -f http://localhost:5984/ || exit 1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
 
     env:
       RAILS_ENV: test
-      COUCHDB_HOST: couchdb
+      COUCHDB_HOST: 127.0.0.1
       COUCHDB_PORT: 5984
       COUCHDB_USER: admin
       COUCHDB_PASSWORD: password
@@ -33,15 +32,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          apt-get update
-          apt-get install -y build-essential libyaml-dev libsqlite3-dev tzdata
-
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          # No need to specify Ruby version, action reads from .ruby-version
+          ruby-version: 3.2.0
           bundler-cache: true
 
       - name: Prepare Rails log directory
@@ -50,10 +44,11 @@ jobs:
           touch log/test.log
           chmod 0664 log/test.log
 
-      - name: Run linter
+      - name: Setup database
         run: |
-          bundle exec rubocop
+          bundle exec rails db:create
 
-      - name: Run RSpec tests
+      - name: Run tests
         run: |
+          bundle exec rails test
           bundle exec rails spec

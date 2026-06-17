@@ -2,9 +2,11 @@
 <div class="container mx-auto">
   <div class="flex items-center mb-4">
     <h1 class="text-3xl">Locus <%= @area %>.<%= @square %>.<%= @locus_code %></h1>
-    <div class="ml-auto">
-      <%= link_to "Edit", edit_area_square_locus_path(@area, @square, @locus_code), class: "btn btn-primary float-right" %>
-    </div>
+    <% if user_role?(:square_supervisor, scope: [@area, @square]) %>
+      <div class="ml-auto">
+        <%= link_to "Edit", edit_area_square_locus_path(@area, @square, @locus_code), class: "btn btn-primary float-right" %>
+      </div>
+    <% end %>
   </div>
 
 <div class="flex mb-4">
