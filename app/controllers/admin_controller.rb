@@ -1,0 +1,30 @@
+class AdminController < ApplicationController
+  before_action :require_superuser
+  def manage_users
+    @users = User.find_all
+  end
+
+  def update_user
+    @user = User.find(params[:id])
+
+    if @user.update(user_params)
+      respond_to do |format|
+        flash.now[:notice] = "User updated successfully"
+        format.html { render partial: 'admin/manage_users_role_form', user: @user, open: true, layout: false }
+        format.turbo_stream
+      end
+    else
+      respond_to do |format|
+        flash.now[:alert] = "Failed to update user"
+        format.html { render partial: 'admin/manage_users_role_form', user: @user, open: true, layout: false }
+        format.turbo_stream
+      end
+    end
+  end
+
+  private
+
+  def user_params
+    params.require(:user).permit(:role, scopes: [])
+  end
+end

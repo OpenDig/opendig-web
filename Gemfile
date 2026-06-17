@@ -61,6 +61,7 @@ gem 'aws-sdk-s3'
 
 group :development, :test do
   gem 'debug'
+  gem 'rails_live_reload'
 
   # Test dependencies (moved them here since Bundler wasn't loading them in CI)
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
@@ -84,6 +85,13 @@ group :development, :test do
   gem "ruby-lsp-rspec", require: false
   gem "ruby-lsp-brakeman", require: false
   gem "ruby-lsp-doclinks", require: false
+  # Test dependencies
+  gem "capybara"
+  gem "selenium-webdriver"
+  gem "webdrivers"
+  gem 'rspec-rails'
+  gem "buildkite-test_collector"
+  gem "rails-controller-testing"
 end
 
 group :development do
@@ -99,3 +107,9 @@ end
 
 gem "tailwindcss-rails", "~> 2.0"
 
+# Omniauth for: Google, Github, Microsoft
+gem "omniauth"
+gem "omniauth-rails_csrf_protection"
+gem "omniauth-google-oauth2"
+gem "omniauth-github"
+gem "omniauth-microsoft-office365"

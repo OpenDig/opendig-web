@@ -1,0 +1,23 @@
+<%= form_with(model: user, class: "contents") do |form| %>
+  <% if user.errors.any? %>
+    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-lg mt-3">
+      <h2><%= pluralize(user.errors.count, "error") %> prohibited this user from being saved:</h2>
+
+      <ul>
+        <% user.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= form.label :email, "Email" %>
+  <%= form.email_field :email, class: "rounded-lg py-3 px-5 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" %>
+
+  <%= form.label :access_level, "Access Level" %>
+  <%= form.select :access_level, User.access_levels.keys.map { |level| [level.humanize, level] }, {}, class: "rounded-lg py-3 px-5 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" %>
+
+  <div class="inline">
+    <%= form.submit "Create user", class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
+  </div>
+<% end %>
