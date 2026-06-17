@@ -3,6 +3,11 @@ Rails.application.routes.draw do
   get '/help', to: 'static_pages#help', as: 'help'
 
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+  resources :loci, only: [] do
+    collection do
+      get :search
+    end
+  end
   get '/login', to: 'sessions#login', as: :login
   direct(:auth) { |provider| "/auth/#{provider}" } # As per OmniAuth documentation
   get '/auth/:provider/callback', to: 'sessions#create', as: :auth_callback
