@@ -45,6 +45,20 @@ class User
 
     def default_role = roles.first
 
+    def role_scopes_for(role)
+      case role.to_s
+      when 'dig_director'
+        # TODO: pull list of all digs from somewhere.
+        # This depends on how multiple-dig support is implemented.
+        { 'OpenDig' => 'opendig' }
+      when 'area_supervisor'
+        CouchDB.main_db.view('opendig/areas', { group: true })['rows'].map { |row| ["Area #{row['key']}", row['key']] }.to_h
+      when 'square_supervisor'
+        CouchDB.main_db.view('opendig/squares', { group: true })['rows'].map { |row| ["Square #{row['key'].join('.')}", row['key'].join('.')] }.to_h
+      end
+      # No other roles need specific scopes
+    end
+
     def id_fields = %w[provider uid]
 
     # `attr_accessor` pulls from this list. To add a new attribute, update it here.
@@ -131,6 +145,10 @@ class User
     as_json(only: self.class.id_fields)
   end
 
+  def id_as_string
+    id.values.join('__')
+  end
+
   def save!
     validate!
 
@@ -155,6 +173,12 @@ class User
     !!updated_record
   end
 
+  def update(attributes, **kwargs)
+    update!(attributes, **kwargs)
+  rescue NotSaved, ActiveModel::ValidationError
+    false
+  end
+
   # Similar to Array#replace. Replaces this object's attributes with the attributes of the other user. Does not save to CouchDB.
   def replace(other)
     self.class.data_fields.each do |field|
@@ -162,6 +186,28 @@ class User
       # monkeypatches attribute accessors
       send(:"#{field}=", other.send(field))
     end
+  end
+
+  def update!(attributes, **kwargs)
+    attributes = deep_stringify_keys(attributes.merge(kwargs))
+
+    # Process custom fields
+    role = attributes.fetch('role', nil)
+    scopes = attributes.fetch('scopes', nil)&.compact_blank
+    if role
+      Rails.logger.info "    Found role assignment: #{role} with scopes: #{scopes}"
+      attributes['roles'] ||= {}
+      attributes['roles'][current_dig] = [role]
+      # Don't carry over scopes if role is changing
+      attributes['roles'][current_dig] += scopes || [] if role.to_s == self.role.to_s
+      Rails.logger.info "    Updated roles: #{attributes['roles']}"
+    end
+
+    attributes.slice!(*User.data_fields)
+    attributes.each { |field, value| send(:"#{field}=", value) }
+    save!
+
+    self
   end
 
   def save

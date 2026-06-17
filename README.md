@@ -40,9 +40,7 @@ Edit the `.envrc` file with your configuration. The file includes:
   - `IMGPROXY_SALT`: 128-character string
   - `IMGPROXY_URL`: http://imgproxy:8080
 
-AWS credentials for development can be found/updated in the `docker-compose.yml` file.
-
-Generate hex encoded strings using the following example (from https://docs.imgproxy.net/configuration/options)
+Generated a hex encoded string using the following example (from https://docs.imgproxy.net/configuration/options)
 
 ```bash
 echo $(xxd -g 2 -l 64 -p /dev/random | tr -d '\n')

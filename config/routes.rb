@@ -20,7 +20,16 @@ Rails.application.routes.draw do
   resources :registrar
   resources :bulk_uploads, only: %i[new create]
 
+  patch '/admin/update_user/:id', to: 'admin#update_user', as: :admin_update_user
+  resources :admin, only: [] do
+    collection do
+      get 'manage_users', as: :manage_users
+    end
+  end
+
   resources :reports, only: %i[index show]
+
+  resources :users, only: [:show, :edit, :create, :update, :destroy]
 
   root to: 'areas#index'
 end
