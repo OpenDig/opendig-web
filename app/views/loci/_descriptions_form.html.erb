@@ -1,22 +1,29 @@
 <div class="row mb-3">
   <div class="col">
-    <h1><%= "#{@locus['locus_type']} Description" %></h1>
+    <h1 class="text-2xl font-bold"><%= "#{@locus['locus_type']} Description" %></h1>
   </div>
 </div>
 <% description_type = @descriptions['description_types'][@locus['locus_type']] %>
 <% @descriptions[description_type].each do |description_section| %>
-  <div class="row">
-    <div class="col">
-      <h2><%= description_section[0] %></h2>
-    </div>
-  </div>
+  <details class="group mb-4 rounded-lg border border-slate-300 bg-white p-4 shadow-sm open:shadow-md">
+    <summary class="flex cursor-pointer list-none items-center justify-between gap-4 rounded-md text-xl font-bold text-slate-900 outline-none transition-colors hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden [&::marker]:hidden">
+      <span><%= description_section[0] %></span>
+      <span class="flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 text-slate-500 transition-transform group-open:rotate-180">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4" aria-hidden="true">
+          <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.946l3.71-3.715a.75.75 0 1 1 1.06 1.06l-4.24 4.25a.75.75 0 0 1-1.06 0l-4.25-4.25a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+        </svg>
+      </span>
+    </summary>
 
-  <% description_section[1].each do |description_section_entry| %>
-    <div class="form-group row">
-      <label for="field" class="col-sm-12 col-form-label"><%= description_section_entry['label'] %></label>
-      <div class="col-sm-12">
-        <%= input_for(description_section_entry, @locus&.dig(description_type)&.dig(description_section_entry['key']), description_type) %>
-      </div>
+    <div class="mt-4 space-y-4">
+      <% description_section[1].each do |description_section_entry| %>
+        <div class="form-group row">
+          <label for="field" class="col-sm-12 col-form-label"><%= description_section_entry['label'] %></label>
+          <div class="col-sm-12">
+            <%= input_for(description_section_entry, @locus&.dig(description_type)&.dig(description_section_entry['key']), description_type) %>
+          </div>
+        </div>
+      <% end %>
     </div>
-  <% end %>
+  </details>
 <% end %>
