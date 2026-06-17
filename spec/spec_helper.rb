@@ -18,29 +18,24 @@ Buildkite::TestCollector.configure(hook: :rspec)
 # See https://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
   config.before(:suite) do
-    Dir.glob(File.join(Rails.root, 'spec', 'fixtures', '*.json')).each do |file|
-      Rails.application.config.couchdb.save_doc(JSON.parse(File.read(file)))
+    # Load test fixtures to main DB (user fixtures are loaded separately in the relevant specs)
+    Dir.glob(File.join(Rails.root, "spec", "fixtures", "*.json")).each do |file|
+      CouchDB.main_db.save_doc(JSON.parse(File.read(file)))
+    end
+
+    Dir.glob(File.join(Rails.root, "spec", "fixtures", "users.yml")).each do |file|
+      YAML.load_file(file).each_value do |attrs|
+        User.new(attrs) # Load into test DB once before suite runs
+      end
     end
   end
 
   config.after(:suite) do
-    db = Rails.application.config.couchdb
-    begin
-      rows = db.all_docs(include_docs: true)['rows'] || []
-      docs_to_delete = rows.map { |r| r['doc'] }.compact.reject do |doc|
-        id = doc['_id'] || ''
-        id.start_with?('_design/') || id == 'opendig_config'
-      end
-
-      if docs_to_delete.any?
-        docs_to_delete.each { |d| d['_deleted'] = true }
-        db.bulk_save(docs_to_delete)
-      end
-    rescue StandardError => e
-      Rails.logger.error "Error cleaning test DB: #{e.class}: #{e.message}"
-      raise
-    end
+    CouchDB.dbs.each(&:clear_db!)
   end
+
+  # Custom matchers
+  RSpec::Matchers.define_negated_matcher :not_change, :change
 
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest

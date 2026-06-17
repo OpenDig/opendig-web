@@ -1,6 +1,6 @@
 class FieldToArea
   def initialize
-    @db = Rails.application.config.couchdb
+    @db = CouchDB.main_db
   end
 
   def migrate

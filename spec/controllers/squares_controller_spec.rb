@@ -2,8 +2,9 @@ require 'rails_helper'
 
 RSpec.describe SquaresController, type: :controller do
   let(:db) { instance_double(CouchRest::Database) }
-  let(:area_id) { '24' }
-  let(:existing_squares) { [{ 'key' => [area_id, 'A'] }, { 'key' => [area_id, 'B'] }, { 'key' => [area_id, 'C'] }] }
+  let(:area_id) { "1" }
+  let(:existing_squares) { [{"key" => [area_id, "A"]}, {"key" => [area_id, "B"]}, {"key" => [area_id, "C"]}] }
+  let(:users) { load_user_fixtures }
 
   before do
     allow(controller).to receive(:set_db)
@@ -12,6 +13,7 @@ RSpec.describe SquaresController, type: :controller do
     allow(controller).to receive(:check_editing_mode)
     controller.instance_variable_set(:@db, db)
     controller.instance_variable_set(:@editing_enabled, true)
+    session[:user_id] = users[:area_supervisor].id
 
     allow(db).to receive(:view).with('opendig/squares', { group: true, start_key: [area_id], end_key: [area_id, {}] })
                                .and_return({ 'rows' => existing_squares })
@@ -37,12 +39,15 @@ RSpec.describe SquaresController, type: :controller do
     end
   end
 
-  describe 'POST create' do
-    context 'when creating a new square' do
-      context 'and save is successful' do
-        it 'creates the square, sets success flash, and redirects to area_squares_path' do
-          expect(db).to receive(:save_doc).with({ 'temp-doc' => true, 'square' => 'D',
-                                                  'area' => area_id }).and_return(true)
+  describe "POST create" do
+    before do
+      allow(controller).to receive(:require_square_supervisor)
+    end
+
+    context "when creating a new square" do
+      context "and save is successful" do
+        it "creates the square, sets success flash, and redirects to area_squares_path" do
+          expect(db).to receive(:save_doc).with({"temp-doc" => true, "square" => "D", "area" => area_id}).and_return(true)
 
           post :create, params: { area_id: area_id, square: 'd' }
 

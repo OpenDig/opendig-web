@@ -165,7 +165,7 @@ module DataSponge
   end
 
   def self.sponge(files = nil)
-    @db = Rails.application.config.couchdb
+    @db = CouchDB.main_db
     @items = Registrar.all_by_season(2022)
     files ||= %w[objects samples artifacts]
     files = Array(files)
@@ -180,7 +180,7 @@ module DataSponge
   end
 
   def self.update_data(files = nil)
-    @db = Rails.application.config.couchdb
+    @db = CouchDB.main_db
     @items = Registrar.all_by_season(2022)
     files ||= %w[objects samples artifacts]
     files = Array(files)

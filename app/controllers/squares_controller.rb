@@ -2,6 +2,7 @@ class SquaresController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:favorite_toggle]
   before_action :load_favorites
   before_action :set_area_and_squares
+  before_action -> { require_area_supervisor(@area) }, except: [:index]
 
   def index
     @favorite_squares = (@favorites['squares'] || []).select { |id| id.start_with?("#{@area}/") }.map { |id| id.split('/', 2)[1] }

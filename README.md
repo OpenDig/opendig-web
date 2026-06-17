@@ -1,5 +1,8 @@
 # OpenDig Web
 
+[![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/OpenDig/opendig-web)
+
+
 A Rails 7 application for managing archaeological dig data. [Join the Discord!](https://discord.gg/DJ7BZcQMsb)
 
 ## Requirements
@@ -40,9 +43,7 @@ Edit the `.envrc` file with your configuration. The file includes:
   - `IMGPROXY_SALT`: 128-character string
   - `IMGPROXY_URL`: http://imgproxy:8080
 
-AWS credentials for development can be found/updated in the `docker-compose.yml` file.
-
-Generate hex encoded strings using the following example (from https://docs.imgproxy.net/configuration/options)
+Generated a hex encoded string using the following example (from https://docs.imgproxy.net/configuration/options)
 
 ```bash
 echo $(xxd -g 2 -l 64 -p /dev/random | tr -d '\n')
@@ -61,7 +62,20 @@ This command tells direnv that it's safe to load the `.envrc` file in this direc
 
 ## Getting Started
 
-### 1. Pre-fill CouchDB database (first-time setup only)
+### Dev container
+
+If you already have VS Code and Docker installed, you can click the badge above or [here](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/OpenDig/opendig-web) to get started. Clicking these links will cause VS Code to automatically install the Dev Containers extension if needed, clone the source code into a container volume, and set up the environment in a dev container for use.
+
+This makes development much simpler, but there are a couple caveats:
+
+1. The first load will take a couple minutes to build the container. Subsequent loads will be much faster.
+2. This project starts multiple containers. Running the app in a dev container prevents [the other Docker containers](#2-start-docker-services) from loading environment variables through direnv. This doesn't cause any problems for development, but it's something to be aware of.
+3. Running the app in a dev container prevents you from reading the app logs through Docker [as specified below](#4-view-logs). Instead, find Rails logs in `log/development.log`.
+4. Closing the editor will close the Docker container the app runs in but it may not close the other Docker containers.
+
+### Manual setup
+
+#### 1. Pre-fill CouchDB database (first-time setup only)
 
 For first-time setup, you need to unzip the initial CouchDB data to pre-fill the database:
 
@@ -71,7 +85,7 @@ unzip couchdb-data-start-data.zip -d couchdb-data
 
 **Note**: This step is only needed once. After the initial setup, the `couchdb-data/` directory will persist your data. If you need to reset the database, you can remove the `couchdb-data/` directory and unzip again.
 
-### 2. Start Docker services
+#### 2. Start Docker services
 
 The application uses Docker Compose to run all required services:
 
@@ -92,7 +106,7 @@ This will:
 - Start all dependent services (CouchDB, MinIO, imgproxy, Redis)
 - Run the Rails application using `bin/dev` (which uses foreman)
 
-### 3. Access the application
+#### 3. Access the application
 
 Once the containers are running, you can access:
 
@@ -100,7 +114,7 @@ Once the containers are running, you can access:
 - **MinIO Console**: http://localhost:9001 (admin/password)
 - **CouchDB**: http://localhost:5984 (admin/password)
 
-### 4. View logs
+#### 4. View logs
 
 To see logs from all services:
 
@@ -113,6 +127,8 @@ To see logs from a specific service:
 ```bash
 docker compose logs -f app
 ```
+
+If running in a dev container, Rails writes logs to `log/development.log`.
 
 ## Development Workflow
 
@@ -135,6 +151,8 @@ Execute Rails commands inside the container:
 
 ```bash
 docker compose exec app bundle exec rails <command>
+# Or, in dev container:
+rails <command>
 ```
 
 For example:
@@ -142,6 +160,9 @@ For example:
 ```bash
 docker compose exec app bundle exec rails console
 docker compose exec app bundle exec rails db:migrate
+# Or, in dev container:
+rails console
+rails db:migrate
 ```
 
 ### Running tests
@@ -149,6 +170,12 @@ docker compose exec app bundle exec rails db:migrate
 ```bash
 bin/spec
 ```
+
+### Logging in
+
+When OpenDig is running in development, you can create or log into a test account by selecting the "Developer" option on the login page or navigating to <http://localhost:3000/auth/developer>. Simply enter sample data into the form.
+
+To set up authentication using OAuth2 providers such as Google and Office 365, follow the instructions in the [Authentication](docs/Authentication.md) setup guide.
 
 ## Project Structure
 
@@ -226,9 +253,9 @@ docker compose up -d
 
 ### Folder permissions issues
 
-If you see permission denied errors in the logs, you may need to setup and run the app in a fresh environment, such as a VM.
+If you see permission denied errors in the logs, you may need to setup and run the app in a fresh environment, such as a VM or container.
 
-At this time, Ubuntu and WSL2 should not have this issue.
+At this time, Ubuntu, WSL2 and VS Code Dev Containers should not have this issue.
 
 ## Additional Resources
 

@@ -1,4 +1,6 @@
 class ReportsController < ApplicationController
+  before_action :require_authentication
+
   def index
     @seasons = @db.view('opendig/seasons', { group: true })['rows'].map { |row| row['key'] }.sort.reverse
     @report_types = { 'Artifacts' => 'A', 'Objects' => 'B', 'Samples' => 'S', 'Bone Bag' => 'Z' }

@@ -1,0 +1,54 @@
+<%= turbo_frame_tag "user_role_#{user.id_as_string}" do %>
+    <% if user == current_user %>
+        <div class="border border-gray-300 rounded p-2 w-full flex items-center justify-between">
+            <span><%= user.role.humanize %></span>
+            <span class="ml-2 text-sm text-gray-500">Cannot change own role</span>
+        </div>
+    <% else %>
+        <details class="group border border-gray-300 rounded p-2 w-full" <%= "open" if open %>>
+            <summary class="list-none cursor-pointer flex items-center justify-between">
+                <%= user.role.humanize %>
+                    <span class="ml-2 text-sm text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </span>
+            </summary>
+            <hr class="my-2 border-gray-200" />
+            <%= form_with(
+                    model: user,
+                    url: admin_update_user_path(id: user.id_as_string),
+                    method: :patch,
+                    local: true,
+                    class: "gap-1 items-center"
+                ) do |f| %>
+                <div class="w-full text-center">
+                    <%= f.label :role, class: 'italic mb-2 ml-2 text-sm text-gray-500 text-center' %>
+                </div>
+                <%= f.select :role,
+                    options_for_select(User.roles.map { |role| [role.humanize, role] }, selected: user.role),
+                    {},
+                    {
+                        disabled: user == current_user,
+                        class: "w-full px-2 py-1 border-2 rounded border-gray-300",
+                    }
+                %>
+                <% role_scopes = User.role_scopes_for(user.role) %>
+                <% if role_scopes&.any? %>
+                    <div class="w-full text-center">
+                        <%= f.label :scopes, "Scopes (Ctrl to select multiple)", class: 'italic mb-2 ml-2 text-sm text-gray-500 text-center' %>
+                    </div>
+                    <%= f.select :scopes,
+                        options_for_select(role_scopes, selected: user.role_scopes),
+                        {},
+                        {
+                            disabled: user == current_user,
+                            class: "w-full px-2 py-2 border-2 rounded border-gray-300", multiple: true, size: [role_scopes.size, 5].min
+                        }
+                    %>
+                <% end %>
+                <%= f.submit "Update", disabled: user == current_user, class: "px-2 py-2 my-2 bg-blue-500 text-white rounded w-full" %>
+            <% end %>
+        </details>
+    <% end %>
+<% end %>

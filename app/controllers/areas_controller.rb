@@ -1,6 +1,7 @@
 class AreasController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:favorite_toggle]
   before_action :load_favorites
+  before_action :require_dig_director, only: [:new, :create]
 
   def index
     @areas = @db.view('opendig/areas', {group: true})['rows']
