@@ -1,6 +1,6 @@
 class PailsController < ApplicationController
   before_action -> { require_square_supervisor([params[:area_id], params[:square_id]]) },
-                except: [:index, :show]
+                except: %i[index show]
 
   def index
     @area = params[:area_id]
@@ -42,14 +42,5 @@ class PailsController < ApplicationController
       flash.now[:error] = 'Something went wrong'
       render :new
     end
-  end
-
-  private
-
-  def set_locus
-    @area = params[:area_id]
-    @square = params[:square_id]
-    @locus_code = params[:id]
-    @locus = @db.view('opendig/locus', key: [@area, @square, @locus_code])['rows']&.first&.dig('value')
   end
 end

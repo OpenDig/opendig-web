@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
   before_action :set_db, :set_descriptions, :set_edit_mode
-  before_action :check_editing_mode, only: [:new, :edit, :create, :update, :destroy]
+  before_action :check_editing_mode, only: %i[new edit create update destroy]
   before_action :check_session_timeout
   before_action :update_session_timestamp
 
@@ -11,6 +11,13 @@ class ApplicationController < ActionController::Base
   helper_method :current_user, :user_signed_in?, :require_authentication, :user_role?, :require_role, :require_superuser, :require_dig_director, :require_area_supervisor, :require_square_supervisor, :require_lab_supervisor, :current_dig
 
   private
+
+  def set_locus
+    @area = params[:area_id]
+    @square = params[:square_id]
+    @locus_code = params[:id]
+    @locus = @db.view('opendig/locus', key: [@area, @square, @locus_code])['rows']&.first&.dig('value')
+  end
 
   def set_db
     @db = CouchDB.main_db
@@ -84,6 +91,7 @@ class ApplicationController < ActionController::Base
       @favorites[category.to_s]&.include?(resource_id.to_s)
     end
   end
+
   def update_session_timestamp
     session[:last_seen] = Time.current
   end
