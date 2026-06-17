@@ -83,6 +83,7 @@ class ApplicationController < ActionController::Base
     categories.all? do |category, resource_id|
       @favorites[category.to_s]&.include?(resource_id.to_s)
     end
+  end
   def update_session_timestamp
     session[:last_seen] = Time.current
   end

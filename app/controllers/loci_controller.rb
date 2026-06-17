@@ -10,6 +10,7 @@ class LociController < ApplicationController
       Locus.new(row['key'])
     end
   end
+end
 
   def search
     query = params[:q].to_s.strip
@@ -89,12 +90,8 @@ class LociController < ApplicationController
     end
 
     def locus_params
-      parameters.require(:locus).permit!
+      params.require(:locus).permit!
     end
-
-  def locus_params
-    parameters.require(:locus).permit!
-  end
 
   def repair_nested_params(obj)
     obj.each do |key, value|
@@ -108,4 +105,4 @@ class LociController < ApplicationController
         end
       end
     end
-end
+  end

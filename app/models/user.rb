@@ -71,7 +71,13 @@ class User
                     []
                   end
       end_key = start_key + [{}]
-      rows = CouchDB.auth_db.view(collection_name, { start_key: start_key, end_key: end_key, reduce: false })['rows']
+      begin
+        rows = CouchDB.auth_db.view(collection_name, { start_key: start_key, end_key: end_key, reduce: false })['rows']
+      rescue CouchRest::BadRequest => e
+        Rails.logger.error "CouchDB BadRequest in User.where: #{e.class}: #{e.message}"
+        return []
+      end
+
       rows.map { |row| from_document(row['value']) }
     end
 
@@ -245,7 +251,13 @@ class User
   def uid_and_provider_combined_must_be_unique
     # Query CouchDB directly since `where` calls `new` and `new` triggers validations
     # Using `where` would cause infinite recursion
-    existing_users = CouchDB.auth_db.view(self.class.collection_name, { key: [provider, uid] })['rows']
+    begin
+      existing_users = CouchDB.auth_db.view(self.class.collection_name, { key: [provider, uid] })['rows']
+    rescue CouchRest::BadRequest => e
+      Rails.logger.error "CouchDB BadRequest in uid uniqueness check: #{e.class}: #{e.message}"
+      return
+    end
+
     return unless existing_users.any? { |user| user['provider'] == provider && user['uid'] == uid }
 
     errors.add(:base, "A user with provider '#{provider}' and uid '#{uid}' already exists.")
