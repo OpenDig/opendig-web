@@ -1,61 +1,68 @@
-require "rails_helper"
+require 'rails_helper'
 
 RSpec.describe ApplicationController, type: :controller do
   # Create a test controller to test ApplicationController functionality
   controller do
     def index
-      render plain: "index"
+      render plain: 'index'
     end
 
     def new
-      render plain: "new"
+      render plain: 'new'
     end
 
     def create
-      render plain: "create"
+      render plain: 'create'
     end
 
     def edit
-      render plain: "edit"
+      render plain: 'edit'
     end
 
     def update
-      render plain: "update"
+      render plain: 'update'
     end
 
     def destroy
-      render plain: "destroy"
+      render plain: 'destroy'
     end
   end
 
-  let(:mock_db) { instance_double(CouchRest::Database) }
   let(:mock_descriptions) { {"pottery" => "Ceramic vessels"} }
+  let(:test_db) { CouchDB.main_db }
+  let(:test_auth_db) { CouchDB.auth_db }
+  let(:users) { load_user_fixtures }
 
   before do
-    allow(Rails.application.config).to receive(:couchdb).and_return(mock_db)
     allow(Rails.application.config).to receive(:descriptions).and_return(mock_descriptions)
   end
 
-  describe "before_action callbacks" do
-    describe "set_db" do
-      it "sets @db from Rails configuration" do
+  describe 'before_action callbacks' do
+    describe 'set_db' do
+      it 'sets @db from Rails configuration' do
         get :index
 
-        expect(assigns(:db)).to eq(mock_db)
+        expect(assigns(:db)).to eq(test_db)
+      end
+
+      it "sets @auth_db from Rails configuration" do
+        get :index
+
+        expect(assigns(:auth_db)).to eq(test_auth_db)
       end
     end
 
-    describe "set_descriptions" do
-      it "sets @descriptions from Rails configuration" do
+    describe 'set_descriptions' do
+      it 'sets @descriptions from Rails configuration' do
         get :index
 
         expect(assigns(:descriptions)).to eq(mock_descriptions)
       end
     end
 
-    describe "set_edit_mode" do
-      context "when EDITING_ENABLED is set" do
-        it "sets @editing_enabled to the ENV value" do
+    describe 'set_edit_mode' do
+      context 'when EDITING_ENABLED is set' do
+        it 'sets @editing_enabled to the ENV value' do
           allow(ENV).to receive(:[]).with('EDITING_ENABLED').and_return('true')
 
           get :index
@@ -64,8 +71,8 @@ RSpec.describe ApplicationController, type: :controller do
         end
       end
 
-      context "when EDITING_ENABLED is not set" do
-        it "sets @editing_enabled to false" do
+      context 'when EDITING_ENABLED is not set' do
+        it 'sets @editing_enabled to false' do
           allow(ENV).to receive(:[]).with('EDITING_ENABLED').and_return(nil)
 
           get :index
@@ -75,7 +82,7 @@ RSpec.describe ApplicationController, type: :controller do
       end
     end
 
-    describe "check_editing_mode" do
+    describe 'check_editing_mode' do
       before do
         routes.draw do
           get 'index' => 'anonymous#index'
@@ -87,79 +94,79 @@ RSpec.describe ApplicationController, type: :controller do
         end
       end
 
-      context "when editing is enabled" do
+      context 'when editing is enabled' do
         before do
           allow(ENV).to receive(:[]).with('EDITING_ENABLED').and_return('true')
         end
 
-        it "allows access to new action" do
+        it 'allows access to new action' do
           get :new
           expect(response).to be_successful
         end
 
-        it "allows access to create action" do
+        it 'allows access to create action' do
           post :create
           expect(response).to be_successful
         end
 
-        it "allows access to edit action" do
+        it 'allows access to edit action' do
           get :edit
           expect(response).to be_successful
         end
 
-        it "allows access to update action" do
+        it 'allows access to update action' do
           patch :update
           expect(response).to be_successful
         end
 
-        it "allows access to destroy action" do
+        it 'allows access to destroy action' do
           delete :destroy
           expect(response).to be_successful
         end
       end
 
-      context "when editing is disabled" do
+      context 'when editing is disabled' do
         before do
           allow(ENV).to receive(:[]).with('EDITING_ENABLED').and_return(nil)
           request.env['HTTP_REFERER'] = '/previous_page'
         end
 
-        it "redirects from new action with error flash" do
+        it 'redirects from new action with error flash' do
           get :new
 
-          expect(flash[:error]).to eq("Editing is disabled")
+          expect(flash[:error]).to eq('Editing is disabled')
           expect(response).to redirect_to('/previous_page')
         end
 
-        it "redirects from create action with error flash" do
+        it 'redirects from create action with error flash' do
           post :create
 
-          expect(flash[:error]).to eq("Editing is disabled")
+          expect(flash[:error]).to eq('Editing is disabled')
           expect(response).to redirect_to('/previous_page')
         end
 
-        it "redirects from edit action with error flash" do
+        it 'redirects from edit action with error flash' do
           get :edit
 
-          expect(flash[:error]).to eq("Editing is disabled")
+          expect(flash[:error]).to eq('Editing is disabled')
           expect(response).to redirect_to('/previous_page')
         end
 
-        it "redirects from update action with error flash" do
+        it 'redirects from update action with error flash' do
           patch :update
 
-          expect(flash[:error]).to eq("Editing is disabled")
+          expect(flash[:error]).to eq('Editing is disabled')
           expect(response).to redirect_to('/previous_page')
         end
 
-        it "redirects from destroy action with error flash" do
+        it 'redirects from destroy action with error flash' do
           delete :destroy
 
-          expect(flash[:error]).to eq("Editing is disabled")
+          expect(flash[:error]).to eq('Editing is disabled')
           expect(response).to redirect_to('/previous_page')
         end
 
-        it "allows access to index action (not restricted)" do
+        it 'allows access to index action (not restricted)' do
           get :index
 
           expect(response).to be_successful
@@ -167,16 +174,230 @@ RSpec.describe ApplicationController, type: :controller do
         end
       end
     end
-  end
 
-  describe "sanity check spec" do
-    it "has all the documents" do
-      # Temporarily remove the mock to access the real database
-      allow(Rails.application.config).to receive(:couchdb).and_call_original
+    describe "check_session_timeout" do
+      before do
+        routes.draw do
+          get 'index' => 'anonymous#index'
+        end
+      end
 
-      # five docs, plus the design doc and config doc
-      expect(Rails.application.config.couchdb.all_docs["rows"].count).to eq(7)
+      it "resets session and sets alert flash if session has expired" do
+        past_time = 31.minutes.ago
+        session[:last_seen] = past_time
+
+        expect(session).to receive(:destroy)
+        get :index
+        expect(flash[:alert]).to eq("Your session has expired due to inactivity.")
+      end
+
+      it "does not reset session if session is still valid" do
+        recent_time = 10.minutes.ago
+        session[:last_seen] = recent_time
+
+        expect(session).not_to receive(:destroy)
+        get :index
+        expect(flash[:alert]).to be_nil
+      end
+    end
+
+    describe "update_session_timestamp" do
+      before do
+        routes.draw do
+          get 'index' => 'anonymous#index'
+        end
+      end
+
+      it "updates session[:last_seen] to current time" do
+        travel_to Time.current do
+          get :index
+
+          expect(session[:last_seen]).to be_within(5.seconds).of(Time.current)
+        end
+      end
     end
   end
 
+  describe 'sanity check spec' do
+    it 'has all the documents' do
+      # Temporarily remove the mock to access the real database
+      allow(CouchDB).to receive(:main_db).and_call_original
+
+      # five docs, plus the design doc and config doc
+      expect(CouchDB.main_db.all_docs["rows"].count).to eq(7)
+    end
+  end
+
+  describe "authentication and authorization helper" do
+    describe "current_user" do
+      it "returns nil if no user is logged in" do
+        expect(controller.send(:current_user)).to be_nil
+      end
+
+      it "returns the current user if logged in" do
+        session[:user_id] = users[:viewer].id
+        expect(controller.send(:current_user)).to eq(users[:viewer])
+      end
+    end
+
+    describe "user_signed_in?" do
+      it "returns false if no user is logged in" do
+        expect(controller.send(:user_signed_in?)).to be_falsey
+      end
+
+      it "returns true if a user is logged in" do
+        session[:user_id] = users[:viewer].id
+        expect(controller.send(:user_signed_in?)).to be_truthy
+      end
+    end
+
+    describe "require_authentication" do
+      controller do
+        before_action :require_authentication, only: [:protected]
+
+        def protected
+          render plain: "protected"
+        end
+      end
+
+      before do
+        routes.draw do
+          get 'protected' => 'anonymous#protected'
+        end
+      end
+
+      it "redirects to root path with error flash if not authenticated" do
+        get :protected
+
+        expect(flash[:error]).to eq("You must be logged in to access this section")
+        expect(response).to redirect_to(controller.root_path)
+      end
+
+      it "allows access if authenticated" do
+        session[:user_id] = users[:viewer].id
+
+        get :protected
+
+        expect(response).to be_successful
+        expect(response.body).to eq("protected")
+      end
+    end
+
+    describe "require_role" do
+      controller do
+        before_action -> { require_square_supervisor(%w[1 1]) }, only: [:square_supervisor_only]
+        before_action :require_superuser, only: [:superuser_only]
+
+        def square_supervisor_only = render plain: "square supervisor only"
+
+        def superuser_only = render plain: "superuser only"
+      end
+
+      before do
+        routes.draw do
+          get 'square_supervisor_only' => 'anonymous#square_supervisor_only'
+          get 'superuser_only' => 'anonymous#superuser_only'
+        end
+      end
+
+      it "redirects to root path with error flash if not authenticated" do
+        get :square_supervisor_only
+
+        expect(flash[:error]).to eq("You must be logged in to access this section")
+        expect(response).to redirect_to(controller.root_path)
+      end
+
+      it "redirects to root path with error flash if authenticated but insufficient role" do
+        session[:user_id] = users[:viewer].id
+
+        get :square_supervisor_only
+
+        expect(flash[:error]).to eq("You must be a(n) square supervisor to access this section")
+        expect(response).to redirect_to(controller.root_path)
+      end
+
+      it "allows access if authenticated and has sufficient role" do
+        session[:user_id] = users[:square_supervisor].id
+
+        get :square_supervisor_only
+
+        expect(response).to be_successful
+        expect(response.body).to eq("square supervisor only")
+      end
+
+      it "allows access if authenticated and has role with higher privileges" do
+        session[:user_id] = users[:superuser].id
+
+        get :square_supervisor_only
+
+        expect(response).to be_successful
+        expect(response.body).to eq("square supervisor only")
+      end
+    end
+
+    describe "user_role?" do
+      it "returns true for viewer role regardless of authentication" do
+        expect(controller.send(:user_role?, :viewer)).to be_truthy
+      end
+
+      it "returns false for non-viewer role if not authenticated" do
+        expect(controller.send(:user_role?, :square_supervisor)).to be_falsey
+      end
+
+      it "returns true if user has the specified role" do
+        session[:user_id] = users[:square_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor)).to be_truthy
+      end
+
+      it "returns true if user has a higher role than the specified role" do
+        session[:user_id] = users[:superuser].id
+
+        expect(controller.send(:user_role?, :square_supervisor)).to be_truthy
+      end
+
+      it "returns false if user does not have the specified role or a higher role" do
+        session[:user_id] = users[:viewer].id
+
+        expect(controller.send(:user_role?, :square_supervisor)).to be_falsey
+      end
+
+      it "returns true if user has the specified role and scope" do
+        session[:user_id] = users[:square_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor, scope: %w[1 1])).to be_truthy
+      end
+
+      it "returns false if user has the specified role but not the specified scope" do
+        session[:user_id] = users[:square_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor, scope: %w[1 2])).to be_falsey
+      end
+
+      it "returns true if user has a higher role than the specified role and has a matching scope" do
+        session[:user_id] = users[:area_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor, scope: %w[1 1])).to be_truthy
+      end
+
+      it "returns false if user has a higher role than the specified role but does not have a matching scope" do
+        session[:user_id] = users[:area_supervisor].id
+
+        expect(controller.send(:user_role?, :square_supervisor, scope: %w[2 1])).to be_falsey
+      end
+
+      it "returns true if user has a higher role than the specified role and has a matching dig scope" do
+        session[:user_id] = users[:dig_director].id
+
+        expect(controller.send(:user_role?, :area_supervisor, scope: "1")).to be_truthy
+      end
+
+      it "returns false if user has a higher role than the specified role but does not have a matching dig scope" do
+        session[:user_id] = users[:dig_director].id
+        allow(controller).to receive(:current_dig).and_return("other_dig")
+
+        expect(controller.send(:user_role?, :area_supervisor, scope: "1")).to be_falsey
+      end
+    end
+  end
 end
