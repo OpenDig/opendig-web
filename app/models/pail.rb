@@ -1,5 +1,4 @@
 class Pail
-
   attr_accessor :pail_number, :pail_date, :locus
 
   def initialize(row)
@@ -9,5 +8,4 @@ class Pail
   def to_ary
     [pail_number, locus, pail_date]
   end
-
 end

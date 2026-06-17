@@ -1,4 +1,4 @@
-name: ruby on rails CI
+name: Tests & Linting
 
 on:
   push:
