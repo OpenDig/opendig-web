@@ -6,8 +6,8 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    container: ubuntu
+    runs-on: ubuntu-24.04
+    container: ubuntu:24.04
 
     services:
       couchdb:

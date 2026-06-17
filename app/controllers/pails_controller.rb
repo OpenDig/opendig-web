@@ -1,4 +1,7 @@
 class PailsController < ApplicationController
+  before_action -> { require_square_supervisor([params[:area_id], params[:square_id]]) },
+                except: [:index, :show]
+
   def index
     @area = params[:area_id]
     @square = params[:square_id]

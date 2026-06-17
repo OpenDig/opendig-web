@@ -1,5 +1,6 @@
 class RegistrarController < ApplicationController
-  before_action :set_item, only: %i[show edit update]
+  before_action :require_dig_director
+  before_action :set_item, only: [:show, :edit, :update]
 
   def index
     @seasons = @db.view('opendig/seasons', { group: true })['rows'].map { |row| row['key'] }.sort.reverse

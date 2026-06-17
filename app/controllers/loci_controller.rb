@@ -1,5 +1,7 @@
 class LociController < ApplicationController
-  before_action :set_locus, only: %i[show edit update]
+  before_action -> { require_square_supervisor([params[:area_id], params[:square_id]]) },
+                except: [:index, :show]
+  before_action :set_locus, only: [:show, :edit, :update]
   def index
     @area = params[:area_id]
     @square = params[:square_id]
