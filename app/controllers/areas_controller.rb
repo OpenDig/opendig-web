@@ -1,9 +1,21 @@
 class AreasController < ApplicationController
+  skip_before_action :verify_authenticity_token, only: [:favorite_toggle]
+  before_action :load_favorites
   before_action :require_dig_director, only: [:new, :create]
 
   def index
     @areas = @db.view('opendig/areas', {group: true})['rows']
-    @favorite_areas = [] # Placeholder for favorite areas, to be implemented in the future
+  end
+
+  def favorite_toggle
+    @area_key = params[:area_key].to_s
+    return render json: { error: 'area_key is required' }, status: :unprocessable_entity if @area_key.blank?
+
+    toggle_favorite :areas, @area_key
+
+    respond_to do |format|
+      format.turbo_stream
+    end
   end
 
   def new; end

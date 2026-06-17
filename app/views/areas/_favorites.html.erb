@@ -1,0 +1,22 @@
+<%= turbo_frame_tag 'favorites' do %>
+  <h2 class="text-3xl">Favorites</h2>
+  <% if @favorites['areas'].blank? %>
+    <div class="p-6 bg-white">
+      <p class="text-gray-400">Click the star to favorite an area</p>
+    </div>
+  <% else %>
+    <div class="flex flex-row gap-4 h-[200px] min-w-[600px] overflow-x-auto mb-8">
+      <% @favorites['areas'].each do |area_key| %>
+        <div class="p-4 bg-white rounded border border-solid border-black-200 flex flex-col items-center flex-none w-[100rpx] h-[220px] overflow-hidden">
+          <img src="<%= asset_path("default.jpg") %>" alt="Default image" class="h-[100px] mb-3"/>
+          <p class="w-full text-center truncate">
+            <%= link_to "Area: #{area_key}", area_squares_path(area_key), class: "text-blue-600 hover:underline block", data: { turbo_frame: "_top" } %>
+          </p>
+          <%# shrink text by 1/4 %>
+          <p class="text-xs text-blue-600 hover:underline">square</p>
+          <p class="text-xs text-blue-600 hover:underline">Loci</p>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

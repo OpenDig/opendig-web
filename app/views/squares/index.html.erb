@@ -29,11 +29,10 @@
       <p class="text-gray-400">Create a new square to get started</p>
     <% else %>
       <% @squares.each do |square| %>
+      <% favorited = @favorites['squares']&.include?("#{@area}/#{square}") %>
       <div class="border-b border-gray-200 px-1 last:border-0 flex items-center justify-between">
         <p class="mb-2"><%= link_to "Square: #{square}", area_square_loci_path(@area, square), class: "text-blue-600 hover:underline" %></p>
-          <button class="favorite-star" data-square-key="<%= square %>" data-favorited="<%= @favorite_squares.any? { |fav| fav == square } %>">
-            <span class="text-xl <%= @favorite_squares.any? { |fav| fav == square } ? 'text-yellow-400' : 'text-gray-300' %>">★</span>
-          </button>
+        <%= render 'favorite_toggle', square_key: square, favorited: favorited %>
       </div>
       <% end %>
     <% end %>
@@ -42,27 +41,7 @@
 </div>
 
 <div class="flex flex-col gap-4 mr-auto ml-4 py-10 px-4 overflow-x-auto">
-  <h2 class="text-3xl">Favorites</h2>
-  <%# force the size of the container to be predetermined by height with a min width set and scroll when it is too full to fit %>
-    <% if @favorite_squares.empty? %>
-      <div class="p-6 bg-white">
-        <p class="text-gray-400">Click the star to favorite a square</p>
-      </div>
-    <% else %>
-  <div class="flex flex-row gap-4 h-[200px] min-w-[600px] overflow-x-auto mb-8">
-      <% @favorite_squares.each do |square| %>
-      <div class="p-4 bg-white rounded border border-solid border-black-200 flex flex-col items-center flex-none w-[100rpx] h-[220px] overflow-hidden">
-        <img src="<%= asset_path("default.jpg") %>" alt="Default image" class="h-[100px] mb-3"/>
-        <p class="w-full text-center truncate">
-          <%= link_to "Square: #{square}", area_square_loci_path(@area, square), class: "text-blue-600 hover:underline block" %>
-        </p>
-        <%# shrink text by 1/4 %>
-        <p class="text-xs text-blue-600 hover:underline">square</p>
-        <p class="text-xs text-blue-600 hover:underline">Loci</p>
-      </div>
-      <% end %>
-  </div>
-    <% end %>
+  <%= render 'squares/favorites' %>
 
   <h2 class="text-3xl">Recent</h2>
   <div class="flex flex-row gap-4 h-[300px] min-w-[600px] overflow-x-auto mb-8">

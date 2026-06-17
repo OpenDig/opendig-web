@@ -1,0 +1,15 @@
+<%= turbo_frame_tag "favorite-toggle-#{area_key}" do %>
+    <% form_with(
+        url: favorite_toggle_areas_path,
+        method: :post,
+        data: { turbo_frame: "favorite-toggle-#{area_key}" },
+        class: "favorite-form",
+        local: true
+        ) do |f| %>
+        <%= hidden_field_tag :area_key, area_key %>
+        <button type="button" class="favorite-star" onclick="this.form.requestSubmit()">
+            <span class="text-xl <%= favorited ? 'text-yellow-400' : 'text-gray-300' %>">★</span>
+        </button>
+        <%= f.submit "Toggle Favorite Status", class: "hidden" %>
+    <% end %>
+<% end %>
