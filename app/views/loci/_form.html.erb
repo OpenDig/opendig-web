@@ -6,4 +6,6 @@
 <%= render 'photos_form', locus_form: locus_form %>
 <%= render 'pails_form', locus_form: locus_form %>
 
-<%= submit_tag 'Save' %>
+<div class="fixed bottom-0 right-0 p-4 bg-white z-50 border-t border-gray-200">
+	<%= submit_tag 'Save', class: 'bg-blue-500 text-white border-none px-4 py-2 rounded cursor-pointer hover:bg-blue-600' %>
+</div>
