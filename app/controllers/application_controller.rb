@@ -4,11 +4,14 @@ class ApplicationController < ActionController::Base
   before_action :check_session_timeout
   before_action :update_session_timestamp
 
-  http_basic_authenticate_with name: "#{ENV['EDIT_USER']}", password: "#{ENV['EDIT_PASSWORD']}" if Rails.env.production?
+  if Rails.env.production?
+    http_basic_authenticate_with name: (ENV['EDIT_USER']).to_s, password: (ENV['EDIT_PASSWORD']).to_s
+  end
 
   helper_method :current_user, :user_signed_in?, :require_authentication, :user_role?, :require_role, :require_superuser, :require_dig_director, :require_area_supervisor, :require_square_supervisor, :require_lab_supervisor, :current_dig
 
   private
+
   def set_db
     @db = CouchDB.main_db
     @auth_db = CouchDB.auth_db
@@ -23,10 +26,10 @@ class ApplicationController < ActionController::Base
   end
 
   def check_editing_mode
-    unless @editing_enabled
-      flash[:error] = "Editing is disabled"
-      redirect_to request.referer
-    end
+    return if @editing_enabled
+
+    flash[:error] = 'Editing is disabled'
+    redirect_to request.referer
   end
 
   def update_session_timestamp
