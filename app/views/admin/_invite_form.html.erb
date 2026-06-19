@@ -1,0 +1,49 @@
+<% assignable_roles = User.roles.select { |role| current_user.can_assign_role?(role) } %>
+<% area_scopes   = User.role_scopes_for('area_supervisor', project: current_dig) || {} %>
+<% square_scopes = User.role_scopes_for('square_supervisor', project: current_dig) || {} %>
+
+<style>[x-cloak] { display: none !important; }</style>
+
+<div x-data="{ role: '<%= @invitation.role %>' }"
+     class="border border-gray-300 rounded p-4 mb-6 max-w-xl mx-auto">
+  <h2 class="text-xl font-bold mb-3">Invite a user</h2>
+  <p class="text-sm text-gray-500 mb-3">
+    The invited person gets this role the next time they sign in with this email address.
+  </p>
+
+  <%= form_with model: @invitation, url: invitations_path, method: :post, class: 'space-y-3' do |f| %>
+    <div>
+      <%= f.label :email, 'Email', class: 'block text-sm text-gray-600 mb-1' %>
+      <%= f.email_field :email, required: true, placeholder: 'person@example.com',
+                        class: 'w-full px-2 py-1 border-2 rounded border-gray-300' %>
+    </div>
+
+    <div>
+      <%= f.label :role, 'Role', class: 'block text-sm text-gray-600 mb-1' %>
+      <%= f.select :role,
+                   options_for_select(assignable_roles.map { |role| [role.humanize, role] }, @invitation.role),
+                   {},
+                   { 'x-model': 'role', class: 'w-full px-2 py-1 border-2 rounded border-gray-300' } %>
+    </div>
+
+    <div x-show="role === 'area_supervisor'" x-cloak>
+      <%= f.label :scopes, 'Areas', class: 'block text-sm text-gray-600 mb-1' %>
+      <%= f.select :scopes, options_for_select(area_scopes),
+                   { include_hidden: false },
+                   { multiple: true, size: [area_scopes.size, 5].min,
+                     ':disabled': "role !== 'area_supervisor'",
+                     class: 'w-full px-2 py-2 border-2 rounded border-gray-300' } %>
+    </div>
+
+    <div x-show="role === 'square_supervisor'" x-cloak>
+      <%= f.label :scopes, 'Squares', class: 'block text-sm text-gray-600 mb-1' %>
+      <%= f.select :scopes, options_for_select(square_scopes),
+                   { include_hidden: false },
+                   { multiple: true, size: [square_scopes.size, 5].min,
+                     ':disabled': "role !== 'square_supervisor'",
+                     class: 'w-full px-2 py-2 border-2 rounded border-gray-300' } %>
+    </div>
+
+    <%= f.submit 'Send invitation', class: 'px-4 py-2 bg-blue-500 text-white rounded cursor-pointer' %>
+  <% end %>
+</div>

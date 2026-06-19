@@ -1,5 +1,5 @@
 ---
-:version: 1
+:version: 3
 :design:
   "_id": _design/authdb
   :views:
@@ -7,3 +7,11 @@
       :map: "function(doc){if (doc.type == 'config') emit(doc, doc);}"
     :users:
       :map: "function(doc){if (doc.uid) emit([doc.provider, doc.uid], doc);}"
+    :invitations_by_email:
+      :map: "function(doc){if (doc.type == 'invitation' && doc.status == 'pending') emit(doc.email, doc);}"
+    :invitations_by_project:
+      :map: "function(doc){if (doc.type == 'invitation') emit([doc.project, doc.status], doc);}"
+    :devices_by_token:
+      :map: "function(doc){if (doc.type == 'device') emit(doc.token_digest, doc);}"
+    :devices_by_user:
+      :map: "function(doc){if (doc.type == 'device') emit(doc.user_id, doc);}"

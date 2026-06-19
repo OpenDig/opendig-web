@@ -9,14 +9,18 @@ Metrics/BlockLength:
     - spec/**/*
     - config/**/*
 
+# Class/module doc comments are not enforced in this codebase.
 Style/Documentation:
-  Exclude:
-    - app/**/*
-    - config/application.rb
+  Enabled: false
 
 Metrics/ModuleLength:
   Exclude:
     - app/**/*
+
+Metrics/ClassLength:
+  Exclude:
+    - app/**/*
+    - config/initializers/*
 
 Metrics/AbcSize:
   Exclude:

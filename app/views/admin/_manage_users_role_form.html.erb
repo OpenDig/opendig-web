@@ -25,15 +25,16 @@
                 <div class="w-full text-center">
                     <%= f.label :role, class: 'italic mb-2 ml-2 text-sm text-gray-500 text-center' %>
                 </div>
+                <% assignable_roles = User.roles.select { |role| current_user.can_assign_role?(role) } %>
                 <%= f.select :role,
-                    options_for_select(User.roles.map { |role| [role.humanize, role] }, selected: user.role),
+                    options_for_select(assignable_roles.map { |role| [role.humanize, role] }, selected: user.role),
                     {},
                     {
                         disabled: user == current_user,
                         class: "w-full px-2 py-1 border-2 rounded border-gray-300",
                     }
                 %>
-                <% role_scopes = User.role_scopes_for(user.role) %>
+                <% role_scopes = User.role_scopes_for(user.role, project: current_dig) %>
                 <% if role_scopes&.any? %>
                     <div class="w-full text-center">
                         <%= f.label :scopes, "Scopes (Ctrl to select multiple)", class: 'italic mb-2 ml-2 text-sm text-gray-500 text-center' %>

@@ -88,6 +88,7 @@ GEM
     aws-sigv4 (1.5.1)
       aws-eventstream (~> 1, >= 1.0.2)
     base64 (0.3.0)
+    bcrypt (3.1.22)
     bigdecimal (4.0.1)
     bindex (0.8.1)
     bootsnap (1.12.0)
@@ -209,17 +210,11 @@ GEM
       logger
       rack (>= 2.2.3)
       rack-protection
-    omniauth-github (2.0.1)
-      omniauth (~> 2.0)
-      omniauth-oauth2 (~> 1.8)
     omniauth-google-oauth2 (1.2.1)
       jwt (>= 2.9.2)
       oauth2 (~> 2.0)
       omniauth (~> 2.0)
       omniauth-oauth2 (~> 1.8)
-    omniauth-microsoft-office365 (0.0.8)
-      omniauth
-      omniauth-oauth2
     omniauth-oauth2 (1.9.0)
       oauth2 (>= 2.0.2, < 3)
       omniauth (~> 2.0)
@@ -437,6 +432,7 @@ PLATFORMS
 
 DEPENDENCIES
   aws-sdk-s3
+  bcrypt (~> 3.1.7)
   bootsnap
   buildkite-test_collector
   capybara
@@ -446,9 +442,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   omniauth
-  omniauth-github
   omniauth-google-oauth2
-  omniauth-microsoft-office365
   omniauth-rails_csrf_protection
   puma (~> 5.0)
   rack-mini-profiler

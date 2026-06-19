@@ -10,6 +10,11 @@ require 'rspec/rails'
 # Configure CouchDB
 CouchDB.set_env! 'test'
 
+# Editing is gated by EDITING_ENABLED (ApplicationController#check_editing_mode).
+# Enable it for the suite so controller specs can exercise create/edit/update
+# actions regardless of the host environment (CI does not set this var).
+ENV['EDITING_ENABLED'] ||= 'true'
+
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
 # run as spec files by default. This means that files in spec/support that end
@@ -27,6 +32,21 @@ CouchDB.set_env! 'test'
 RSpec.configure do |config|
   # Load specific Rails helpers needed
   config.include ActiveSupport::Testing::TimeHelpers
+
+  # The suite operates against a single project ("opendig"). Make it the current
+  # CouchDB project for every example so model code that calls `CouchDB.main_db`
+  # (and User role lookups, which default to CouchDB.current_project) resolves it.
+  config.before(:each) do
+    CouchDB.current_project = 'opendig'
+  end
+
+  # Controller examples run a real request through `resolve_project`, which reads
+  # the subdomain. Give them a host whose subdomain is the test project, and treat
+  # that project as existing (avoids a live _all_dbs lookup).
+  config.before(:each, type: :controller) do
+    request.host = 'opendig.example.com'
+    allow(Project).to receive(:exists?).with('opendig').and_return(true)
+  end
 
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_path = "#{::Rails.root}/spec/fixtures"

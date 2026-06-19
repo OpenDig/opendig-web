@@ -22,19 +22,16 @@ class Find
   end
 
   def self.get_image_keys(registration_number)
-    Rails.cache.fetch("#{registration_number}_images", expires_in: 5.minutes) do
+    Rails.cache.fetch("#{ProjectStorage.storage_project}/#{registration_number}_images", expires_in: 5.minutes) do
       bucket = Rails.application.config.s3_bucket
-      object_key = "finds/#{registration_number}"
-      objects = bucket.objects(prefix: object_key)
-      keys = objects.map(&:key)
-      keys
+      object_key = "#{ProjectStorage.artifacts_prefix}/#{registration_number}"
+      bucket.objects(prefix: object_key).map(&:key)
     end
   end
 
   def self.check_image(registration_number)
-    Rails.cache.fetch("#{registration_number}_has_keys", expires_in: 5.minutes) do
-      keys = get_image_keys(registration_number)
-      keys.any?
+    Rails.cache.fetch("#{ProjectStorage.storage_project}/#{registration_number}_has_keys", expires_in: 5.minutes) do
+      get_image_keys(registration_number).any?
     end
   end
 
@@ -42,13 +39,8 @@ class Find
     bucket = Rails.application.config.s3_bucket
 
     if Find.can_have_image?(registration_number)
-      Rails.cache.fetch("#{registration_number}_presigned_urls", expires_in: 5.minutes) do
-        keys = get_image_keys(registration_number)
-        urls = keys.map do |key|
-          find_url(key)
-          bucket.object(key).presigned_url(:get)
-        end
-        urls
+      Rails.cache.fetch("#{ProjectStorage.storage_project}/#{registration_number}_presigned_urls", expires_in: 5.minutes) do
+        get_image_keys(registration_number).map { |key| bucket.object(key).presigned_url(:get) }
       end
     else
       ['https://via.placeholder.com/250x250.png?text=No+Image']
@@ -66,8 +58,9 @@ class Find
   end
 
   def self.clear_cache_keys(registration_number)
-    Rails.cache.delete("#{registration_number}_images")
-    Rails.cache.delete("#{registration_number}_has_keys")
-    Rails.cache.delete("#{registration_number}_presigned_urls")
+    prefix = ProjectStorage.storage_project
+    Rails.cache.delete("#{prefix}/#{registration_number}_images")
+    Rails.cache.delete("#{prefix}/#{registration_number}_has_keys")
+    Rails.cache.delete("#{prefix}/#{registration_number}_presigned_urls")
   end
 end

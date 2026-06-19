@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::Base
+  before_action :resolve_project
   before_action :set_db, :set_descriptions, :set_edit_mode
   before_action :check_editing_mode, only: %i[new edit create update destroy]
   before_action :check_session_timeout
@@ -8,9 +9,29 @@ class ApplicationController < ActionController::Base
     http_basic_authenticate_with name: (ENV['EDIT_USER']).to_s, password: (ENV['EDIT_PASSWORD']).to_s
   end
 
-  helper_method :current_user, :user_signed_in?, :require_authentication, :user_role?, :require_role, :require_superuser, :require_dig_director, :require_area_supervisor, :require_square_supervisor, :require_lab_supervisor, :current_dig
+  helper_method :current_user, :user_signed_in?, :require_authentication, :user_role?, :require_role,
+                :require_superuser, :require_dig_director, :require_area_supervisor, :require_square_supervisor,
+                :require_registrar_read, :require_registrar_write, :require_manage_users, :current_dig, :current_project
 
   private
+
+  # Resolve the project ("dig") from the request subdomain (balua.opendig.org ->
+  # "balua") and make it the current CouchDB project for this request. The apex
+  # host (no subdomain) shows the OpenDig landing page; an unknown subdomain 404s.
+  def resolve_project
+    key = request.subdomains.reject { |s| s == 'www' }.last
+    @project = nil
+    CouchDB.current_project = nil
+
+    if key.blank?
+      render 'shared/landing', layout: false
+    elsif Project.exists?(key)
+      @project = key
+      CouchDB.current_project = key
+    else
+      render 'shared/unknown_project', layout: false, status: :not_found
+    end
+  end
 
   def set_locus
     @area = params[:area_id]
@@ -113,12 +134,9 @@ class ApplicationController < ActionController::Base
   def current_user
     return nil unless session[:user_id]
 
-    # Cache current user so we aren't looking them up multiple times per request
-    if session[:user_id]
-      @current_user ||= User.find(session[:user_id])
-    else
-      @current_user = nil
-    end
+    # Cache current user so we aren't looking them up multiple times per request.
+    # Scope their role lookups to the project resolved for this request.
+    @current_user ||= User.find(session[:user_id])&.tap { |u| u.current_dig = @project }
   end
 
   def require_authentication
@@ -181,16 +199,53 @@ class ApplicationController < ActionController::Base
 
   def require_dig_director = require_role :dig_director, scope: current_dig
 
-  def require_area_supervisor(area_id) = require_role :area_supervisor, scope: area_id
-
-  def require_square_supervisor(square_id) = require_role :square_supervisor, scope: square_id
-
-  def require_lab_supervisor = require_role :lab_supervisor
-
-  # Not sure how handling multiple digs will work ATP.
-  # This is good enough to get per-dig permissions going.
-  # Needs refactoring later.
-  def current_dig
-    'opendig'
+  # Excavation-data edit gates. These use the capability predicate (which excludes
+  # registrars) rather than the linear `require_role`, since a registrar ranks above
+  # the supervisors in the role list but must stay read-only on excavation data.
+  def require_area_supervisor(area_id)
+    require_dig_data_edit(:area_supervisor, area: area_id)
   end
+
+  def require_square_supervisor(square_scope)
+    area, square = Array(square_scope)
+    require_dig_data_edit(:square_supervisor, area: area, square: square)
+  end
+
+  # Registrar tools: everyone in the project may read; registrar/dig_director/superuser may write.
+  def require_registrar_read = require_capability(:can_view_registrar?, "view the registrar")
+
+  def require_registrar_write = require_capability(:can_edit_registrar?, "edit the registrar")
+
+  # User role management for the project.
+  def require_manage_users = require_capability(:can_manage_roles?, "manage users")
+
+  def require_dig_data_edit(role_label, area:, square: nil)
+    require_authentication
+    return if performed?
+
+    return true if current_user.can_edit_dig_data?(area: area, square: square)
+
+    flash[:error] = "You must be a(n) #{role_label.to_s.humanize.downcase} to access this section"
+    redirect_to root_path
+    false
+  end
+
+  # Generic capability gate: requires authentication then a boolean predicate on the user.
+  def require_capability(predicate, action_description)
+    require_authentication
+    return if performed?
+
+    return true if current_user.public_send(predicate)
+
+    flash[:error] = "You are not allowed to #{action_description}"
+    redirect_to root_path
+    false
+  end
+
+  # The project ("dig") resolved for this request (set by `resolve_project`).
+  # Falls back to the thread-local current project for contexts that bypass the
+  # request cycle (e.g. unit tests invoking helpers directly).
+  def current_dig = @project || CouchDB.current_project
+
+  alias current_project current_dig
 end

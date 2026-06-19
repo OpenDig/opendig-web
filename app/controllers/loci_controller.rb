@@ -10,7 +10,6 @@ class LociController < ApplicationController
       Locus.new(row['key'])
     end
   end
-end
 
   def search
     query = params[:q].to_s.strip
@@ -106,3 +105,4 @@ end
       end
     end
   end
+end

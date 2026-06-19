@@ -6,6 +6,14 @@ export IMGPROXY_KEY= # Hex-encoded string
 export IMGPROXY_SALT= # Hex-encoded string
 export IMGPROXY_URL=http://imgproxy:8080
 
+# Single universal S3 bucket for all projects. Objects are keyed
+# <project>/artifacts/... and <project>/daily_photos/...
+export S3_BUCKET=opendig
+
+# Public CouchDB URL handed to paired mobile devices for direct sync.
+# In production this must be a publicly reachable URL (e.g. https://db.opendig.org).
+export COUCHDB_SYNC_URL=http://localhost:5984
+
 # Omniauth credentials. For more info, see `docs/Authentication.md`
 export GOOGLE_CLIENT_ID= # retrieve from Google Cloud Console
 export GOOGLE_CLIENT_SECRET= # retrieve from Google Cloud Console

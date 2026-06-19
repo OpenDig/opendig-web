@@ -1,6 +1,9 @@
 <div>
 <%# create an update notice %>
   <h1 class="text-3xl font-bold mb-4 text-center">User Management</h1>
+
+  <%= render 'admin/invite_form' %>
+
   <div class="space-y-4">
   <table class="w-full mt-6 border-collapse border border-gray-300">
     <thead>
@@ -36,4 +39,41 @@
     </tbody>
   </table>
   </div>
+
+  <% if @invitations.present? %>
+    <div class="mt-10">
+      <h2 class="text-2xl font-bold mb-3">Pending Invitations</h2>
+      <table class="w-full border-collapse border border-gray-300">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="border border-gray-300 p-2 text-center">Email</th>
+            <th class="border border-gray-300 p-2 text-center">Role</th>
+            <th class="border border-gray-300 p-2 text-center">Invited By</th>
+            <th class="border border-gray-300 p-2 text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @invitations.each do |invitation| %>
+            <tr>
+              <td class="border border-gray-300 p-2"><%= invitation.email %></td>
+              <td class="border border-gray-300 p-2 text-center">
+                <%= invitation.role.humanize %>
+                <% if invitation.scopes.present? %>
+                  <span class="text-sm text-gray-500">(<%= invitation.scopes.join(', ') %>)</span>
+                <% end %>
+              </td>
+              <td class="border border-gray-300 p-2 text-center"><%= invitation.invited_by %></td>
+              <td class="border border-gray-300 p-2 text-center">
+                <%= button_to 'Revoke', revoke_invitation_path(email: invitation.email),
+                              method: :delete,
+                              form: { class: 'inline' },
+                              class: 'px-3 py-1 bg-red-500 text-white rounded',
+                              data: { confirm: 'Revoke this invitation?' } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
 </div>

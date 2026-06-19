@@ -14,20 +14,20 @@ class Photo
   end
 
   def self.photo_exists?(number)
-    Rails.cache.fetch "daily_photos/#{number}_exists" do
+    Rails.cache.fetch "#{ProjectStorage.daily_photos_prefix}/#{number}_exists" do
       bucket = Rails.application.config.s3_bucket
-      bucket.object("daily_photos/#{number}.JPG").exists?
+      bucket.object("#{ProjectStorage.daily_photos_prefix}/#{number}.JPG").exists?
     end
   end
 
   def self.photo_url(number, style)
-    Rails.cache.fetch "daily_photos/photo_url_#{number}_#{style}" do
+    Rails.cache.fetch "#{ProjectStorage.daily_photos_prefix}/photo_url_#{number}_#{style}" do
       photo_style = styles(style)
       if photo_exists?(number)
         builder = Imgproxy::Builder.new(
           photo_style.transform_keys(&:to_sym)
         )
-        builder.url_for("s3://#{Rails.application.config.s3_bucket.name}/daily_photos/#{number}.JPG")
+        builder.url_for("s3://#{Rails.application.config.s3_bucket.name}/#{ProjectStorage.daily_photos_prefix}/#{number}.JPG")
       else
         height = photo_style[:height] || 1000
         width = photo_style[:width] || 1000
@@ -39,7 +39,7 @@ class Photo
   def self.visible_loci(number)
     db = CouchDB.main_db
 
-    Rails.cache.fetch "daily_photos/visible_loci_#{number}" do
+    Rails.cache.fetch "#{ProjectStorage.daily_photos_prefix}/visible_loci_#{number}" do
       db.view('opendig/photos', key: number, include_docs: false)['rows'].map do |row|
         row['value'][0]
       end

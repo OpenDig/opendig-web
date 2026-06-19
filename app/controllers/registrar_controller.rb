@@ -1,5 +1,7 @@
 class RegistrarController < ApplicationController
-  before_action :require_dig_director
+  # Supervisors may read the registrar; only registrar/dig_director/superuser may write.
+  before_action :require_registrar_read
+  before_action :require_registrar_write, only: %i[new create edit update destroy]
   before_action :set_item, only: [:show, :edit, :update]
 
   def index

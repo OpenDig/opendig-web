@@ -9,6 +9,9 @@ Rails.application.routes.draw do
     end
   end
   get '/login', to: 'sessions#login', as: :login
+  post '/login', to: 'sessions#password_login' # email/password sign-in
+  get '/signup', to: 'registrations#new', as: :signup
+  post '/signup', to: 'registrations#create'
   direct(:auth) { |provider| "/auth/#{provider}" } # As per OmniAuth documentation
   get '/auth/:provider/callback', to: 'sessions#create', as: :auth_callback
   get '/auth/failure', to: 'sessions#failure', as: :auth_failure
@@ -39,9 +42,25 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :reports, only: %i[index show]
+  resources :invitations, only: %i[create]
+  delete '/invitations', to: 'invitations#destroy', as: :revoke_invitation
 
-  resources :users, only: [:show, :edit, :create, :update, :destroy]
+  # User account (holds the low-frequency device-pairing section)
+  get    '/account',               to: 'account#show',               as: :account
+  post   '/account/pairing_code',  to: 'account#create_pairing_code', as: :account_pairing_code
+  get    '/account/pairing_status', to: 'account#pairing_status',     as: :account_pairing_status
+  delete '/account/devices/:id',   to: 'account#revoke_device',       as: :account_device
+
+  # Token-authenticated device API (no project subdomain)
+  namespace :api do
+    namespace :v1 do
+      post   'devices/pair',    to: 'devices#pair'
+      delete 'devices/current', to: 'devices#destroy'
+      get    'config',          to: 'config#show'
+    end
+  end
+
+  resources :reports, only: %i[index show]
 
   root to: 'areas#index'
 end

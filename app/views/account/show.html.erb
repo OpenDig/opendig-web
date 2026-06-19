@@ -1,0 +1,121 @@
+<div class="container mx-auto max-w-2xl">
+  <h1 class="text-3xl font-bold mb-1">Account</h1>
+  <p class="text-gray-600 mb-6"><%= current_user.name.presence %> <span class="text-gray-400">&middot;</span> <%= current_user.email %></p>
+
+  <section class="border border-gray-300 rounded p-5">
+    <h2 class="text-xl font-bold mb-1">Devices</h2>
+    <p class="text-sm text-gray-500 mb-4">
+      Pair a tablet or phone to collect data in the field. Generate a code, then enter it in the OpenDig app on your device.
+    </p>
+
+    <% if @pairing_code %>
+      <div id="pairing-code"
+           class="border-2 border-blue-600 bg-blue-50 rounded-lg p-5 mb-5"
+           data-code="<%= @pairing_code.code %>"
+           data-expires-at="<%= @pairing_code.expires_at %>"
+           data-status-url="<%= account_pairing_status_path(code: @pairing_code.code) %>">
+        <p class="text-sm text-gray-600 mb-2">Enter this code in the OpenDig app on your device:</p>
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="font-mono text-4xl font-bold tracking-[0.3em] select-all text-gray-900" aria-label="Pairing code">
+            <%= @pairing_code.code %>
+          </span>
+          <button type="button" data-copy
+                  class="px-3 py-2 text-sm border border-gray-400 rounded hover:bg-white"
+                  aria-label="Copy pairing code">Copy</button>
+        </div>
+        <p class="text-sm text-gray-600 mt-3" data-countdown-wrap aria-live="polite">
+          Expires in <span data-countdown>10:00</span>
+        </p>
+      </div>
+    <% end %>
+
+    <%= form_with url: account_pairing_code_path, method: :post, class: 'flex items-end gap-2 mb-6' do |f| %>
+      <div class="flex-1">
+        <%= f.label :device_name, 'Device name (optional)', class: 'block text-sm text-gray-600 mb-1' %>
+        <%= f.text_field :device_name, placeholder: 'e.g. Field iPad',
+                         class: 'w-full px-3 py-2 border-2 rounded border-gray-300' %>
+      </div>
+      <%= f.submit 'Pair a device', class: 'px-4 py-2 bg-blue-600 text-white rounded font-medium cursor-pointer' %>
+    <% end %>
+
+    <div id="devices-list">
+      <%= render 'account/devices', devices: @devices %>
+    </div>
+  </section>
+</div>
+
+<script>
+  (function () {
+    function initPairing() {
+      var card = document.getElementById('pairing-code');
+      if (!card || card.dataset.initialized) return;
+      card.dataset.initialized = '1';
+
+      // Tap-to-copy (handy when one person holds both the laptop and the tablet)
+      var copyBtn = card.querySelector('[data-copy]');
+      if (copyBtn && navigator.clipboard) {
+        copyBtn.addEventListener('click', function () {
+          navigator.clipboard.writeText(card.dataset.code).then(function () {
+            copyBtn.textContent = 'Copied';
+            setTimeout(function () { copyBtn.textContent = 'Copy'; }, 1500);
+          });
+        });
+      }
+
+      var countdown = card.querySelector('[data-countdown]');
+      var countdownWrap = card.querySelector('[data-countdown-wrap]');
+      var expiresAt = new Date(card.dataset.expiresAt).getTime();
+      var stopped = false;
+
+      var tick = setInterval(function () {
+        var ms = expiresAt - Date.now();
+        if (ms <= 0) {
+          clearInterval(tick);
+          stopped = true;
+          card.classList.add('opacity-50');
+          if (countdownWrap) {
+            countdownWrap.innerHTML = '<span class="text-red-600 font-medium">Expired.</span> Generate a new code below.';
+          }
+          return;
+        }
+        var m = Math.floor(ms / 60000), s = Math.floor((ms % 60000) / 1000);
+        if (countdown) countdown.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      }, 500);
+
+      // Poll to confirm the device claimed the code — closes the loop, no reload.
+      var poll = setInterval(function () {
+        if (stopped) { clearInterval(poll); return; }
+        fetch(card.dataset.statusUrl, { headers: { 'Accept': 'application/json' } })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data.status === 'claimed') {
+              stopped = true;
+              clearInterval(poll);
+              clearInterval(tick);
+              card.className = 'border-2 border-green-600 bg-green-50 rounded-lg p-5 mb-5';
+              card.innerHTML = '<p class="text-green-800 font-semibold text-lg">✓ Paired — ' +
+                ((data.device_name || 'device')) + ' is connected.</p>';
+              refreshDeviceList();
+            } else if (data.status === 'expired') {
+              clearInterval(poll);
+            }
+          })
+          .catch(function () { /* transient; keep polling */ });
+      }, 4000);
+
+      function refreshDeviceList() {
+        fetch(window.location.pathname, { headers: { 'Accept': 'text/html' } })
+          .then(function (r) { return r.text(); })
+          .then(function (html) {
+            var fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('devices-list');
+            var current = document.getElementById('devices-list');
+            if (fresh && current) current.innerHTML = fresh.innerHTML;
+          })
+          .catch(function () {});
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initPairing);
+    document.addEventListener('turbo:load', initPairing);
+  })();
+</script>
