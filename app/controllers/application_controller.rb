@@ -5,10 +5,6 @@ class ApplicationController < ActionController::Base
   before_action :check_session_timeout
   before_action :update_session_timestamp
 
-  if Rails.env.production?
-    http_basic_authenticate_with name: (ENV['EDIT_USER']).to_s, password: (ENV['EDIT_PASSWORD']).to_s
-  end
-
   helper_method :current_user, :user_signed_in?, :require_authentication, :user_role?, :require_role,
                 :require_superuser, :require_dig_director, :require_area_supervisor, :require_square_supervisor,
                 :require_registrar_read, :require_registrar_write, :require_manage_users, :current_dig, :current_project
