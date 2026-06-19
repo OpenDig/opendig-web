@@ -17,15 +17,46 @@ RSpec.describe AccountController, type: :controller do
   end
 
   describe 'POST create_pairing_code' do
-    it 'generates a pairing code owned by the current user' do
+    it 'generates a code and redirects (POST->redirect->GET) so refresh is safe' do
       session[:user_id] = users[:viewer].id
 
       post :create_pairing_code, params: { device_name: 'iPad' }
 
-      expect(response).to be_successful
-      expect(assigns(:pairing_code).user_id).to eq(users[:viewer].id_as_string)
+      expect(response).to have_http_status(:see_other)
+      code_param = Rack::Utils.parse_query(URI.parse(response.location).query)['code']
+      expect(code_param).to be_present
+
+      code = PairingCode.find(code_param)
+      expect(code.user_id).to eq(users[:viewer].id_as_string)
     ensure
-      assigns(:pairing_code)&.destroy!
+      code&.destroy!
+    end
+  end
+
+  describe 'GET show with ?code=' do
+    it "renders the current user's active pairing code from the redirect" do
+      session[:user_id] = users[:viewer].id
+      code = PairingCode.generate_for(users[:viewer])
+
+      get :show, params: { code: code.code }
+
+      expect(response).to be_successful
+      expect(assigns(:pairing_code)&.code).to eq(code.code)
+      expect(response.body).to include(code.code)
+    ensure
+      code&.destroy!
+    end
+
+    it "ignores a code that belongs to another user" do
+      session[:user_id] = users[:viewer].id
+      other = PairingCode.generate_for(users[:registrar])
+
+      get :show, params: { code: other.code }
+
+      expect(response).to be_successful
+      expect(assigns(:pairing_code)).to be_nil
+    ensure
+      other&.destroy!
     end
   end
 
