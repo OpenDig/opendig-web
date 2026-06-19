@@ -23,6 +23,35 @@ RSpec.describe Project, type: :model do
       allow(CouchDB).to receive(:server).and_raise(StandardError)
       expect(described_class.all(env: 'production')).to eq([])
     end
+
+    it 're-polls for new databases after the TTL, with no restart' do
+      server = instance_double(CouchRest::Server)
+      allow(CouchDB).to receive_messages(users_database_name: 'opendig_users_production', server: server)
+      allow(described_class).to receive(:monotonic_now).and_return(0)
+
+      allow(server).to receive(:databases).and_return(%w[balua_production])
+      expect(described_class.all(env: 'production')).to eq(%w[balua])
+
+      # A new project db appears; within the TTL the cached list is still served.
+      allow(server).to receive(:databases).and_return(%w[balua_production umayri_production])
+      expect(described_class.all(env: 'production')).to eq(%w[balua])
+
+      # Once the TTL passes, the next call re-polls and picks the new one up.
+      allow(described_class).to receive(:monotonic_now).and_return(Project::CACHE_TTL_SECONDS + 1)
+      expect(described_class.all(env: 'production')).to eq(%w[balua umayri])
+    end
+
+    it 'keeps serving the last known list when a re-poll fails' do
+      server = instance_double(CouchRest::Server)
+      allow(CouchDB).to receive_messages(users_database_name: 'opendig_users_production', server: server)
+      allow(described_class).to receive(:monotonic_now).and_return(0)
+      allow(server).to receive(:databases).and_return(%w[balua_production])
+      expect(described_class.all(env: 'production')).to eq(%w[balua])
+
+      allow(described_class).to receive(:monotonic_now).and_return(Project::CACHE_TTL_SECONDS + 1)
+      allow(server).to receive(:databases).and_raise(StandardError)
+      expect(described_class.all(env: 'production')).to eq(%w[balua]) # not []
+    end
   end
 
   describe '.exists?' do
