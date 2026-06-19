@@ -1,0 +1,34 @@
+<div class="flex flex-col mb-8 bg-amber-50 border border-amber-200 p-4 rounded-lg shadow">
+  <div class="flex items-center flex-wrap gap-3 mb-6">
+    <h1 class="text-2xl font-bold">Field Photos</h1>
+    <span class="text-xs font-medium uppercase tracking-wide text-amber-800 bg-amber-100 border border-amber-300 rounded-full px-2 py-0.5">
+      Unofficial &middot; uploaded from the field
+    </span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="table w-full">
+      <thead>
+        <tr>
+          <th class="px-4 py-2 text-left">Date</th>
+          <th class="px-4 py-2 text-left">Uploaded by</th>
+          <th class="px-4 py-2 text-left">Subject</th>
+          <th class="px-4 py-2 text-center">Photo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @locus.dig('user_photos').each do |photo| %>
+          <tr class="hover:bg-amber-100">
+            <td class="px-4 py-2 text-left"><%= read_date(photo["taken_at"]) %></td>
+            <td class="px-4 py-2 text-left"><%= photo["user_name"].presence || photo["user"] %></td>
+            <td class="px-4 py-2 text-left"><%= photo["subject"] %></td>
+            <td class="px-4 py-2 text-center">
+              <a class="locus-photo-link flex justify-center" href="<%= Photo.url_for_key(photo["key"], :medium) %>" data-lightbox="locus-field-photos">
+                <img class="locus-photo w-32 h-32 object-cover rounded" src="<%= Photo.url_for_key(photo["key"], :thumb) %>" alt="" />
+              </a>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

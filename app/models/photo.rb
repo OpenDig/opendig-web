@@ -36,6 +36,18 @@ class Photo
     end
   end
 
+  # Imgproxy URL for an arbitrary object key, e.g. a user/field photo stored
+  # under <project>/user_photos/.... Unlike official daily photos there is no
+  # number -> daily_photos mapping; the caller passes the full key recorded on
+  # the locus, and the object is taken to exist (it's referenced in the record).
+  def self.url_for_key(key, style)
+    Rails.cache.fetch "photo_url_key_#{key}_#{style}" do
+      photo_style = styles(style)
+      builder = Imgproxy::Builder.new(photo_style.transform_keys(&:to_sym))
+      builder.url_for("s3://#{Rails.application.config.s3_bucket.name}/#{key}")
+    end
+  end
+
   def self.visible_loci(number)
     db = CouchDB.main_db
 
