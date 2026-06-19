@@ -4,7 +4,7 @@ RSpec.describe ProjectStorage do
   it 'scopes S3 key prefixes under the current project' do
     CouchDB.current_project = 'balua'
 
-    expect(described_class.artifacts_prefix).to eq('balua/artifacts')
+    expect(described_class.finds_prefix).to eq('balua/finds')
     expect(described_class.daily_photos_prefix).to eq('balua/daily_photos')
     expect(described_class.user_photos_prefix).to eq('balua/user_photos')
   end

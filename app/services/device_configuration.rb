@@ -53,7 +53,7 @@ class DeviceConfiguration
   def storage_prefixes(key)
     CouchDB.with_project(key) do
       {
-        'artifacts_prefix' => ProjectStorage.artifacts_prefix,
+        'finds_prefix' => ProjectStorage.finds_prefix,
         'daily_photos_prefix' => ProjectStorage.daily_photos_prefix,
         'user_photos_prefix' => ProjectStorage.user_photos_prefix
       }
