@@ -10,6 +10,11 @@ require 'rspec/rails'
 # Configure CouchDB
 CouchDB.set_env! 'test'
 
+# Editing is gated by EDITING_ENABLED (ApplicationController#check_editing_mode).
+# Enable it for the suite so controller specs can exercise create/edit/update
+# actions regardless of the host environment (CI does not set this var).
+ENV['EDITING_ENABLED'] ||= 'true'
+
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
 # run as spec files by default. This means that files in spec/support that end
