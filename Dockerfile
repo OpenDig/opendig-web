@@ -37,7 +37,10 @@ COPY --from=madnight/alpine-wkhtmltopdf-builder:0.12.5-alpine3.10-606718795 \
     /bin/wkhtmltopdf /bin/wkhtmltopdf
 
 COPY . .
-RUN bundle install
+# Production image: skip the development and test gem groups (rspec, rubocop,
+# selenium, debug, web-console, etc.).
+RUN bundle config set --local without 'development test' && \
+    bundle install --jobs 4 --retry 3
 
 EXPOSE 3000
 CMD ["bin/prod"]
