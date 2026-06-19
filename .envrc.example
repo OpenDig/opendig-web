@@ -1,25 +1,30 @@
-export AWS_ACCESS_KEY_ID= # retrieve from Minio
-export AWS_SECRET_ACCESS_KEY= # retrieve from Minio
-export EDIT_PASSWORD=editor
-export EDIT_USER=editor
-export IMGPROXY_KEY= # Hex-encoded string
-export IMGPROXY_SALT= # Hex-encoded string
-export IMGPROXY_URL=http://imgproxy:8080
+# Copy to .envrc and `direnv allow`. These feed the docker-compose containers, so
+# run docker compose from a shell where direnv has loaded them.
 
-# Single universal S3 bucket for all projects. Objects are keyed
-# <project>/artifacts/... and <project>/daily_photos/...
+# S3-compatible object store. In dev this is the local minio (see docker-compose);
+# its root credentials are admin / password unless you changed them. Both the app
+# and imgproxy read minio with these.
+export AWS_ACCESS_KEY_ID=admin
+export AWS_SECRET_ACCESS_KEY=password
+
+# Single universal bucket; objects are keyed <project>/finds/...,
+# <project>/daily_photos/... and <project>/user_photos/...
 export S3_BUCKET=opendig
 
+# imgproxy. The URL must be reachable FROM THE BROWSER (it ends up in <img src>),
+# so use localhost, NOT the internal docker hostname. Leave KEY/SALT blank in dev
+# to disable signature checking (the dev imgproxy accepts unsigned URLs); set them
+# in production, where the app signs URLs to match.
+export IMGPROXY_URL=http://localhost:8080
+export IMGPROXY_KEY= # hex-encoded; blank in dev
+export IMGPROXY_SALT= # hex-encoded; blank in dev
+
 # Public CouchDB URL handed to paired mobile devices for direct sync.
-# In production this must be a publicly reachable URL (e.g. https://db.opendig.org).
+# In production this must be a publicly reachable URL (e.g. https://couch.opendig.org).
 export COUCHDB_SYNC_URL=http://localhost:5984
 
-# Omniauth credentials. For more info, see `docs/Authentication.md`
+# Google OAuth (the only enabled provider). See docs/Authentication.md
 export GOOGLE_CLIENT_ID= # retrieve from Google Cloud Console
 export GOOGLE_CLIENT_SECRET= # retrieve from Google Cloud Console
-export MICROSOFT_CLIENT_ID= # retrieve from Microsoft Entra admin center
-export MICROSOFT_CLIENT_SECRET= # retrieve from Microsoft Entra admin center
-export GITHUB_CLIENT_ID= # retrieve from GitHub developer settings
-export GITHUB_CLIENT_SECRET= # retrieve from GitHub developer settings
 
 export RAILS_ENV=development

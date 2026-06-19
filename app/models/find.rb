@@ -22,11 +22,16 @@ class Find
   end
 
   def self.get_image_keys(registration_number)
+    bucket = Rails.application.config.try(:s3_bucket)
+    return [] if bucket.nil?
+
     Rails.cache.fetch("#{ProjectStorage.storage_project}/#{registration_number}_images", expires_in: 5.minutes) do
-      bucket = Rails.application.config.s3_bucket
       object_key = "#{ProjectStorage.finds_prefix}/#{registration_number}"
       bucket.objects(prefix: object_key).map(&:key)
     end
+  rescue StandardError => e
+    Rails.logger.warn("Find.get_image_keys failed for #{registration_number}: #{e.class}: #{e.message}")
+    []
   end
 
   def self.check_image(registration_number)
@@ -35,25 +40,27 @@ class Find
     end
   end
 
-  def self.get_presigned_urls(registration_number)
-    bucket = Rails.application.config.s3_bucket
+  NO_IMAGE_PLACEHOLDER = 'https://via.placeholder.com/250x250.png?text=No+Image'.freeze
 
-    if Find.can_have_image?(registration_number)
-      Rails.cache.fetch("#{ProjectStorage.storage_project}/#{registration_number}_presigned_urls", expires_in: 5.minutes) do
-        get_image_keys(registration_number).map { |key| bucket.object(key).presigned_url(:get) }
-      end
-    else
-      ['https://via.placeholder.com/250x250.png?text=No+Image']
+  def self.get_presigned_urls(registration_number)
+    bucket = Rails.application.config.try(:s3_bucket)
+    return [NO_IMAGE_PLACEHOLDER] if bucket.nil? || !Find.can_have_image?(registration_number)
+
+    Rails.cache.fetch("#{ProjectStorage.storage_project}/#{registration_number}_presigned_urls", expires_in: 5.minutes) do
+      get_image_keys(registration_number).map { |key| bucket.object(key).presigned_url(:get) }
     end
+  rescue StandardError => e
+    Rails.logger.warn("Find.get_presigned_urls failed for #{registration_number}: #{e.class}: #{e.message}")
+    [NO_IMAGE_PLACEHOLDER]
   end
 
   def self.url(key, style = :original)
+    bucket = Rails.application.config.try(:s3_bucket)
+    return Photo.placeholder_url(style) if bucket.nil?
+
     Rails.cache.fetch("#{key}_url_#{style}", expires_in: 1.hour) do
-      photo_style = Photo.styles(style)
-      builder = Imgproxy::Builder.new(
-        photo_style.transform_keys(&:to_sym)
-      )
-      builder.url_for("s3://#{Rails.application.config.s3_bucket.name}/#{key}")
+      builder = Imgproxy::Builder.new(Photo.styles(style).transform_keys(&:to_sym))
+      builder.url_for("s3://#{bucket.name}/#{key}")
     end
   end
 
