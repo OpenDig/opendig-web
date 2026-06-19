@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>OpenDig</title>
+  <title><%= (current_dig.presence&.humanize || "OpenDig") %> &middot; OpenDig</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,500;0,600;1,400&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
   <%= javascript_importmap_tags %>
   <%= turbo_include_tags %>
   <%= csrf_meta_tags %>
@@ -10,6 +13,21 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js" integrity="sha256-eTyxS0rkjpLEo16uXTS0uVCS4815lc40K2iVpWDvdSY=" crossorigin="anonymous"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Adopt the OpenDig landing aesthetic across the app: remap blue -> earthy
+    // terracotta so existing blue-* utilities pick up the theme, and set the fonts.
+    tailwind.config = {
+      theme: { extend: {
+        colors: { blue: { 50:'#f6ece4', 100:'#efdccd', 200:'#e2bda7', 500:'#b1542b', 600:'#9c4824', 700:'#8d3f1d', 800:'#7a3517' } },
+        fontFamily: { sans: ['Archivo','system-ui','sans-serif'], serif: ['Spectral','serif'] }
+      } }
+    }
+  </script>
+  <style>
+    :root{--sand:#f4ecdd;--paper:#fbf6ec;--ink:#2a231b;--ink-soft:#6a5d4c;--line:#ddcfb4;--rust:#b1542b;--rust-deep:#8d3f1d;--clay:#9c6b3f}
+    body{background:var(--sand);color:var(--ink);font-family:'Archivo',system-ui,sans-serif}
+    h1,h2,h3,h4{font-family:'Spectral',serif;color:var(--ink)}
+  </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flickity/3.0.0/flickity.pkgd.min.js"></script>
@@ -18,59 +36,54 @@
 
 <body>
   <!-- Navigation Bar -->
-  <nav class="bg-gray-800">
+  <nav class="bg-[#fbf6ec] border-b border-[#ddcfb4]">
     <div class="container mx-auto px-4">
-      <div class="flex items-center justify-between h-16">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <!-- Your Logo or Branding Goes Here -->
-            <a href="/">
-              <img src="<%= asset_path("logo.svg") %>" alt="Logo" class="h-8">
-            </a>
-          </div>
-        </div>
+      <div class="flex items-center justify-between h-16 gap-4">
+        <!-- Wordmark = current dig (project) name -->
+        <a href="/" class="font-serif text-2xl font-semibold text-[#2a231b] hover:text-[#b1542b] transition-colors whitespace-nowrap">
+          <%= (current_dig.presence&.humanize || "OpenDig") %>
+        </a>
         <!-- Navigation Links -->
-        <div class="hidden md:flex md:items-center md:space-x-4">
-          <ul class="ml-10 flex items-baseline space-x-4">
-            <li><%= link_to "Home", root_path, class: "text-gray-300 hover:text-white" %></li>
+        <div class="hidden md:flex md:items-center md:gap-5">
+          <ul class="flex items-center gap-5 text-[15px] font-medium text-[#6a5d4c]">
+            <li><%= link_to "Home", root_path, class: "hover:text-[#b1542b]" %></li>
             <% if user_signed_in? %>
               <% if current_user.can_view_registrar? %>
-                <li><%= link_to("Registrar Tools", registrar_index_path, class: "text-gray-300 hover:text-white") %></li>
+                <li><%= link_to("Registrar", registrar_index_path, class: "hover:text-[#b1542b]") %></li>
               <% end %>
               <% if current_user.can_edit_registrar? %>
-                <li><%= link_to("Bulk Uploader", new_bulk_upload_path, class: "text-gray-300 hover:text-white") %></li>
+                <li><%= link_to("Bulk Upload", new_bulk_upload_path, class: "hover:text-[#b1542b]") %></li>
               <% end %>
-              <!-- <li><#= link_to "Reports", registrar_index_path, class: "text-gray-300 hover:text-white" %></li> -->
               <% if current_user.can_manage_roles? %>
-                <li><%= link_to("User Management", manage_users_admin_index_path, class: "text-gray-300 hover:text-white") %></li>
+                <li><%= link_to("Users", manage_users_admin_index_path, class: "hover:text-[#b1542b]") %></li>
               <% end %>
-              <li><%= link_to((current_user.name.presence || "Account"), account_path, class: "text-gray-300 hover:text-white") %></li>
+              <li><%= link_to((current_user.name.presence || "Account"), account_path, class: "hover:text-[#b1542b]") %></li>
               <li>
-                <%= button_to "Logout",
+                <%= button_to "Sign out",
                               logout_path,
                               method: :delete,
                               form: { class: "inline" },
-                              class: "text-gray-300 hover:text-white bg-transparent p-0 border-0",
-                              data: { confirm: "Are you sure you want to log out?" } 
+                              class: "bg-transparent p-0 border-0 text-[#6a5d4c] hover:text-[#b1542b] cursor-pointer font-medium",
+                              data: { confirm: "Sign out of OpenDig?" }
                 %>
               </li>
             <% else %>
-              <li><%= link_to "Login", login_path, class: "text-gray-300 hover:text-white" %></li>
+              <li><%= link_to "Sign in", login_path, class: "px-3.5 py-1.5 rounded-full bg-[#b1542b] text-white hover:bg-[#8d3f1d]" %></li>
             <% end %>
           </ul>
-          <div class="relative ml-6">
-            <form id="menu-loci-search-form" class="w-64" action="<%= search_loci_path %>" method="get">
+          <div class="relative">
+            <form id="menu-loci-search-form" class="w-56" action="<%= search_loci_path %>" method="get">
               <label for="menu-loci-search-input" class="sr-only">Search loci</label>
               <input
                 id="menu-loci-search-input"
                 name="q"
                 type="search"
-                placeholder="Search Loci"
+                placeholder="Search loci"
                 value="<%= params[:q] %>"
                 autocomplete="off"
-                class="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-white placeholder-neutral-400 focus:border-white focus:outline-none"
+                class="w-full rounded-md border border-[#ddcfb4] bg-white px-3 py-1.5 text-sm text-[#2a231b] placeholder-[#9c8e78] focus:border-[#9c6b3f] focus:outline-none"
               >
-              <div id="menu-loci-search-results" class="absolute z-20 mt-2 hidden max-h-80 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg"></div>
+              <div id="menu-loci-search-results" class="absolute z-20 mt-2 hidden max-h-80 w-full overflow-auto rounded-md border border-[#ddcfb4] bg-white shadow-lg"></div>
             </form>
           </div>
         </div>
