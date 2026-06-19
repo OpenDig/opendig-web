@@ -47,4 +47,5 @@
   <%= render 'pottery' if @locus["pottery"] %>
   <%= render 'pails' if @locus["pails"] %>
   <%= render 'photos' if @locus["photos"] %>
+  <%= render 'user_photos' if @locus["user_photos"].present? %>
 </div>
