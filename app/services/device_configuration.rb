@@ -63,19 +63,42 @@ class DeviceConfiguration
     { 'url' => ENV.fetch('IMGPROXY_URL', nil), 'key' => ENV.fetch('IMGPROXY_KEY', nil), 'salt' => ENV.fetch('IMGPROXY_SALT', nil) }
   end
 
-  # The shared S3 bucket the device uploads to / fetches from directly. endpoint
-  # is nil for real AWS and set (force_path_style) for a custom endpoint like the
-  # dev minio. Objects are written public-read, matching server-side uploads.
+  # The shared S3-compatible object store the device uploads to / fetches from
+  # directly. We use Wasabi, not AWS, so the endpoint is explicit and the bundle
+  # carries a fully-qualified public_url_base -- the device must not assume an
+  # s3://bucket path resolves to AWS. force_path_style + public_url_base are
+  # path-style (https://<endpoint>/<bucket>/<key>), matching the app's own client
+  # and the imgproxy config. Objects are written public-read.
   def s3_config
     {
       'bucket' => bucket_name,
-      'region' => ENV.fetch('AWS_REGION', 'us-east-1'),
-      'endpoint' => ENV['S3_URL'].presence,
-      'force_path_style' => ENV['S3_URL'].present?,
+      'region' => s3_region,
+      'endpoint' => s3_endpoint,
+      'force_path_style' => true,
+      'public_url_base' => public_url_base,
       'access_key_id' => ENV.fetch('AWS_ACCESS_KEY_ID', nil),
       'secret_access_key' => ENV.fetch('AWS_SECRET_ACCESS_KEY', nil),
       'acl' => 'public-read'
     }
+  end
+
+  # Fully-qualified base for direct object URLs: <endpoint>/<bucket>. The device
+  # appends a storage prefix + key (e.g. .../opendig/balua/daily_photos/12.JPG)
+  # with no scheme assumptions. Falls back to AWS virtual-hosted style only if no
+  # endpoint is configured (i.e. genuinely on AWS).
+  def public_url_base
+    endpoint = s3_endpoint
+    return "https://#{bucket_name}.s3.#{s3_region}.amazonaws.com" if endpoint.blank?
+
+    "#{endpoint.chomp('/')}/#{bucket_name}"
+  end
+
+  def s3_endpoint
+    ENV['S3_URL'].presence
+  end
+
+  def s3_region
+    ENV.fetch('AWS_REGION', 'us-east-1')
   end
 
   def bucket_name
