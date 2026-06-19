@@ -3,13 +3,14 @@ class AccountController < ApplicationController
 
   def show
     @devices = Device.for_user(current_user.id_as_string)
+    @pairing_code = active_pairing_code(params[:code])
   end
 
-  # Generate a short-lived pairing code for the current user to enter on a device.
+  # Generate a short-lived pairing code, then redirect (POST->redirect->GET) so the
+  # resulting URL (/account?code=...) is refreshable instead of the POST-only route.
   def create_pairing_code
-    @pairing_code = PairingCode.generate_for(current_user, device_name: params[:device_name])
-    @devices = Device.for_user(current_user.id_as_string)
-    render :show
+    code = PairingCode.generate_for(current_user, device_name: params[:device_name])
+    redirect_to account_path(code: code.code), status: :see_other
   end
 
   # Polled by the account page to close the "did it work?" loop: a pending code
@@ -35,5 +36,16 @@ class AccountController < ApplicationController
       flash[:alert] = 'Device not found.'
     end
     redirect_to account_path
+  end
+
+  private
+
+  # The current user's pairing code from the ?code= param, only if it's still
+  # active and belongs to them (so a stale/foreign code in the URL shows nothing).
+  def active_pairing_code(raw_code)
+    return if raw_code.blank?
+
+    code = PairingCode.find(raw_code)
+    code if code&.active? && code.user_id == current_user.id_as_string
   end
 end

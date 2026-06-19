@@ -29,9 +29,7 @@
       </div>
     <% end %>
 
-    <%# turbo: false so the rendered page (which shows the new code) is displayed —
-        Turbo ignores 200 responses to form POSTs. %>
-    <%= form_with url: account_pairing_code_path, method: :post, data: { turbo: false }, class: 'flex items-end gap-2 mb-6' do |f| %>
+    <%= form_with url: account_pairing_code_path, method: :post, class: 'flex items-end gap-2 mb-6' do |f| %>
       <div class="flex-1">
         <%= f.label :device_name, 'Device name (optional)', class: 'block text-sm text-gray-600 mb-1' %>
         <%= f.text_field :device_name, placeholder: 'e.g. Field iPad',
