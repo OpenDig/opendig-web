@@ -17,8 +17,8 @@ RSpec.describe DeviceConfiguration do
     expect(project['scopes']).to eq(['1'])
     expect(project['database']).to eq('opendig_test')
     expect(project['storage']).to eq(
-      'artifacts_prefix' => 'opendig/artifacts',
-      'daily_photos_prefix' => 'opendig/daily_photos'
+      'artifacts_prefix' => 'opendig/artifacts', 'daily_photos_prefix' => 'opendig/daily_photos',
+      'user_photos_prefix' => 'opendig/user_photos'
     )
     expect(config['projects'].map { |p| p['key'] }).not_to include('balua') # not a member
   end
