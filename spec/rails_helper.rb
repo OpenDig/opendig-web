@@ -85,3 +85,14 @@ def load_user_fixtures
     User.new(attrs, persist: false) # Load into memory only (much faster than saving to DB)
   end.to_h.with_indifferent_access
 end
+
+# Temporarily set ENV vars for the duration of the block, restoring prior values
+# afterwards. A nil value unsets the variable. Used to exercise config that reads
+# from the environment (e.g. the device S3 bundle).
+def with_env(vars)
+  previous = vars.keys.index_with { |k| ENV.fetch(k, nil) }
+  vars.each { |k, v| v.nil? ? ENV.delete(k) : ENV[k] = v }
+  yield
+ensure
+  previous.each { |k, v| v.nil? ? ENV.delete(k) : ENV[k] = v }
+end
