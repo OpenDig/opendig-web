@@ -2,6 +2,10 @@ require 'rails_helper'
 
 RSpec.describe DeviceConfiguration do
   let(:users) { load_user_fixtures }
+  let(:wasabi_env) do
+    { 'S3_BUCKET' => 'opendig', 'S3_URL' => 'https://s3.eu-central-1.wasabisys.com',
+      'AWS_REGION' => 'eu-central-1', 'AWS_ACCESS_KEY_ID' => 'AKIA', 'AWS_SECRET_ACCESS_KEY' => 'secret' }
+  end
 
   before { allow(Project).to receive(:all).and_return(%w[opendig balua]) }
 
@@ -19,24 +23,24 @@ RSpec.describe DeviceConfiguration do
     expect(config['projects'].map { |p| p['key'] }).not_to include('balua') # not a member
   end
 
-  it 'includes the shared S3 bucket, region and credentials for direct upload' do
-    config = with_env('S3_BUCKET' => 'opendig', 'S3_URL' => 'http://minio:9000',
-                      'AWS_ACCESS_KEY_ID' => 'AKIA', 'AWS_SECRET_ACCESS_KEY' => 'secret') do
-      described_class.new(users[:dig_director]).as_json
-    end
+  it 'includes the Wasabi endpoint, region, credentials and a path-style base URL' do
+    config = with_env(wasabi_env) { described_class.new(users[:dig_director]).as_json }
 
     expect(config['s3']).to include(
-      'bucket' => 'opendig', 'region' => 'us-east-1', 'endpoint' => 'http://minio:9000',
-      'force_path_style' => true, 'access_key_id' => 'AKIA',
-      'secret_access_key' => 'secret', 'acl' => 'public-read'
+      'bucket' => 'opendig', 'region' => 'eu-central-1',
+      'endpoint' => 'https://s3.eu-central-1.wasabisys.com', 'force_path_style' => true,
+      'public_url_base' => 'https://s3.eu-central-1.wasabisys.com/opendig',
+      'access_key_id' => 'AKIA', 'secret_access_key' => 'secret', 'acl' => 'public-read'
     )
   end
 
-  it 'reports no S3 endpoint (real AWS) when S3_URL is unset' do
-    config = with_env('S3_URL' => nil) { described_class.new(users[:dig_director]).as_json }
+  it 'falls back to an AWS virtual-hosted base URL only when no endpoint is set' do
+    config = with_env('S3_BUCKET' => 'opendig', 'S3_URL' => nil, 'AWS_REGION' => 'us-east-1') do
+      described_class.new(users[:dig_director]).as_json
+    end
 
     expect(config['s3']['endpoint']).to be_nil
-    expect(config['s3']['force_path_style']).to be(false)
+    expect(config['s3']['public_url_base']).to eq('https://opendig.s3.us-east-1.amazonaws.com')
   end
 
   it 'gives a superuser every project, as superuser' do
