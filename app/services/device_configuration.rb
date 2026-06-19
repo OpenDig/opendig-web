@@ -54,7 +54,8 @@ class DeviceConfiguration
     CouchDB.with_project(key) do
       {
         'artifacts_prefix' => ProjectStorage.artifacts_prefix,
-        'daily_photos_prefix' => ProjectStorage.daily_photos_prefix
+        'daily_photos_prefix' => ProjectStorage.daily_photos_prefix,
+        'user_photos_prefix' => ProjectStorage.user_photos_prefix
       }
     end
   end
