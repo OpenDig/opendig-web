@@ -21,23 +21,32 @@ class Photo
     "https://placehold.jp/#{photo_style[:height] || 1000}x#{photo_style[:width] || 1000}.jpg?text=No+Image"
   end
 
-  def self.photo_exists?(number)
+  # The stored object key for a daily-photo number. Daily photos are
+  # <number>.<ext>, but the extension's case varies across data migrations
+  # (.JPG vs .jpg) and S3 keys are case-sensitive, so resolve the actual object
+  # by prefix instead of assuming one extension.
+  def self.object_key_for(number)
     bucket = Rails.application.config.try(:s3_bucket)
-    return false if bucket.nil?
+    return nil if bucket.nil?
 
-    Rails.cache.fetch "#{ProjectStorage.daily_photos_prefix}/#{number}_exists" do
-      bucket.object("#{ProjectStorage.daily_photos_prefix}/#{number}.JPG").exists?
+    Rails.cache.fetch "#{ProjectStorage.daily_photos_prefix}/#{number}_key" do
+      bucket.objects(prefix: "#{ProjectStorage.daily_photos_prefix}/#{number}.").first&.key
     end
   rescue StandardError => e
-    Rails.logger.warn("Photo.photo_exists? failed for #{number}: #{e.class}: #{e.message}")
-    false
+    Rails.logger.warn("Photo.object_key_for failed for #{number}: #{e.class}: #{e.message}")
+    nil
+  end
+
+  def self.photo_exists?(number)
+    object_key_for(number).present?
   end
 
   def self.photo_url(number, style)
     Rails.cache.fetch "#{ProjectStorage.daily_photos_prefix}/photo_url_#{number}_#{style}" do
-      if photo_exists?(number)
+      key = object_key_for(number)
+      if key
         builder = Imgproxy::Builder.new(styles(style).transform_keys(&:to_sym))
-        builder.url_for("s3://#{Rails.application.config.s3_bucket.name}/#{ProjectStorage.daily_photos_prefix}/#{number}.JPG")
+        builder.url_for("s3://#{Rails.application.config.s3_bucket.name}/#{key}")
       else
         placeholder_url(style)
       end
