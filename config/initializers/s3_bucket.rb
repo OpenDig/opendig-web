@@ -15,8 +15,11 @@ if Rails.env.production?
   )
   
   s3 = Aws::S3::Resource.new
-  
-  bucket_name = "opendig-#{Rails.env}"
+
+  # One universal bucket for all projects; project scoping happens in the object
+  # key (<project>/artifacts/..., <project>/daily_photos/...). Dev and prod are
+  # separated by endpoint (minio vs. real S3), so the literal name is safe.
+  bucket_name = ENV.fetch('S3_BUCKET', 'opendig')
   Rails.application.config.s3_bucket = s3.bucket(bucket_name)
 end
 

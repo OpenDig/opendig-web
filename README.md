@@ -14,6 +14,26 @@ OpenDig Web is a Rails 7 application for managing archaeological dig data. It su
 
 - Please refer to [Getting Started](docs/getting-started.md).
 
+## Projects & subdomains
+
+Each archaeological project is its own CouchDB database (`<project>_<env>`, e.g.
+`balua_production`) and is selected by subdomain: `balua.opendig.org`,
+`umayri.opendig.org`. Locally, use [`lvh.me`](http://lvh.me) (it resolves to
+`127.0.0.1`, no `/etc/hosts` edits needed):
+
+- `http://balua.lvh.me:3000`
+- `http://umayri.lvh.me:3000`
+
+Seed local project databases (requires a running CouchDB):
+
+```sh
+bin/rails projects:seed_dev            # replicates the legacy db into balua_* and creates umayri_*
+bin/rails projects:list                # list project keys for the current env
+bin/rails 'projects:create[mysite]'    # create a new empty project database
+```
+
+The apex host (`http://lvh.me:3000`) shows a project chooser.
+
 ## Documentation
 
 - [Getting Started](docs/getting-started.md)

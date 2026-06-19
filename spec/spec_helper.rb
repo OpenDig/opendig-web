@@ -18,20 +18,25 @@ Buildkite::TestCollector.configure(hook: :rspec)
 # See https://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
   config.before(:suite) do
-    # Load test fixtures to main DB (user fixtures are loaded separately in the relevant specs)
-    Dir.glob(File.join(Rails.root, "spec", "fixtures", "*.json")).each do |file|
-      CouchDB.main_db.save_doc(JSON.parse(File.read(file)))
-    end
+    # The test suite operates against a single project ("opendig" -> opendig_test).
+    CouchDB.with_project('opendig') do
+      # Load test fixtures to main DB (user fixtures are loaded separately in the relevant specs)
+      Dir.glob(File.join(Rails.root, "spec", "fixtures", "*.json")).each do |file|
+        CouchDB.main_db.save_doc(JSON.parse(File.read(file)))
+      end
 
-    Dir.glob(File.join(Rails.root, "spec", "fixtures", "users.yml")).each do |file|
-      YAML.load_file(file).each_value do |attrs|
-        User.new(attrs) # Load into test DB once before suite runs
+      Dir.glob(File.join(Rails.root, "spec", "fixtures", "users.yml")).each do |file|
+        YAML.load_file(file).each_value do |attrs|
+          User.new(attrs) # Load into test DB once before suite runs
+        end
       end
     end
   end
 
   config.after(:suite) do
-    CouchDB.dbs.each(&:clear_db!)
+    CouchDB.with_project('opendig') do
+      (CouchDB.dbs + [CouchDB.main_db]).each(&:clear_db!)
+    end
   end
 
   # Custom matchers

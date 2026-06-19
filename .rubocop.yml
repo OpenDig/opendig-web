@@ -18,6 +18,11 @@ Metrics/ModuleLength:
   Exclude:
     - app/**/*
 
+Metrics/ClassLength:
+  Exclude:
+    - app/**/*
+    - config/initializers/*
+
 Metrics/AbcSize:
   Exclude:
     - app/controllers/*

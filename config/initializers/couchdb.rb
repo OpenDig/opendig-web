@@ -11,24 +11,84 @@ class HTTPClient
 end
 
 class CouchDB
+  CONFIG_PATH = 'config/couchdb.yml'.freeze
+
   # Singleton pattern (these are class methods)
   class << self
-    def main_db
-      @main_db = CouchDB.new(env: env) unless @main_db&.env == env
-      @main_db
+    # The main database is now per-project: each project (selected by subdomain)
+    # lives in its own CouchDB database named "#{project}_#{env}". Connections are
+    # cached per (env, project). The project defaults to the request-scoped
+    # `current_project` so model code can keep calling `CouchDB.main_db` with no args.
+    def main_db(project = current_project)
+      raise NoProjectError, 'No current project resolved for CouchDB.main_db' if project.blank?
+
+      @main_dbs ||= {}
+      @main_dbs[[env, project.to_s]] ||= CouchDB.new(env: env, db_name: Project.database_name(project, env: env))
     end
 
+    # The auth/users database is shared across all projects.
     def auth_db
       @auth_db = CouchDB.new(env: env, design_docs_path: 'config/auth_views.yaml', label: 'users', config_doc_id: 'authdb_config', design_doc_id: '_design/authdb') unless @auth_db&.env == env
       @auth_db
     end
 
-    def dbs = [main_db, auth_db]
+    # main_db is no longer enumerable without a project, so `dbs` covers only the
+    # shared databases. Callers that need a project db should use `main_db(project)`.
+    def dbs = [auth_db]
 
-    def set_env!(env = Rails.env) = @env = env
+    # Request-scoped current project key. Set by ApplicationController#resolve_project
+    # for requests; set explicitly (or via `with_project`) for rake/lib/specs.
+    def current_project = Thread.current[:couchdb_project]
+
+    def current_project=(project)
+      Thread.current[:couchdb_project] = project&.to_s
+    end
+
+    # Run a block with a given current project, restoring the previous one after.
+    def with_project(project)
+      previous = current_project
+      self.current_project = project
+      yield
+    ensure
+      self.current_project = previous
+    end
+
+    # A server-level connection (for _all_dbs etc.), built from the same config
+    # and ENV overrides that an instance connection uses.
+    def server
+      cfg      = config_for(env)
+      protocol = cfg['protocol']
+      host     = ENV['COUCHDB_HOST'] || cfg['host']
+      port     = cfg['port']
+      username = ENV['COUCHDB_USER'] || cfg['username']
+      password = ENV['COUCHDB_PASSWORD'] || cfg['password']
+      authority = "#{username}:#{password}@#{host}#{port ? ":#{port}" : ''}"
+      CouchRest.new("#{protocol}://#{authority}")
+    end
+
+    # Name of the shared users database, computed without opening a connection.
+    def users_database_name(env = self.env)
+      cfg    = config_for(env)
+      prefix = cfg['prefix'].is_a?(Hash) ? cfg.dig('prefix', 'users') : cfg['prefix']
+      suffix = cfg['suffix'].is_a?(Hash) ? cfg.dig('suffix', 'users') : cfg['suffix']
+      "#{prefix}_#{suffix}"
+    end
+
+    def config_for(env = self.env)
+      YAML.load_file("#{Rails.root}/#{CONFIG_PATH}")[env].with_indifferent_access
+    end
+
+    def set_env!(env = Rails.env)
+      @env = env
+      @main_dbs = {}
+      @auth_db = nil
+      @env
+    end
 
     def env = @env || Rails.env
   end
+
+  class NoProjectError < StandardError; end
 
   attr_reader :client, :config, :label, :env
 
@@ -77,7 +137,11 @@ class CouchDB
     # Whereas in production these will automatically connect to opendig_production and opendig_auth_production respectively.
     prefix   = (@config["prefix"].is_a?(Hash) ? @config.dig("prefix", @label) : @config["prefix"]) || nil
     suffix   = (@config["suffix"].is_a?(Hash) ? @config.dig("suffix", @label) : @config["suffix"]) || nil
-    database = (@config["db_name"].is_a?(Hash) ? @config.dig("db_name", @label) : @config["db_name"]) || "#{prefix}_#{suffix}"
+    # An explicit db_name passed at construction (used by the per-project main_db)
+    # takes precedence over the prefix/suffix convention.
+    database = params[:db_name] ||
+               (@config["db_name"].is_a?(Hash) ? @config.dig("db_name", @label) : @config["db_name"]) ||
+               "#{prefix}_#{suffix}"
     return if dry_run # skip actual DB connection if just testing config loading
 
     url = "#{protocol}://#{@config['username']}:#{@config['password']}@#{@config['host']}:#{@config['port']}/#{database}"

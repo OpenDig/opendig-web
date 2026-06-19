@@ -400,4 +400,58 @@ RSpec.describe ApplicationController, type: :controller do
       end
     end
   end
+
+  describe "resolve_project" do
+    render_views
+
+    before do
+      routes.draw { get 'index' => 'anonymous#index' }
+    end
+
+    it "sets @project and the current CouchDB project for a known subdomain" do
+      request.host = 'opendig.example.com'
+      allow(Project).to receive(:exists?).with('opendig').and_return(true)
+
+      get :index
+
+      expect(assigns(:project)).to eq('opendig')
+      expect(CouchDB.current_project).to eq('opendig')
+      expect(response).to be_successful
+    end
+
+    it "renders the OpenDig landing page for the apex host" do
+      request.host = 'example.com'
+      allow(Project).to receive(:all).and_return(%w[balua umayri])
+
+      get :index
+
+      expect(response).to have_http_status(:ok)
+      expect(assigns(:project)).to be_nil
+      expect(response.body).to include('OpenDig')
+      expect(response.body).to include('Sign in') # logged-out call to action
+    end
+
+    it "shows a signed-in user their digs on the landing page" do
+      request.host = 'example.com'
+      session[:user_id] = users[:superuser].id
+      allow(Project).to receive(:all).and_return(%w[balua umayri])
+
+      get :index
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Your digs')
+      expect(response.body).to include('Balua')
+      expect(response.body).to include('Sign out')
+    end
+
+    it "returns 404 for an unknown subdomain" do
+      request.host = 'nope.example.com'
+      allow(Project).to receive(:exists?).with('nope').and_return(false)
+
+      get :index
+
+      expect(response).to have_http_status(:not_found)
+      expect(response.body).to include("isn't here")
+    end
+  end
 end

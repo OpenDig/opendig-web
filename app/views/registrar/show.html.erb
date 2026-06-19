@@ -4,7 +4,9 @@
       <h1 class="text-2xl font-bold">Field Find <%= @find['field_number'] %></h1>
     </div>
     <div class="w-2/12">
-      <%= link_to "Edit", edit_registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code), class: "px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-full float-right" %>
+      <% if current_user&.can_edit_registrar? %>
+        <%= link_to "Edit", edit_registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code), class: "px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-full float-right" %>
+      <% end %>
     </div>
   </div>
   <div class="flex mb-4">

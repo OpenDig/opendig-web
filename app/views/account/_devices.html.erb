@@ -1,0 +1,37 @@
+<% if devices.blank? %>
+  <div class="text-center py-8 px-4 bg-gray-50 rounded border border-dashed border-gray-300">
+    <p class="text-gray-700 font-medium">No devices paired yet</p>
+    <p class="text-gray-500 text-sm mt-1">Pair a tablet or phone to collect data in the field. It syncs your projects offline.</p>
+  </div>
+<% else %>
+  <table class="w-full border-collapse border border-gray-300">
+    <thead>
+      <tr class="bg-gray-100">
+        <th class="border border-gray-300 p-2 text-left">Device</th>
+        <th class="border border-gray-300 p-2">Last seen</th>
+        <th class="border border-gray-300 p-2">Paired</th>
+        <th class="border border-gray-300 p-2">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% devices.each do |device| %>
+        <tr>
+          <td class="border border-gray-300 p-2"><%= device.device_name %></td>
+          <td class="border border-gray-300 p-2 text-center">
+            <%= device.last_seen_at.present? ? "#{time_ago_in_words(Time.zone.parse(device.last_seen_at))} ago" : '—' %>
+          </td>
+          <td class="border border-gray-300 p-2 text-center">
+            <%= device.created_at.present? ? "#{time_ago_in_words(Time.zone.parse(device.created_at))} ago" : '—' %>
+          </td>
+          <td class="border border-gray-300 p-2 text-center">
+            <%= button_to 'Revoke', account_device_path(device.device_id),
+                          method: :delete,
+                          form: { class: 'inline' },
+                          data: { confirm: 'Revoke this device? It will stop syncing.' },
+                          class: 'px-3 py-2 bg-red-600 text-white rounded' %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

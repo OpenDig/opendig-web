@@ -34,14 +34,17 @@
           <ul class="ml-10 flex items-baseline space-x-4">
             <li><%= link_to "Home", root_path, class: "text-gray-300 hover:text-white" %></li>
             <% if user_signed_in? %>
-              <% if user_role?(:dig_director, scope: current_dig) %>
+              <% if current_user.can_view_registrar? %>
                 <li><%= link_to("Registrar Tools", registrar_index_path, class: "text-gray-300 hover:text-white") %></li>
+              <% end %>
+              <% if current_user.can_edit_registrar? %>
                 <li><%= link_to("Bulk Uploader", new_bulk_upload_path, class: "text-gray-300 hover:text-white") %></li>
               <% end %>
               <!-- <li><#= link_to "Reports", registrar_index_path, class: "text-gray-300 hover:text-white" %></li> -->
-              <% if current_user.role_at_least? :superuser %>
+              <% if current_user.can_manage_roles? %>
                 <li><%= link_to("User Management", manage_users_admin_index_path, class: "text-gray-300 hover:text-white") %></li>
               <% end %>
+              <li><%= link_to((current_user.name.presence || "Account"), account_path, class: "text-gray-300 hover:text-white") %></li>
               <li>
                 <%= button_to "Logout",
                               logout_path,

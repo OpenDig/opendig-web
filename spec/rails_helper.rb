@@ -28,6 +28,21 @@ RSpec.configure do |config|
   # Load specific Rails helpers needed
   config.include ActiveSupport::Testing::TimeHelpers
 
+  # The suite operates against a single project ("opendig"). Make it the current
+  # CouchDB project for every example so model code that calls `CouchDB.main_db`
+  # (and User role lookups, which default to CouchDB.current_project) resolves it.
+  config.before(:each) do
+    CouchDB.current_project = 'opendig'
+  end
+
+  # Controller examples run a real request through `resolve_project`, which reads
+  # the subdomain. Give them a host whose subdomain is the test project, and treat
+  # that project as existing (avoids a live _all_dbs lookup).
+  config.before(:each, type: :controller) do
+    request.host = 'opendig.example.com'
+    allow(Project).to receive(:exists?).with('opendig').and_return(true)
+  end
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_path = "#{::Rails.root}/spec/fixtures"
 

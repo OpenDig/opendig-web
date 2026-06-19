@@ -49,6 +49,47 @@ RSpec.describe SessionsController, type: :controller do
     end
   end
 
+  describe "applying invitations on login" do
+    after { Invitation.find('opendig', 'invited@example.com')&.revoke! }
+
+    it "applies a pending invitation matching the signed-in email" do
+      Invitation.new(email: 'invited@example.com', project: 'opendig', role: 'registrar', invited_by: 'admin@example.com').save!
+      request.env['omniauth.auth'] = {
+        'uid' => 'invited-uid', 'provider' => 'test_provider',
+        'info' => { 'name' => 'Invited Person', 'email' => 'invited@example.com' }
+      }
+
+      get :create, params: { provider: 'test_provider' }
+
+      user = User.find_by(provider: 'test_provider', uid: 'invited-uid')
+      user.current_dig = 'opendig'
+      expect(user.role).to eq('registrar')
+      expect(Invitation.pending_for('invited@example.com')).to be_empty
+    end
+  end
+
+  describe "POST password_login" do
+    before { User.register(email: 'login@example.com', password: 'supersecret', name: 'Login').save }
+    after do
+      doc = CouchDB.auth_db.get('email__login@example.com') rescue nil
+      CouchDB.auth_db.delete_doc(doc) if doc
+    end
+
+    it "signs in with correct email and password" do
+      post :password_login, params: { email: 'login@example.com', password: 'supersecret' }
+
+      expect(session[:user_id]).to be_present
+      expect(response).to redirect_to(controller.root_path)
+    end
+
+    it "rejects a wrong password" do
+      post :password_login, params: { email: 'login@example.com', password: 'nope' }
+
+      expect(session[:user_id]).to be_nil
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
   describe "DELETE destroy" do
     before do
       session[:user_id] = users[:viewer].id

@@ -15,3 +15,7 @@ development:
 test:
   <<: *default
   suffix: test
+
+production:
+  <<: *default
+  suffix: production

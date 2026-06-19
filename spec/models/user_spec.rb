@@ -34,8 +34,12 @@ RSpec.describe User, type: :model do
       expect(user).not_to be_valid
       user = described_class.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", roles: { 'opendig' => ['invalid_role'] }, persist: false)
       expect(user).not_to be_valid
-      user = described_class.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", roles: { 'otherdig' => ['viewer'] }, persist: false)
-      expect(user).not_to be_valid
+    end
+
+    it "is valid even without an entry for the current project (defaults to viewer there)" do
+      user = described_class.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", roles: { 'otherdig' => ['dig_director'] }, persist: false)
+      expect(user).to be_valid
+      expect(user.role).to eq('viewer') # current project is "opendig"
     end
 
     it "loads default role if none provided" do
@@ -172,6 +176,106 @@ RSpec.describe User, type: :model do
     it "returns the scopes for the user's role in the current dig" do
       user = described_class.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", roles: { "opendig" => %w[viewer scope1 scope2] }, persist: false)
       expect(user.role_scopes).to eq(%w[scope1 scope2])
+    end
+  end
+
+  describe "role predicates and capabilities" do
+    it "#superuser? is global across projects" do
+      user = described_class.new(uid: "1", provider: "p", email: "e@e.com", name: "N", roles: { 'otherdig' => ['superuser'] }, persist: false)
+      user.current_dig = 'opendig' # not a member of opendig at all
+      expect(user).to be_superuser
+      expect(user.can_manage_roles?).to be(true)
+      expect(user.can_edit_registrar?).to be(true)
+      expect(user.can_edit_dig_data?(area: '9', square: '9')).to be(true)
+    end
+
+    it "registrar can edit the registrar but not excavation data" do
+      registrar = users[:registrar]
+      expect(registrar.can_edit_registrar?).to be(true)
+      expect(registrar.can_view_registrar?).to be(true)
+      expect(registrar.can_edit_dig_data?(area: '1', square: '1')).to be(false)
+      expect(registrar.can_manage_roles?).to be(false)
+    end
+
+    it "supervisors get registrar read-only and scoped dig-data edit" do
+      area_sup = users[:area_supervisor]   # scope: area "1"
+      square_sup = users[:square_supervisor] # scope: square ["1", "1"]
+
+      expect(area_sup.can_view_registrar?).to be(true)
+      expect(area_sup.can_edit_registrar?).to be(false)
+      expect(area_sup.can_edit_dig_data?(area: '1', square: '5')).to be(true)
+      expect(area_sup.can_edit_dig_data?(area: '2')).to be(false)
+
+      expect(square_sup.can_edit_registrar?).to be(false)
+      expect(square_sup.can_edit_dig_data?(area: '1', square: '1')).to be(true)
+      expect(square_sup.can_edit_dig_data?(area: '1', square: '2')).to be(false)
+    end
+
+    it "viewers have no registrar access and cannot edit" do
+      viewer = users[:viewer]
+      expect(viewer.can_view_registrar?).to be(false)
+      expect(viewer.can_edit_dig_data?(area: '1', square: '1')).to be(false)
+    end
+
+    it "dig directors can manage roles but not assign superuser" do
+      dd = users[:dig_director]
+      expect(dd.can_manage_roles?).to be(true)
+      expect(dd.can_assign_role?('registrar')).to be(true)
+      expect(dd.can_assign_role?('superuser')).to be(false)
+      expect(users[:superuser].can_assign_role?('superuser')).to be(true)
+    end
+  end
+
+  describe "email/password accounts" do
+    after do
+      doc = CouchDB.auth_db.get('email__pw@example.com') rescue nil
+      CouchDB.auth_db.delete_doc(doc) if doc
+    end
+
+    it "registers an email user and authenticates the password" do
+      user = described_class.register(email: 'PW@Example.com', password: 'supersecret', name: 'PW User')
+
+      expect(user.provider).to eq('email')
+      expect(user.uid).to eq('pw@example.com') # normalized
+      expect(user.password_digest).to be_present
+      expect(user).to be_valid
+      expect(user.save).to be_truthy
+
+      expect(described_class.authenticate_email('pw@example.com', 'supersecret')).to be_truthy
+      expect(described_class.authenticate_email('PW@Example.com', 'supersecret')).to be_truthy # case-insensitive
+      expect(described_class.authenticate_email('pw@example.com', 'wrong')).to be_nil
+      expect(described_class.authenticate_email('nobody@example.com', 'supersecret')).to be_nil
+    end
+
+    it "requires a password of at least 8 characters" do
+      user = described_class.register(email: 'pw@example.com', password: 'short', name: 'PW')
+      expect(user).not_to be_valid
+      expect(user.errors[:password].join).to match(/8 characters/)
+    end
+
+    it "requires a matching confirmation when one is given" do
+      user = described_class.register(email: 'pw@example.com', password: 'supersecret', password_confirmation: 'different', name: 'PW')
+      expect(user).not_to be_valid
+    end
+  end
+
+  describe "#apply_pending_invitations!" do
+    let(:user) { described_class.new(uid: 'invitee-uid', provider: 'test_provider', email: 'invitee@example.com', name: 'Invitee') }
+
+    after { Invitation.find('opendig', 'invitee@example.com')&.revoke! }
+
+    it "applies a pending invitation to the user's roles and marks it accepted" do
+      Invitation.new(email: 'invitee@example.com', project: 'opendig', role: 'registrar', invited_by: 'a@example.com').save!
+
+      user.apply_pending_invitations!
+      user.current_dig = 'opendig'
+
+      expect(user.role).to eq('registrar')
+      expect(Invitation.pending_for('invitee@example.com')).to be_empty
+    end
+
+    it "is a no-op when there are no pending invitations" do
+      expect(user.apply_pending_invitations!).to eq([])
     end
   end
 

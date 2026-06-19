@@ -26,6 +26,11 @@ module OpendigWeb7
     # config.time_zone = "Central Time (US & Canada)"
     config.eager_load_paths << Rails.root.join('lib')
     config.assets.precompile += ['pdf.css']
+
+    # Projects are selected by subdomain (e.g. balua.opendig.org -> "balua").
+    # Both opendig.org and lvh.me (dev) are two-label registrable domains, so a
+    # tld_length of 1 yields the project key as request.subdomain for each.
+    config.action_dispatch.tld_length = 1
     config.autoload_paths += Dir["#{Rails.root}/lib/**/"] if Rails.env == 'development'
     config.assets.css_compressor = nil
 

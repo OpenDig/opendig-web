@@ -62,4 +62,11 @@ Rails.application.configure do
 
   cache_servers = %w[redis://redis:6379/0]
   config.cache_store = :redis_cache_store, { url: cache_servers }
+
+  # Allow project subdomains served from lvh.me (resolves to 127.0.0.1), e.g.
+  # balua.lvh.me:3000. Without this Rails rejects the request as a blocked host.
+  config.hosts << "lvh.me"
+  config.hosts << /.*\.lvh\.me/
+  config.hosts << "opendig.org"
+  config.hosts << /.*\.opendig\.org/
 end

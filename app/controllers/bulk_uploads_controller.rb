@@ -1,6 +1,6 @@
 class BulkUploadsController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create] # Skip CSRF protection for AJAX requests
-  before_action :require_dig_director
+  before_action :require_registrar_write
 
   def new; end
 
@@ -9,7 +9,7 @@ class BulkUploadsController < ApplicationController
     uploaded_file_keys = []
     bucket = Rails.application.config.s3_bucket
     uploaded_files.each do |file|
-      s3_object = bucket.object("finds/#{file.original_filename}")
+      s3_object = bucket.object("#{ProjectStorage.artifacts_prefix}/#{file.original_filename}")
 
       s3_object.upload_file(file.tempfile.path, acl: 'public-read') do |progress|
         # Progress tracking logic here

@@ -113,7 +113,6 @@ RSpec.describe LociController, type: :controller do
 
   describe 'GET edit' do
     before do
-      allow(controller).to receive(:require_lab_supervisor)
       allow(db).to receive(:view).with('opendig/locus', key: [area_id, square_id, locus_code])
                                  .and_return({ 'rows' => [{ 'value' => locus_data }] })
     end
@@ -130,11 +129,7 @@ RSpec.describe LociController, type: :controller do
   end
 
   describe "POST create" do
-    before do
-      allow(controller).to receive(:require_lab_supervisor)
-    end
-
-    let(:new_locus_params) {
+    let(:new_locus_params) do
       {
         'area' => area_id,
         'square' => square_id,
@@ -169,12 +164,11 @@ RSpec.describe LociController, type: :controller do
 
   describe "PUT/PATCH update" do
     before do
-      allow(controller).to receive(:require_lab_supervisor)
       allow(db).to receive(:view).with('opendig/locus', key: [area_id, square_id, locus_code])
         .and_return({"rows" => [{"value" => locus_data}]})
     end
 
-    let(:updated_params) {
+    let(:updated_params) do
       {
         'designation' => 'updated designation',
         'age' => 'medieval'
