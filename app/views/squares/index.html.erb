@@ -1,65 +1,59 @@
-<div class="flex">
-<div class="flex flex-col h-screen mt-10">
-  <div class="w-full px-4 mb-4">
-    <div class="flex items-center mb-4">
-      <h1 class="text-3xl">Square <%= @area %></h1>
+<div class="container mx-auto px-2 py-8">
+  <div class="flex items-end flex-wrap gap-4 mb-8">
+    <div>
+      <nav class="text-sm text-[#6a5d4c] mb-1">
+        <%= link_to "Areas", areas_path, class: "hover:text-[#b1542b]" %>
+        <span class="mx-1" aria-hidden="true">/</span>
+        <span class="text-[#2a231b]">Area <%= @area %></span>
+      </nav>
+      <h1 class="font-serif text-4xl text-[#2a231b]">Squares</h1>
+      <p class="text-[#6a5d4c] mt-1">Squares in Area <%= @area %> &mdash; open one to browse its loci.</p>
+    </div>
+    <% if current_user&.can_edit_dig_data?(area: @area) %>
       <div class="ml-auto">
-        <% if current_user&.can_edit_dig_data?(area: @area) %>
-          <%= link_to new_area_square_path(@area) do %>
-            <button type="button" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded">
-              New Square
-            </button>
-          <% end %>
+        <%= link_to new_area_square_path(@area), class: "inline-flex items-center gap-2 rounded-full bg-[#b1542b] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#8d3f1d] transition-colors" do %>
+          <span class="text-lg leading-none">+</span> New square
         <% end %>
       </div>
-    </div>
-
-  <%# let text overflow and set the width to be predetermined %>
-  <div class="p-6 bg-white rounded border border-solid border-black-200 overflow-y-auto h-[600px] w-[300px]">
-
-    <%# Breadcrumb navigation %>
-    <nav aria-label="breadcrumb" class="mb-4 text-center border-b border-gray-200 pb-4">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><%= link_to 'Home', root_path, class: "text-blue-600 hover:underline" %></li>
-        <li class="breadcrumb-item active" aria-current="page"><%= "Area #{@area}" %></li>
-      </ol>
-    </nav>
-
-    <% if @squares.empty? %>
-      <p class="text-gray-400">Create a new square to get started</p>
-    <% else %>
-      <% @squares.each do |square| %>
-      <% favorited = @favorites['squares']&.include?("#{@area}/#{square}") %>
-      <div class="border-b border-gray-200 px-1 last:border-0 flex items-center justify-between">
-        <p class="mb-2"><%= link_to "Square: #{square}", area_square_loci_path(@area, square), class: "text-blue-600 hover:underline" %></p>
-        <%= render 'favorite_toggle', square_key: square, favorited: favorited %>
-      </div>
-      <% end %>
     <% end %>
   </div>
-</div>
-</div>
 
-<div class="flex flex-col gap-4 mr-auto ml-4 py-10 px-4 overflow-x-auto">
   <%= render 'squares/favorites' %>
 
-  <h2 class="text-3xl">Recent</h2>
-  <div class="flex flex-row gap-4 h-[300px] min-w-[600px] overflow-x-auto mb-8">
-    <% if @squares.empty? %>
-      <div class="p-6 bg-white rounded border border-solid border-black-200">
-        <p class="text-gray-400">You have no recent squares yet.</p>
-      </div>
-    <% else %>
+  <% if @squares.empty? %>
+    <div class="rounded-xl border border-dashed border-[#ddcfb4] bg-[#fbf6ec] p-12 text-center">
+      <p class="font-serif text-2xl text-[#2a231b] mb-1">No squares yet</p>
+      <p class="text-[#6a5d4c]">
+        <% if current_user&.can_edit_dig_data?(area: @area) %>
+          Create your first square in this area to start recording loci.
+        <% else %>
+          Squares will appear here once the team adds them.
+        <% end %>
+      </p>
+    </div>
+  <% else %>
+    <h2 class="font-serif text-2xl text-[#2a231b] mb-4">All squares</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       <% @squares.each do |square| %>
-      <div class="p-4 bg-white rounded border border-solid border-black-200 flex flex-col items-center flex-none w-[100rpx] h-[220px] overflow-hidden">
-        <img src="<%= asset_path("default.jpg") %>" alt="Default image" class="h-[100px] mb-3"/>
-        <p class="w-full text-center truncate">
-          <%= link_to "Square: #{square}", area_square_loci_path(@area, square), class: "text-blue-600 hover:underline block" %>
-        </p>
-        <%# shrink text by 1/4 %>
-        <p class="text-xs text-blue-600 hover:underline">Loci</p>
-      </div>
+        <% favorited = @favorites['squares']&.include?("#{@area}/#{square}") %>
+        <div class="group relative flex flex-col rounded-xl border border-[#ddcfb4] bg-[#fbf6ec] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md hover:border-[#c8a87f]">
+          <div class="flex items-start justify-between gap-2 mb-3">
+            <span class="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[#efe3cf] text-[#b1542b] font-serif text-xl">
+              <%= square.to_s.first(2).upcase %>
+            </span>
+            <%# Sits above the stretched card link so the star stays clickable. %>
+            <div class="relative z-10">
+              <%= render 'favorite_toggle', square_key: square, favorited: favorited %>
+            </div>
+          </div>
+          <h3 class="font-serif text-2xl text-[#2a231b]">
+            <%= link_to "Square #{square}", area_square_loci_path(@area, square),
+                        class: "transition-colors group-hover:text-[#b1542b] before:absolute before:inset-0",
+                        aria: { label: "Open square #{square}" } %>
+          </h3>
+          <span class="mt-3 text-sm font-medium text-[#b1542b]">View loci &rarr;</span>
+        </div>
       <% end %>
-    <% end %>
-  </div>
+    </div>
+  <% end %>
 </div>
