@@ -8,9 +8,15 @@ services:
     environment:
       RAILS_ENV: development
       EDITING_ENABLED: false
+      # Object storage is provider-agnostic: the app, imgproxy and the device
+      # bundle all derive everything from S3_URL + AWS_REGION + S3_BUCKET. In dev
+      # minio is the S3-compatible stand-in for Wasabi (the prod provider); in
+      # prod these point at https://s3.<region>.wasabisys.com / eu-west-1.
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       S3_URL: 'http://minio:9000'
+      S3_BUCKET: ${S3_BUCKET:-opendig}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
       IMGPROXY_KEY: ${IMGPROXY_KEY}
       IMGPROXY_SALT: ${IMGPROXY_SALT}
       IMGPROXY_URL: ${IMGPROXY_URL}
@@ -42,6 +48,8 @@ services:
     volumes:
       - ./couchdb-data:/opt/couchdb/data
 
+  # Dev S3-compatible object store, standing in for Wasabi in production. The app
+  # talks to it purely via S3_URL, so swapping providers is config, not code.
   minio:
     image: minio/minio:RELEASE.2025-04-08T15-41-24Z # pinned here as later versiosn require CLI only interaction
     command: server --console-address ":9001" /data
