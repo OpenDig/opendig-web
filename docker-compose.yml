@@ -36,7 +36,10 @@ services:
       - minio
       - imgproxy
       - redis
-    command: sh -c "bin/rails server -b 0.0.0.0 -p 3000"
+    # Self-heal when the image predates a newly-added gem (e.g. after the Gemfile
+    # changes and the container is recreated): install only if something's missing,
+    # otherwise boot straight up.
+    command: sh -c "bundle check || bundle install; bin/rails server -b 0.0.0.0 -p 3000"
     platform: linux/amd64
   db:
     image: couchdb:latest

@@ -24,7 +24,7 @@ class Find
   def self.get_image_keys(registration_number)
     Rails.cache.fetch("#{ProjectStorage.storage_project}/#{registration_number}_images", expires_in: 5.minutes) do
       bucket = Rails.application.config.s3_bucket
-      object_key = "#{ProjectStorage.artifacts_prefix}/#{registration_number}"
+      object_key = "#{ProjectStorage.finds_prefix}/#{registration_number}"
       bucket.objects(prefix: object_key).map(&:key)
     end
   end

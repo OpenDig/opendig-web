@@ -1,7 +1,7 @@
 require "securerandom"
 
 # Project-scoped S3 object-key prefixes. All projects share one bucket (default
-# "opendig"); each project's files live under <project>/artifacts/... (find images),
+# "opendig"); each project's files live under <project>/finds/... (find images),
 # <project>/daily_photos/... (official daily photos) and <project>/user_photos/...
 # (unofficial field photos taken on a paired device) so projects -- and the
 # official vs. user photo categories -- never collide. The project is the one
@@ -16,8 +16,8 @@ module ProjectStorage
     project
   end
 
-  def artifacts_prefix
-    "#{storage_project}/artifacts"
+  def finds_prefix
+    "#{storage_project}/finds"
   end
 
   def daily_photos_prefix
