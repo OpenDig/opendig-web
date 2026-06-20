@@ -170,6 +170,12 @@ RSpec.describe User, type: :model do
       user = described_class.new(uid: "12345", provider: "test_provider", email: "test@example.com", name: "Test User", roles: { "opendig" => ["viewer"] }, persist: false)
       expect(user.role).to eq("viewer")
     end
+
+    it "is superuser on every project, even one with no explicit entry" do
+      user = described_class.new(uid: "1", provider: "p", email: "e@e.com", name: "N", roles: { 'otherdig' => ['superuser'] }, persist: false)
+      user.current_dig = 'opendig' # not a member of opendig at all
+      expect(user.role).to eq('superuser')
+    end
   end
 
   describe "#role_scopes" do

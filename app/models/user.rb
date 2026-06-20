@@ -269,6 +269,10 @@ class User
   end
 
   def role
+    # Superuser is global (an entry under any project grants it everywhere), so
+    # it's the effective role on every project, even one with no explicit entry.
+    return 'superuser' if superuser?
+
     # A user with no entry for the current project is treated as a plain viewer.
     roles[current_dig]&.first&.to_s || User.default_role
   end
