@@ -87,9 +87,75 @@
             </form>
           </div>
         </div>
+
+        <!-- Mobile menu toggle (only below md) -->
+        <button type="button" id="mobile-menu-toggle"
+                class="md:hidden inline-flex items-center justify-center rounded-md p-2 text-[#6a5d4c] hover:text-[#b1542b] hover:bg-[#efe3cf] focus:outline-none"
+                aria-controls="mobile-menu" aria-expanded="false" aria-label="Toggle navigation menu">
+          <svg id="mobile-menu-icon-open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg id="mobile-menu-icon-close" class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mobile menu panel (toggled by the button above; never shown on md+) -->
+      <div id="mobile-menu" class="hidden md:hidden pb-4">
+        <ul class="flex flex-col gap-1 text-[15px] font-medium text-[#6a5d4c]">
+          <li><%= link_to "Home", root_path, class: "block rounded px-3 py-2 hover:bg-[#efe3cf] hover:text-[#b1542b]" %></li>
+          <% if user_signed_in? %>
+            <% if current_user.can_view_registrar? %>
+              <li><%= link_to("Registrar", registrar_index_path, class: "block rounded px-3 py-2 hover:bg-[#efe3cf] hover:text-[#b1542b]") %></li>
+            <% end %>
+            <% if current_user.can_edit_registrar? %>
+              <li><%= link_to("Bulk Upload", new_bulk_upload_path, class: "block rounded px-3 py-2 hover:bg-[#efe3cf] hover:text-[#b1542b]") %></li>
+            <% end %>
+            <% if current_user.can_manage_roles? %>
+              <li><%= link_to("Users", manage_users_admin_index_path, class: "block rounded px-3 py-2 hover:bg-[#efe3cf] hover:text-[#b1542b]") %></li>
+            <% end %>
+            <li><%= link_to((current_user.name.presence || "Account"), account_path, class: "block rounded px-3 py-2 hover:bg-[#efe3cf] hover:text-[#b1542b]") %></li>
+            <li>
+              <%= button_to "Sign out", logout_path, method: :delete,
+                            form: { class: "block" },
+                            class: "w-full text-left rounded px-3 py-2 bg-transparent border-0 text-[#6a5d4c] hover:bg-[#efe3cf] hover:text-[#b1542b] cursor-pointer font-medium",
+                            data: { confirm: "Sign out of OpenDig?" } %>
+            </li>
+          <% else %>
+            <li><%= link_to "Sign in", login_path, class: "block rounded px-3 py-2 bg-[#b1542b] text-white text-center hover:bg-[#8d3f1d]" %></li>
+          <% end %>
+        </ul>
+        <form class="mt-3 px-1" action="<%= search_loci_path %>" method="get">
+          <label for="mobile-loci-search-input" class="sr-only">Search loci</label>
+          <input id="mobile-loci-search-input" name="q" type="search" placeholder="Search loci"
+                 value="<%= params[:q] %>" autocomplete="off"
+                 class="w-full rounded-md border border-[#ddcfb4] bg-white px-3 py-2 text-sm text-[#2a231b] placeholder-[#9c8e78] focus:border-[#9c6b3f] focus:outline-none">
+        </form>
       </div>
     </div>
   </nav>
+
+  <script>
+    (function () {
+      function initMobileMenu() {
+        var btn = document.getElementById('mobile-menu-toggle');
+        var menu = document.getElementById('mobile-menu');
+        if (!btn || !menu || btn.dataset.bound) return;
+        btn.dataset.bound = '1';
+        var iconOpen = document.getElementById('mobile-menu-icon-open');
+        var iconClose = document.getElementById('mobile-menu-icon-close');
+        btn.addEventListener('click', function () {
+          var open = menu.classList.toggle('hidden') === false;
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          if (iconOpen) iconOpen.classList.toggle('hidden', open);
+          if (iconClose) iconClose.classList.toggle('hidden', !open);
+        });
+      }
+      document.addEventListener('DOMContentLoaded', initMobileMenu);
+      document.addEventListener('turbo:load', initMobileMenu);
+    })();
+  </script>
 
   <div class="container mx-auto flash">
     <div class="row">
