@@ -21,7 +21,7 @@ class SessionsController < ApplicationController
 
   def create
     if user_signed_in?
-      redirect_to root_path, notice: 'Already logged in!'
+      redirect_to post_login_destination, allow_other_host: true, notice: 'Already logged in!'
       return
     end
 
@@ -30,7 +30,9 @@ class SessionsController < ApplicationController
     user.apply_pending_invitations! # grant any roles this email was invited to
     session[:user_id] = user.id
     greeting = user.name.blank? ? '!' : ". Welcome #{user.name}!"
-    redirect_to root_path, notice: "Logged in with #{user.email}" + greeting
+    # The handshake ran on the apex; send the user back to the subdomain they
+    # started on (the shared session cookie keeps them signed in there).
+    redirect_to post_login_destination, allow_other_host: true, notice: "Logged in with #{user.email}#{greeting}"
   end
 
   def destroy
@@ -41,5 +43,27 @@ class SessionsController < ApplicationController
   def failure
     flash[:error] = 'Authentication failed, please try again.'
     redirect_to root_path
+  end
+
+  private
+
+  # After an apex OAuth callback, return to the subdomain the user came from
+  # (OmniAuth stores the request's `origin` param as omniauth.origin). Only honor
+  # an origin on our own registrable domain -- never an arbitrary host -- to avoid
+  # an open redirect; otherwise fall back to the local root.
+  def post_login_destination
+    origin = request.env['omniauth.origin']
+    return root_path if origin.blank?
+
+    uri = begin
+      URI.parse(origin)
+    rescue URI::InvalidURIError
+      nil
+    end
+    return root_path unless uri&.host
+
+    registrable = request.domain
+    same_site = uri.host == registrable || uri.host.end_with?(".#{registrable}")
+    same_site ? origin : root_path
   end
 end

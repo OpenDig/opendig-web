@@ -1,4 +1,25 @@
 module ApplicationHelper
+  # Always begin the OAuth handshake on the apex domain (opendig.org), so the
+  # provider (Google) needs only one registered redirect URI instead of one per
+  # subdomain. The `origin` carries the user back to the subdomain they started
+  # on; the shared session cookie (see config/initializers/session_store.rb)
+  # keeps them logged in there.
+  def oauth_start_url(provider, origin: oauth_return_origin)
+    "#{oauth_apex_base}/auth/#{provider}?origin=#{CGI.escape(origin)}"
+  end
+
+  # Scheme + apex host (registrable domain), preserving a non-default port in dev.
+  def oauth_apex_base
+    host = request.domain.presence || request.host
+    host = "#{host}:#{request.port}" unless request.port == (request.ssl? ? 443 : 80)
+    "#{request.scheme}://#{host}"
+  end
+
+  # Where to send the user after login: the root of the host they're on now.
+  def oauth_return_origin
+    "#{request.scheme}://#{request.host_with_port}/"
+  end
+
   def stratigraphic_relationships
     DataDigger.stratigraphy_related_how
   end
