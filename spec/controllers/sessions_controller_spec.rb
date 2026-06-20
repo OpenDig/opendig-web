@@ -49,6 +49,35 @@ RSpec.describe SessionsController, type: :controller do
     end
   end
 
+  describe "post-login redirect (apex OAuth callback -> originating subdomain)" do
+    let(:auth_hash) do
+      { 'uid' => users[:viewer].uid, 'provider' => users[:viewer].provider,
+        'info' => { 'name' => users[:viewer].name, 'email' => users[:viewer].email } }
+    end
+
+    before do
+      request.host = 'opendig.org'
+      request.env['omniauth.auth'] = auth_hash
+    end
+
+    it "returns the user to a subdomain origin on our registrable domain" do
+      request.env['omniauth.origin'] = 'https://balua.opendig.org/'
+      get :create, params: { provider: 'test_provider' }
+      expect(response).to redirect_to('https://balua.opendig.org/')
+    end
+
+    it "ignores a foreign origin (open-redirect guard) and falls back to root" do
+      request.env['omniauth.origin'] = 'https://evil.example.com/'
+      get :create, params: { provider: 'test_provider' }
+      expect(response).to redirect_to(controller.root_path)
+    end
+
+    it "falls back to root when no origin is present" do
+      get :create, params: { provider: 'test_provider' }
+      expect(response).to redirect_to(controller.root_path)
+    end
+  end
+
   describe "applying invitations on login" do
     after { Invitation.find('opendig', 'invited@example.com')&.revoke! }
 
