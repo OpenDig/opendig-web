@@ -40,6 +40,50 @@ namespace :projects do
     puts "Replicated #{source.name} -> #{target.name}."
   end
 
+  desc "Move role assignments + pending invitations from one project key to another " \
+       "(run after renaming a project). Usage: rake 'projects:rekey_roles[umayri_2016,umayri]'. " \
+       "Preview first with DRY_RUN=1."
+  task :rekey_roles, %i[old_key new_key] => :environment do |_t, args|
+    old_key = args[:old_key]
+    new_key = args[:new_key]
+    abort "Usage: rake 'projects:rekey_roles[old_key,new_key]'" if old_key.blank? || new_key.blank?
+
+    dry = ENV['DRY_RUN'].present?
+    prefix = dry ? '[dry-run] ' : ''
+    users_changed = 0
+    invites_changed = 0
+
+    User.find_all.each do |user|
+      roles = user.roles || {}
+      next unless roles.key?(old_key)
+
+      if roles.key?(new_key)
+        puts "SKIP #{user.email}: already has a '#{new_key}' role entry"
+        next
+      end
+
+      roles[new_key] = roles.delete(old_key)
+      puts "#{prefix}#{user.email}: roles '#{old_key}' -> '#{new_key}' (#{roles[new_key].inspect})"
+      unless dry
+        user.roles = roles
+        user.save!
+      end
+      users_changed += 1
+    end
+
+    Invitation.for_project(old_key).each do |inv|
+      puts "#{prefix}invitation #{inv.email}: '#{old_key}' -> '#{new_key}'"
+      next if dry
+
+      Invitation.new(email: inv.email, project: new_key, role: inv.role, scopes: inv.scopes,
+                     invited_by: inv.invited_by, status: inv.status).save!
+      inv.revoke!
+      invites_changed += 1
+    end
+
+    puts "#{dry ? 'Would update' : 'Updated'} #{users_changed} user(s) and #{invites_changed} invitation(s)."
+  end
+
   desc 'Seed development project databases (balua from the legacy opendig db, plus an empty umayri).'
   task seed_dev: :environment do
     abort 'projects:seed_dev is for the development environment only' unless CouchDB.env == 'development'
