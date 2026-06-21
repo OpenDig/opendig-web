@@ -1,13 +1,13 @@
 <div class="container mx-auto px-2 py-8">
-  <% _cover = Project.cover_photo_url(current_dig) %>
-  <% _desc = Project.description(current_dig) %>
+  <% _cover = Project.cover_photo_url(CouchDB.current_project) %>
+  <% _desc = Project.description(CouchDB.current_project) %>
   <% if _cover.present? || _desc.present? %>
     <div class="mb-8 overflow-hidden rounded-2xl border border-[#ddcfb4] bg-[#fbf6ec]">
       <% if _cover.present? %>
         <img src="<%= _cover %>" alt="" class="h-48 w-full object-cover">
       <% end %>
       <div class="p-5">
-        <h1 class="font-serif text-3xl text-[#2a231b]"><%= Project.display_name(current_dig) %></h1>
+        <h1 class="font-serif text-3xl text-[#2a231b]"><%= Project.display_name(CouchDB.current_project) %></h1>
         <% if _desc.present? %>
           <p class="text-[#6a5d4c] mt-2 max-w-3xl"><%= _desc %></p>
         <% end %>

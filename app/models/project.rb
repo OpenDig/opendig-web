@@ -59,7 +59,7 @@ class Project
     def metadata(key, env: CouchDB.env)
       return {} if key.blank? || !exists?(key, env: env)
 
-      CouchDB.main_db(key).get(META_DOC_ID)
+      CouchDB.main_db(key).get(META_DOC_ID) || {}
     rescue StandardError
       {}
     end

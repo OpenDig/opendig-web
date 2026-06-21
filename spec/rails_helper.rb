@@ -45,7 +45,10 @@ RSpec.configure do |config|
   # that project as existing (avoids a live _all_dbs lookup).
   config.before(:each, type: :controller) do
     request.host = 'opendig.example.com'
-    allow(Project).to receive(:exists?).with('opendig').and_return(true)
+    # `opendig` is the test project; any other key is treated as absent. A block
+    # stub (rather than `.with('opendig')`) tolerates the optional `env:` kwarg
+    # Project.exists? now accepts and the per-dig lookups the landing page makes.
+    allow(Project).to receive(:exists?) { |key, **| key.to_s == 'opendig' }
   end
 
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
