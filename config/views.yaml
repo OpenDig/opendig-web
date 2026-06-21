@@ -1,5 +1,5 @@
 ---
-:version: 12
+:version: 15
 :design:
   "_id": _design/opendig
   :views:
@@ -98,6 +98,18 @@
           }
         }
       :reduce: "function(keys,values){return true;}"
+    :photo_keys:
+      :map: >
+        function (doc) {
+          if (doc.photos) {
+            for (var _p in doc.photos) {
+              var photo = doc.photos[_p];
+              if (photo.key) {
+                emit(photo.key, [doc.area + '.' + doc.square + '.' + doc.code, doc._id]);
+              }
+            }
+          }
+        }
     :seasons:
       :map: >
         function (doc) {

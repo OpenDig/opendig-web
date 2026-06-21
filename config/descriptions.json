@@ -2254,6 +2254,16 @@
         "time_level": "Period modifier",
         "question": "Reading modifier"
     },
+    "find_declaration": {
+        "categories": [
+            { "key": "field_find", "label": "Field Find" },
+            { "key": "sample", "label": "Sample" }
+        ],
+        "sample_types": [
+            { "key": "C14", "label": "C14" },
+            { "key": "Soil", "label": "Soil" }
+        ]
+    },
     "finds": [
         {
             "key": "field_number",

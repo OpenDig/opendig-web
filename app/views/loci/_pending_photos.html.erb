@@ -1,0 +1,42 @@
+<div class="rounded-xl border border-[#e0c9a0] bg-[#fcf3e0] p-4 mb-6">
+  <h2 class="font-serif text-2xl text-[#2a231b] mb-1">
+    <%= @pending_photos.size %> pending photo<%= 's' unless @pending_photos.size == 1 %>
+  </h2>
+  <p class="text-sm text-[#6a5d4c] mb-4">
+    Photos uploaded for square <%= @area %>.<%= @square %> not yet linked to a locus.
+    Tick the loci a photo belongs to (it can belong to several) and link it.
+  </p>
+
+  <div class="grid gap-3 grid-cols-[repeat(auto-fill,minmax(240px,1fr))]">
+    <% @pending_photos.each do |photo| %>
+      <div class="bg-white border border-[#ddcfb4] rounded-lg overflow-hidden flex flex-col">
+        <img src="<%= photo.thumb_url %>" alt="" class="h-36 w-full object-cover" loading="lazy">
+        <div class="p-3 flex flex-col gap-2 flex-1">
+          <div class="font-mono text-[11px] text-[#6a5d4c] break-all"><%= photo.filename %></div>
+          <% if photo.name.subject.present? %>
+            <div class="text-xs text-[#9c8e78]"><%= photo.name.subject %></div>
+          <% end %>
+
+          <% if @loci.any? %>
+            <%= form_with url: photo_associate_path, method: :post, local: true, class: "mt-auto" do %>
+              <%= hidden_field_tag :key, photo.key %>
+              <%= hidden_field_tag :return_to, area_square_loci_path(@area, @square) %>
+              <div class="flex flex-wrap gap-x-3 gap-y-1 mb-2 max-h-28 overflow-y-auto">
+                <% @loci.each do |l| %>
+                  <label class="inline-flex items-center gap-1.5 text-sm text-[#2a231b]">
+                    <input type="checkbox" name="locus_ids[]" value="<%= l.id %>" class="rounded border-[#c8a87f]">
+                    <%= l.code %>
+                  </label>
+                <% end %>
+              </div>
+              <%= submit_tag 'Link to selected loci',
+                    class: "w-full rounded-full bg-[#b1542b] px-3 py-1.5 text-white text-sm font-medium hover:bg-[#8d3f1d] cursor-pointer" %>
+            <% end %>
+          <% else %>
+            <p class="text-xs text-[#9c8e78] mt-auto">No loci in this square yet — create one to link photos.</p>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

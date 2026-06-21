@@ -47,12 +47,22 @@
         <div class="hidden md:flex md:items-center md:gap-5">
           <ul class="flex items-center gap-5 text-[15px] font-medium text-[#6a5d4c]">
             <li><%= link_to "Home", root_path, class: "hover:text-[#b1542b]" %></li>
+            <% if current_dig.present? %>
+              <% _apex_port = request.optional_port ? ":#{request.optional_port}" : "" %>
+              <li><a class="hover:text-[#b1542b]" href="<%= "#{request.protocol}#{request.domain}#{_apex_port}/" %>">All digs</a></li>
+            <% end %>
             <% if user_signed_in? %>
+              <% if current_user.superuser? %>
+                <li><%= link_to("Projects", projects_path, class: "hover:text-[#b1542b]") %></li>
+              <% end %>
               <% if current_user.can_view_registrar? %>
                 <li><%= link_to("Registrar", registrar_index_path, class: "hover:text-[#b1542b]") %></li>
               <% end %>
               <% if current_user.can_edit_registrar? %>
                 <li><%= link_to("Bulk Upload", new_bulk_upload_path, class: "hover:text-[#b1542b]") %></li>
+              <% end %>
+              <% if current_user.can_edit_registrar? %>
+                <li><%= link_to("Photos", photos_review_path, class: "hover:text-[#b1542b]") %></li>
               <% end %>
               <% if current_user.can_manage_roles? %>
                 <li><%= link_to("Users", manage_users_admin_index_path, class: "hover:text-[#b1542b]") %></li>
@@ -111,6 +121,9 @@
             <% end %>
             <% if current_user.can_edit_registrar? %>
               <li><%= link_to("Bulk Upload", new_bulk_upload_path, class: "block rounded px-3 py-2 hover:bg-[#efe3cf] hover:text-[#b1542b]") %></li>
+            <% end %>
+            <% if current_user.can_edit_registrar? %>
+              <li><%= link_to("Photos", photos_review_path, class: "block rounded px-3 py-2 hover:bg-[#efe3cf] hover:text-[#b1542b]") %></li>
             <% end %>
             <% if current_user.can_manage_roles? %>
               <li><%= link_to("Users", manage_users_admin_index_path, class: "block rounded px-3 py-2 hover:bg-[#efe3cf] hover:text-[#b1542b]") %></li>

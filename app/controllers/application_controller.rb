@@ -18,6 +18,10 @@ class ApplicationController < ActionController::Base
     CouchDB.current_project = nil
 
     if key.blank?
+      # The apex host normally shows the landing page, but superuser project
+      # administration also lives at the apex (it spans all projects).
+      return if controller_name == 'projects'
+
       render 'shared/landing', layout: false
     elsif Project.exists?(key)
       @project = key

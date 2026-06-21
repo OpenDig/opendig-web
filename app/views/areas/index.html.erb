@@ -1,4 +1,20 @@
 <div class="container mx-auto px-2 py-8">
+  <% _cover = Project.cover_photo_url(CouchDB.current_project) %>
+  <% _desc = Project.description(CouchDB.current_project) %>
+  <% if _cover.present? || _desc.present? %>
+    <div class="mb-8 overflow-hidden rounded-2xl border border-[#ddcfb4] bg-[#fbf6ec]">
+      <% if _cover.present? %>
+        <img src="<%= _cover %>" alt="" class="h-48 w-full object-cover">
+      <% end %>
+      <div class="p-5">
+        <h1 class="font-serif text-3xl text-[#2a231b]"><%= Project.display_name(CouchDB.current_project) %></h1>
+        <% if _desc.present? %>
+          <p class="text-[#6a5d4c] mt-2 max-w-3xl"><%= _desc %></p>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
   <div class="flex items-end flex-wrap gap-4 mb-8">
     <div>
       <h1 class="font-serif text-4xl text-[#2a231b]">Areas</h1>

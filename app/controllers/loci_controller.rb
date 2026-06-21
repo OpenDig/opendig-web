@@ -9,6 +9,8 @@ class LociController < ApplicationController
                      { group: true, start_key: [@area, @square], end_key: [@area, @square, {}] })['rows'].map do |row|
       Locus.new(row['key'])
     end
+    # Convention-named photos in this square not yet linked to a locus.
+    @pending_photos = BulkPhoto.pending_for_square(@area, @square)
   end
 
   def search

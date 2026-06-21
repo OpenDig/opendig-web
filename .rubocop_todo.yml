@@ -360,7 +360,7 @@ Rails/HelperInstanceVariable:
   Exclude:
     - 'app/helpers/application_helper.rb'
 
-# Offense count: 25
+# Offense count: 27
 Rails/I18nLocaleTexts:
   Exclude:
     - 'app/controllers/account_controller.rb'
@@ -370,6 +370,8 @@ Rails/I18nLocaleTexts:
     - 'app/controllers/invitations_controller.rb'
     - 'app/controllers/loci_controller.rb'
     - 'app/controllers/pails_controller.rb'
+    - 'app/controllers/photos_controller.rb'
+    - 'app/controllers/projects_controller.rb'
     - 'app/controllers/registrar_controller.rb'
     - 'app/controllers/sessions_controller.rb'
     - 'app/controllers/squares_controller.rb'

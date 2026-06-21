@@ -37,7 +37,9 @@ class DeviceConfiguration
     project_keys.map do |key|
       {
         'key' => key,
-        'name' => key.humanize,
+        'name' => Project.display_name(key),
+        'description' => Project.description(key),
+        'cover_photo_url' => Project.cover_photo_url(key),
         # A superuser is superuser on every project, even ones with no explicit
         # roles entry; otherwise report the user's stored role for that project.
         'role' => superuser ? 'superuser' : @user.role_for(key),

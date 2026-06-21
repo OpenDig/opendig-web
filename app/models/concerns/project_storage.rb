@@ -20,6 +20,9 @@ module ProjectStorage
     "#{storage_project}/finds"
   end
 
+  # All locus photos live here: legacy numbered photos ({number}.JPG) AND the
+  # new convention-named photos (B26.08.92.001.0621_Progress.JPG, see PhotoName),
+  # which are bulk-uploaded here and associated to loci by their full S3 key.
   def daily_photos_prefix
     "#{storage_project}/daily_photos"
   end
