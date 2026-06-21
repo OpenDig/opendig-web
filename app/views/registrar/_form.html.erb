@@ -1,4 +1,12 @@
-<%= render 'general_form', form: form %>
-<%= render 'registrars_form', form: form %>
+<% %w[general_form registrars_form].each do |partial| %>
+  <section class="ls-section">
+    <%= render partial, form: form %>
+  </section>
+<% end %>
 
-<%= submit_tag 'Save' %>
+<div class="sticky bottom-0 -mx-2 mt-2 flex justify-end gap-3 border-t border-[#ddcfb4] bg-[#fbf6ec]/95 px-4 py-3 backdrop-blur">
+  <%= link_to 'Cancel', registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code),
+              class: 'inline-flex items-center rounded-full border border-[#ddcfb4] px-4 py-2 text-sm font-medium text-[#6a5d4c] hover:border-[#c8a87f] hover:text-[#b1542b]' %>
+  <%= submit_tag 'Save changes',
+                 class: 'inline-flex items-center rounded-full bg-[#b1542b] px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#8d3f1d] cursor-pointer border-0' %>
+</div>

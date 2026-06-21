@@ -1,27 +1,24 @@
-<div class="container mx-auto">
-  <div class="flex items-center mb-4">
-    <div class="w-10/12">
-      <h1 class="text-2xl font-bold">Field find or Sample #<%#= @find.field_number %></h1>
-    </div>
-    <div class="w-2/12">
-      <%= link_to "Back", registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code), class: "px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-full float-right" %>
-    </div>
+<div class="container mx-auto max-w-4xl px-2 py-8">
+  <nav class="text-sm text-[#6a5d4c] mb-2">
+    <%= link_to 'Registrar', registrar_index_path, class: "hover:text-[#b1542b]" %>
+    <span class="mx-1" aria-hidden="true">/</span>
+    <%= link_to "Locus #{@area}.#{@square}.#{@locus_code}", area_square_locus_path(@area, @square, @locus_code), class: "hover:text-[#b1542b]" %>
+    <span class="mx-1" aria-hidden="true">/</span>
+    <span class="text-[#2a231b]">Pail <%= @pail_id %></span>
+  </nav>
+  <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+    <h1 class="font-serif text-4xl text-[#2a231b]">Editing Field Find #<%= @find['field_number'] %></h1>
+    <%= link_to "Back to find", registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code),
+                class: "inline-flex items-center rounded-full border border-[#ddcfb4] px-4 py-2 text-sm font-medium text-[#6a5d4c] hover:border-[#c8a87f] hover:text-[#b1542b]" %>
   </div>
-  <div class="flex mb-4">
-    <nav aria-label="breadcrumb">
-      <ol class="flex breadcrumb">
-        <li class="mr-2"><%= link_to 'Registrar Home', registrar_index_path, class: "text-blue-500 hover:underline" %></li>
-        <li class="mr-2"><%= link_to "Locus #{@area}.#{@square}.#{@locus_code}", area_square_locus_path(@area, @square, @locus_code), class: "text-blue-500 hover:underline" %></li>
-        <li>Pail Number <%= @pail_id %></li>
-      </ol>
-    </nav>
+
+  <div class="od-form">
+    <%= form_with(url: registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code), method: 'patch', local: true) do |form| %>
+      <%= render 'form', form: form %>
+    <% end %>
   </div>
+
+  <%= render 'shared/navigation_safety' %>
 </div>
 
-<%= form_with(url: registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code), method: 'patch', local: true) do |form| %>
-  <div class="container mx-auto">
-    <%= render 'form', form: form %>
-  </div>
-<% end %>
-
-<%= render 'shared/navigation_safety' %>
+<%= render 'shared/edit_form_theme' %>

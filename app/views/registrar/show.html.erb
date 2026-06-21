@@ -1,97 +1,64 @@
-<div class="container mx-auto">
-  <div class="flex items-center mb-4">
-    <div class="w-10/12">
-      <h1 class="text-2xl font-bold">Field Find <%= @find['field_number'] %></h1>
+<div class="container mx-auto max-w-5xl px-2 py-8">
+  <nav class="text-sm text-[#6a5d4c] mb-2">
+    <%= link_to 'Registrar', registrar_index_path, class: "hover:text-[#b1542b]" %>
+    <span class="mx-1" aria-hidden="true">/</span>
+    <%= link_to "Locus #{@area}.#{@square}.#{@locus_code}", area_square_locus_path(@area, @square, @locus_code), class: "hover:text-[#b1542b]" %>
+    <span class="mx-1" aria-hidden="true">/</span>
+    <span class="text-[#2a231b]">Pail <%= @pail_id %></span>
+  </nav>
+
+  <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+    <div>
+      <h1 class="font-serif text-4xl text-[#2a231b]">Field Find #<%= @find['field_number'] %></h1>
+      <p class="text-[#6a5d4c] mt-1">Locus <%= @area %>.<%= @square %>.<%= @locus_code %> &middot; Pail <%= @pail_id %></p>
     </div>
-    <div class="w-2/12">
-      <% if current_user&.can_edit_registrar? %>
-        <%= link_to "Edit", edit_registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code), class: "px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-full float-right" %>
-      <% end %>
-    </div>
+    <% if current_user&.can_edit_registrar? %>
+      <%= link_to "Edit find", edit_registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code),
+                  class: "inline-flex items-center rounded-full bg-[#b1542b] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#8d3f1d]" %>
+    <% end %>
   </div>
-  <div class="flex mb-4">
-    <nav aria-label="breadcrumb">
-      <ol class="flex breadcrumb">
-        <li class="mr-2"><%= link_to 'Registrar Home', registrar_index_path, class: "text-blue-500 hover:underline" %></li>
-        <li class="mr-2"><%= link_to "Locus #{@area}.#{@square}.#{@locus_code}", area_square_locus_path(@area, @square, @locus_code), class: "text-blue-500 hover:underline" %></li>
-        <li>Pail Number <%= @pail_id %></li>
-      </ol>
-    </nav>
-  </div>
-  <div class="flex mb-4">
-    <div class="w-8/12">
-      <h2 class="text-xl font-semibold">General Information</h2>
-      <% @descriptions['finds'].each do |item| %>
-        <div class="flex mb-2">
-          <div class="w-1/4">
-            <%= item["label"] %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <div class="lg:col-span-2 rounded-xl border border-[#ddcfb4] bg-[#fbf6ec] p-6">
+      <h2 class="font-serif text-2xl text-[#2a231b] mb-4 pb-2 border-b border-[#e7dcc4]">General Information</h2>
+      <dl class="divide-y divide-[#e7dcc4]">
+        <% @descriptions['finds'].each do |item| %>
+          <div class="grid grid-cols-3 gap-3 py-2">
+            <dt class="text-sm font-medium text-[#6a5d4c]"><%= item["label"] %></dt>
+            <dd class="col-span-2 text-sm text-[#2a231b]"><%= output(@find.dig(item["key"]), item["type"]).presence || "—" %></dd>
           </div>
-          <div class="w-3/4">
-            <%= output(@find.dig(item["key"]), item["type"]) %>
-          </div>
-        </div>
-      <% end %>
+        <% end %>
+      </dl>
     </div>
-    <div class="w-4/12">
-      <% if Find.can_have_image?(@find.dig('registration_number')) %>
-      <div class="glide">
-        <div class="glide__track" data-glide-el="track">
-          <ul class="glide__slides">
 
-          </ul>
-        </div>
-      </div>
-
-
-      <div id="default-carousel" class="relative w-full" data-carousel="static">
-        <!-- Carousel wrapper -->
-        <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
-            <% Find.get_image_keys(@find.dig('registration_number')).each do |key| %>
-            <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                <%= image_tag(Find.url(key, :medium), class: 'absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2') %>
-            </div>
+    <div class="rounded-xl border border-[#ddcfb4] bg-[#fbf6ec] p-4">
+      <h2 class="font-serif text-lg text-[#2a231b] mb-3">Images</h2>
+      <% image_keys = Find.can_have_image?(@find['registration_number']) ? Find.get_image_keys(@find['registration_number']) : [] %>
+      <% if image_keys.any? %>
+        <div class="space-y-3">
+          <% image_keys.each do |key| %>
+            <%= link_to Find.url(key, :original), target: "_blank", rel: "noopener", class: "block" do %>
+              <%= image_tag Find.url(key, :medium), class: "w-full rounded-lg border border-[#e7dcc4]", loading: "lazy", alt: "Find image" %>
             <% end %>
+          <% end %>
         </div>
-        <!-- Slider indicators -->
-        <div class="absolute z-30 flex space-x-3 -translate-x-1/2 bottom-5 left-1/2">
-            <button type="button" class="w-3 h-3 rounded-full" aria-current="true" aria-label="Slide 1" data-carousel-slide-to="0"></button>
-            <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 2" data-carousel-slide-to="1"></button>
+      <% else %>
+        <div class="flex h-40 items-center justify-center rounded-lg border border-dashed border-[#ddcfb4] text-sm text-[#9c8e78]">
+          No images
         </div>
-        <!-- Slider controls -->
-        <button type="button" class="absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
-          <span class="inline-flex items-center justify-center w-8 h-8 rounded-full sm:w-10 sm:h-10 bg-black/30 dark:bg-gray-800/30 group-hover:bg-black/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-            <svg aria-hidden="true" class="w-5 h-5 text-white sm:w-6 sm:h-6 dark:text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-            <span class="sr-only">Previous</span>
-          </span>
-        </button>
-        <button type="button" class="absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-next>
-          <span class="inline-flex items-center justify-center w-8 h-8 rounded-full sm:w-10 sm:h-10 bg-black/30 dark:bg-gray-800/30 group-hover:bg-black/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-            <svg aria-hidden="true" class="w-5 h-5 text-white sm:w-6 sm:h-6 dark:text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-            <span class="sr-only">Next</span>
-          </span>
-        </button>
-    </div>
       <% end %>
     </div>
   </div>
-  <hr class="my-4">
-  <div class="flex mb-4">
-    <div class="w-full">
-      <h2 class="text-xl font-semibold">Detailed Information</h2>
+
+  <div class="rounded-xl border border-[#ddcfb4] bg-[#fbf6ec] p-6">
+    <h2 class="font-serif text-2xl text-[#2a231b] mb-4 pb-2 border-b border-[#e7dcc4]">Registration Details</h2>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-10">
       <% @descriptions['registar_info'].each do |item| %>
-        <div class="flex mb-2">
-          <div class="w-1/4">
-            <%= item["label"] %>
-          </div>
-          <div class="w-3/4">
-            <%= output(@find.dig(item["key"]), item["type"]) %>
-          </div>
+        <div class="grid grid-cols-3 gap-3 py-2 border-b border-[#e7dcc4]">
+          <dt class="text-sm font-medium text-[#6a5d4c]"><%= item["label"] %></dt>
+          <dd class="col-span-2 text-sm text-[#2a231b]"><%= output(@find.dig(item["key"]), item["type"]).presence || "—" %></dd>
         </div>
       <% end %>
-    </div>
+    </dl>
   </div>
 </div>
