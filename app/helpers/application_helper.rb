@@ -104,25 +104,24 @@ module ApplicationHelper
   end
 
   def input_for(form_definition_hash, value, description_type)
+    name = "locus[#{description_type}][#{form_definition_hash['key']}]"
     case form_definition_hash['type']
-    when 'picker'
-      if form_definition_hash['values'].is_a? Hash
-        select_tag "locus[#{description_type}][#{form_definition_hash['key']}]",
-                   options_for_select(@descriptions['lookups'][form_definition_hash['values']['from']], value),
-                   include_blank: true,
-                   class: 'form-control'
-      else
-        select_tag "locus[#{description_type}][#{form_definition_hash['key']}]",
-                   options_for_select(form_definition_hash['values'], value), include_blank: true, class: 'form-control'
-      end
-    when 'text_field'
-      text_field_tag "locus[#{description_type}][#{form_definition_hash['key']}]", value, class: 'form-control'
-    when 'date'
-      text_field_tag "locus[#{description_type}][#{form_definition_hash['key']}]", value, class: 'form-control'
+    # 'munsel_picker' (the Munsell colour list) is just a picker with inline values.
+    when 'picker', 'munsel_picker'
+      options = if form_definition_hash['values'].is_a?(Hash)
+                  @descriptions['lookups'][form_definition_hash['values']['from']]
+                else
+                  form_definition_hash['values']
+                end
+      select_tag name, options_for_select(options || [], value), include_blank: true, class: 'form-control'
     when 'checkbox'
-      check_box_tag "locus[#{description_type}][#{form_definition_hash['key']}]", true, false, class: 'form-control'
+      check_box_tag name, true, ActiveModel::Type::Boolean.new.cast(value), class: 'form-control'
     when 'text_area'
-      text_area_tag "locus[#{description_type}][#{form_definition_hash['key']}]", value, class: 'form-control'
+      text_area_tag name, value, class: 'form-control'
+    # text_field, date, and any missing/unknown type fall back to a text input so
+    # a field never silently disappears (was the case for nil-typed fields).
+    else
+      text_field_tag name, value, class: 'form-control'
     end
   end
 
