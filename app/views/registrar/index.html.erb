@@ -1,69 +1,78 @@
-<div class="flex mb-4">
-  <div class="col-span-12 align-bottom">
-    <h1 class="text-2xl font-semibold">Registar Homepage for season <%= @selected_season %></h1>
-  </div>
-</div>
-
-<div class="flex mb-4">
-  <div class="col-span-12">
-    <h1 class="text-2xl"><%= @status.capitalize %> Items</h1>
-  </div>
-</div>
-
-<div class="flex mb-4">
-  <div class="col-span-12">
-    <div class="flex flex-wrap">
-      <div class="col-span-2 mr-2">
-        <%= link_to 'All Field Finds', registrar_index_path(status: 'all'), class: 'w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded' %>
-      </div>
-      <div class="col-span-2 mr-2">
-        <%= link_to 'Unregistered', registrar_index_path(status: 'unregistered'), class: 'w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded' %>
-      </div>
-      <div class="col-span-2 mr-2">
-        <%= link_to 'Initial Registration', registrar_index_path(status: 'initial'), class: 'w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded' %>
-      </div>
-      <div class="col-span-2 mr-2">
-        <%= link_to 'Work in Progress', registrar_index_path(status: 'wip'), class: 'w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded' %>
-      </div>
-      <div class="col-span-2">
-        <%= link_to 'Completed', registrar_index_path(status: 'completed'), class: 'w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded' %>
-      </div>
+<div class="container mx-auto max-w-5xl px-2 py-8">
+  <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+    <div>
+      <h1 class="font-serif text-4xl text-[#2a231b]">Registrar</h1>
+      <p class="text-[#6a5d4c] mt-1">Field finds move left&nbsp;&rarr;&nbsp;right through registration.</p>
     </div>
-  </div>
-</div>
-
-
-<table class="w-full mb-4">
-  <thead>
-    <tr>
-      <th class="px-4 py-2 text-left">Information</th>
-      <th class="px-4 py-2 text-left" style="width: 10%;">Reg Number</th>
-      <th class="px-4 py-2 text-left" style="width: 10%;">Type</th>
-      <th class="px-4 py-2 text-left">Remarks</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @finds.each.with_index do |find, index| %>
-      <tr class="<%= index.even? ? 'bg-gray-100' : '' %>">
-<td class="px-4 py-2 text-left">
-  <%= link_to registrar_path(id: find.id, pail_id: find.pail_number, item_type: find.type, item_number: find.field_number, item_locus_code: find.formatted_locus_code) do %>
-    <div class="flex flex-col">
-      <div class="text-lg font-semibold"><%= find.formatted_locus_code %></div>
-      <div class="grid grid-cols-2 gap-1">
-        <span class="text-sm font-semibold text-gray-600">Pail:</span>
-        <span class="text-sm text-left"><%= find.pail_number %></span>
-        <span class="text-sm font-semibold text-gray-600">Field number:</span>
-        <span class="text-sm text-left"><%= find.field_number %></span>
+    <form method="get" action="<%= registrar_index_path %>" class="flex items-end gap-2">
+      <input type="hidden" name="status" value="<%= @selected_stage %>">
+      <div>
+        <label for="season" class="block text-sm font-medium text-[#6a5d4c] mb-1">Season</label>
+        <select name="season" id="season" onchange="this.form.submit()"
+                class="rounded-md border border-[#ddcfb4] bg-white px-3 py-2 text-sm text-[#2a231b] focus:border-[#9c6b3f] focus:outline-none">
+          <% @seasons.each do |yr| %>
+            <option value="<%= yr %>" <%= 'selected' if yr == @selected_season %>><%= yr %></option>
+          <% end %>
+        </select>
       </div>
+    </form>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="flex flex-wrap items-stretch gap-2 mb-5">
+    <% @stages.each_with_index do |stage, i| %>
+      <% active = stage[:key] == @selected_stage %>
+      <%= link_to registrar_index_path(status: stage[:key], season: @selected_season),
+            class: "flex-1 min-w-[8.5rem] rounded-xl border px-4 py-3 transition-colors #{active ? 'border-[#b1542b] bg-[#b1542b] text-white shadow-sm' : 'border-[#ddcfb4] bg-[#fbf6ec] text-[#2a231b] hover:border-[#c8a87f]'}" do %>
+        <span class="block text-xs uppercase tracking-wide <%= active ? 'text-white/80' : 'text-[#9c8e78]' %>">Stage <%= i + 1 %></span>
+        <span class="flex items-center justify-between gap-2 mt-0.5">
+          <span class="font-serif text-lg leading-tight"><%= stage[:label] %></span>
+          <span class="inline-flex items-center justify-center rounded-full px-2 py-0.5 text-sm font-semibold <%= active ? 'bg-white/20 text-white' : 'bg-[#efe3cf] text-[#8d3f1d]' %>"><%= @stage_counts[stage[:key]] %></span>
+        </span>
+      <% end %>
+    <% end %>
+  </div>
+
+  <p class="text-sm text-[#6a5d4c] mb-3">
+    <% current = @stages.find { |s| s[:key] == @selected_stage } %>
+    Showing <span class="font-semibold"><%= @finds.size %></span>
+    <%= (current ? current[:label] : 'All').downcase %> find<%= 's' unless @finds.size == 1 %> for <%= @selected_season %>.
+    <%= link_to "View all #{@stage_counts['all']}", registrar_index_path(status: 'all', season: @selected_season),
+                class: "ml-1 text-[#b1542b] hover:text-[#8d3f1d] font-medium" unless @selected_stage == 'all' %>
+  </p>
+
+  <% if @finds.empty? %>
+    <div class="rounded-xl border border-dashed border-[#ddcfb4] bg-[#fbf6ec] p-12 text-center">
+      <p class="font-serif text-2xl text-[#2a231b] mb-1">Nothing here yet</p>
+      <p class="text-[#6a5d4c]">No finds in this stage for the <%= @selected_season %> season.</p>
+    </div>
+  <% else %>
+    <div class="overflow-x-auto rounded-xl border border-[#ddcfb4]">
+      <table class="w-full text-sm">
+        <thead class="bg-[#f1e9d8] text-left text-[#6a5d4c]">
+          <tr>
+            <th class="px-4 py-3 font-medium">Find</th>
+            <th class="px-4 py-3 font-medium">Reg. number</th>
+            <th class="px-4 py-3 font-medium">Type</th>
+            <th class="px-4 py-3 font-medium">Remarks</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#e7dcc4] bg-white">
+          <% @finds.each do |find| %>
+            <tr class="hover:bg-[#fbf6ec]">
+              <td class="px-4 py-3">
+                <%= link_to registrar_path(id: find.id, pail_id: find.pail_number, item_type: find.type, item_number: find.field_number, item_locus_code: find.formatted_locus_code), class: "block group" do %>
+                  <span class="font-serif text-base font-semibold text-[#2a231b] group-hover:text-[#b1542b]"><%= find.formatted_locus_code %></span>
+                  <span class="block text-xs text-[#9c8e78]">Pail <%= find.pail_number %> &middot; Field #<%= find.field_number %></span>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 text-[#2a231b]"><%= find.registration_number.presence || "—" %></td>
+              <td class="px-4 py-3 text-[#2a231b]"><%= find.type %></td>
+              <td class="px-4 py-3 text-[#6a5d4c]"><%= find.remarks %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
     </div>
   <% end %>
-</td>
-
-
-        <td class="px-4 py-2 text-left"><%= find.registration_number %></td>
-        <td class="px-4 py-2 text-left"><%= find.type %></td>
-        <td class="px-4 py-2 text-left"><%= find.remarks %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+</div>

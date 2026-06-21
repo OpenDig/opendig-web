@@ -1,9 +1,26 @@
 class Registrar
   attr_accessor :code, :pail_number, :field_number, :registration_number, :type, :remarks, :id, :state, :square, :area
 
+  # The registration pipeline, in order. Each find sits in exactly one stage,
+  # derived from its stored `state`. Labels are what the registrar page shows;
+  # `states` lists the raw state values that map into the stage. Field finds
+  # synced from devices have no state yet, so they land in "Incoming".
+  STAGES = [
+    { key: 'incoming',  label: 'Incoming',             states: %w[unregistered] },
+    { key: 'initial',   label: 'Initial Registration', states: ['initial registration'] },
+    { key: 'pending',   label: 'Pending Approval',     states: %w[WIP] },
+    { key: 'completed', label: 'Completed',            states: ['registrarion complete'] }
+  ].freeze
+
   def initialize(row_values)
     @area, @square, @code, @pail_number, @field_number, @registration_number, @type, @remarks, @state, @id = row_values
     @state = 'unregistered' unless @state.present?
+  end
+
+  # The pipeline stage key for this find. Any unrecognised state falls into the
+  # first stage so nothing silently disappears from the board.
+  def stage
+    STAGES.find { |s| s[:states].include?(state) }&.fetch(:key) || STAGES.first[:key]
   end
 
   def to_ary

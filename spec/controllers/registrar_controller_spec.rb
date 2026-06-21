@@ -31,6 +31,45 @@ RSpec.describe RegistrarController, type: :controller do
     end
   end
 
+  describe 'GET index season + pipeline' do
+    let(:finds) do
+      [
+        Registrar.new(['1', '1', '001', '1', '1', nil, 'Ceramic', 'a', nil, 'i1']),                      # incoming
+        Registrar.new(['1', '1', '002', '1', '2', nil, 'Ceramic', 'b', 'initial registration', 'i2']),   # initial
+        Registrar.new(['1', '1', '003', '1', '3', nil, 'Ceramic', 'c', 'WIP', 'i3']) # pending
+      ]
+    end
+
+    before do
+      session[:user_id] = users[:registrar].id
+      allow(Registrar).to receive(:all_by_season).and_return(finds)
+    end
+
+    it 'defaults to the current season and offers it among the options' do
+      get :index
+      expect(assigns(:selected_season)).to eq(Date.current.year)
+      expect(assigns(:seasons)).to include(Date.current.year, 2020)
+    end
+
+    it 'honours the season param' do
+      allow(Registrar).to receive(:all_by_season).with(2020).and_return(finds)
+      get :index, params: { season: '2020' }
+      expect(assigns(:selected_season)).to eq(2020)
+    end
+
+    it 'counts every stage and defaults to Incoming' do
+      get :index
+      expect(assigns(:selected_stage)).to eq('incoming')
+      expect(assigns(:stage_counts)).to include('incoming' => 1, 'initial' => 1, 'pending' => 1, 'all' => 3)
+      expect(assigns(:finds).map(&:id)).to eq(['i1'])
+    end
+
+    it 'filters by the requested stage' do
+      get :index, params: { status: 'pending' }
+      expect(assigns(:finds).map(&:id)).to eq(['i3'])
+    end
+  end
+
   describe 'GET edit (write access)' do
     let(:params) { { id: 'doc1', pail_id: '1', item_number: '1', item_locus_code: '1.1.001' } }
 
