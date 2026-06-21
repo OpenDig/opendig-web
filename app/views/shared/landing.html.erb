@@ -120,13 +120,28 @@
 
     <% if signed_in %>
       <section class="digs">
-        <h2>Your digs</h2>
-        <p class="sub">Projects you have access to. Pick one to enter the field record.</p>
+        <div style="display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap;margin-bottom:1.6rem">
+          <div>
+            <h2>Your digs</h2>
+            <p class="sub" style="margin-bottom:0">Projects you have access to. Pick one to enter the field record.</p>
+          </div>
+          <% if current_user.superuser? %>
+            <a class="btn btn-primary" style="margin-left:auto" href="<%= projects_path %>">Manage projects</a>
+          <% end %>
+        </div>
         <% if digs.any? %>
           <div class="dig-grid">
             <% digs.each do |key| %>
+              <% cover = Project.cover_photo_url(key, :thumb) %>
+              <% desc = Project.description(key) %>
               <a class="dig-card" href="<%= "#{request.protocol}#{key}.#{request.domain}#{port}/" %>">
-                <span class="name"><%= key.humanize %></span>
+                <% if cover.present? %>
+                  <img src="<%= cover %>" alt="" style="width:100%;height:120px;object-fit:cover;border-radius:10px;margin-bottom:.3rem">
+                <% end %>
+                <span class="name"><%= Project.display_name(key) %></span>
+                <% if desc.present? %>
+                  <span style="color:var(--ink-soft);font-size:.9rem;line-height:1.45"><%= truncate(desc, length: 130) %></span>
+                <% end %>
                 <span class="go">Enter the dig →</span>
               </a>
             <% end %>

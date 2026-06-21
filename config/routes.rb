@@ -35,6 +35,13 @@ Rails.application.routes.draw do
   resources :registrar
   resources :bulk_uploads, only: %i[new create]
 
+  # Bulk locus-photo association (parse convention-named photos -> suggest loci).
+  get  '/photos',           to: 'photos#review',    as: :photos_review
+  post '/photos/associate', to: 'photos#associate', as: :photo_associate
+
+  # Superuser project administration (runs at the apex host, no subdomain).
+  resources :projects, only: %i[index new create edit update]
+
   patch '/admin/update_user/:id', to: 'admin#update_user', as: :admin_update_user
   resources :admin, only: [] do
     collection do
@@ -57,6 +64,7 @@ Rails.application.routes.draw do
       post   'devices/pair',    to: 'devices#pair'
       delete 'devices/current', to: 'devices#destroy'
       get    'config',          to: 'config#show'
+      get    'photos/pending',  to: 'photos#pending'
     end
   end
 

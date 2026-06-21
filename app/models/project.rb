@@ -49,6 +49,90 @@ class Project
       @cache = {}
     end
 
+    # --- project metadata (cover photo + description) ----------------------
+    #
+    # A project has no document of its own (it *is* a database), so optional
+    # presentation metadata lives in a single doc, `_id: "project"`, inside the
+    # project's CouchDB database.
+    META_DOC_ID = 'project'.freeze
+
+    def metadata(key, env: CouchDB.env)
+      return {} if key.blank? || !exists?(key, env: env)
+
+      CouchDB.main_db(key).get(META_DOC_ID)
+    rescue StandardError
+      {}
+    end
+
+    def display_name(key, env: CouchDB.env)
+      metadata(key, env: env)['name'].presence || key.to_s.humanize
+    end
+
+    def description(key, env: CouchDB.env)
+      metadata(key, env: env)['description'].presence
+    end
+
+    def cover_photo_key(key, env: CouchDB.env)
+      metadata(key, env: env)['cover_photo'].presence
+    end
+
+    # imgproxy URL for the project's cover photo, or nil when none is set.
+    def cover_photo_url(key, style = :medium, env: CouchDB.env)
+      cover = cover_photo_key(key, env: env)
+      return nil if cover.blank?
+
+      photo_style = Photo.styles(style)
+      Imgproxy::Builder.new(photo_style.transform_keys(&:to_sym))
+                       .url_for("s3://#{bucket_name}/#{cover}")
+    rescue StandardError
+      nil
+    end
+
+    # Provision a brand-new project: create its CouchDB database (which also
+    # pushes the design docs) and seed the metadata doc. Returns the key.
+    def create!(key, name: nil, description: nil, env: CouchDB.env)
+      key = normalize_key(key)
+      raise ArgumentError, 'A project key is required' if key.blank?
+      raise ArgumentError, "Project '#{key}' already exists" if exists?(key, env: env)
+
+      # Instantiating a CouchDB connection with an explicit db_name creates the
+      # database if missing and installs the design docs.
+      db = CouchDB.new(env: env, db_name: database_name(key, env: env))
+      db.save_doc(
+        '_id' => META_DOC_ID,
+        'type' => 'project',
+        'name' => name.presence || key.humanize,
+        'description' => description
+      )
+      reset_cache!
+      key
+    end
+
+    # Update presentation metadata for an existing project.
+    def update_metadata(key, name: nil, description: nil, cover_photo: nil, env: CouchDB.env)
+      db = CouchDB.main_db(key)
+      doc = (db.get(META_DOC_ID) rescue nil) || { '_id' => META_DOC_ID, 'type' => 'project' }
+      doc['name'] = name unless name.nil?
+      doc['description'] = description unless description.nil?
+      doc['cover_photo'] = cover_photo unless cover_photo.nil?
+      db.save_doc(doc)
+      doc
+    end
+
+    # Object key for a project's cover photo within the shared bucket.
+    def cover_photo_object_key(key, filename)
+      ext = File.extname(filename.to_s).downcase
+      "#{normalize_key(key)}/cover/cover#{ext.empty? ? '.jpg' : ext}"
+    end
+
+    def bucket_name
+      Rails.application.config.try(:s3_bucket)&.name || ENV.fetch('S3_BUCKET', 'opendig')
+    end
+
+    def normalize_key(key)
+      key.to_s.strip.downcase.gsub(/[^a-z0-9_]+/, '_').gsub(/\A_+|_+\z/, '')
+    end
+
     private
 
     def monotonic_now

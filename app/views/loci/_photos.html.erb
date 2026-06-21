@@ -12,13 +12,19 @@
       </thead>
       <tbody>
         <% @locus.dig('photos').each do |photo| %>
+          <%
+            # Convention-named/bulk photos reference an S3 key; legacy daily
+            # photos reference a number.
+            medium = photo["key"].present? ? Photo.url_for_key(photo["key"], :medium) : Photo.photo_url(photo["number"], :medium)
+            thumb  = photo["key"].present? ? Photo.url_for_key(photo["key"], :thumb)  : Photo.photo_url(photo["number"], :thumb)
+          %>
           <tr class="hover:bg-gray-200">
             <td class="px-4 py-2 text-left"><%= read_date photo["date"] %></td>
-            <td class="px-4 py-2 text-left"><%= photo["number"] %></td>
+            <td class="px-4 py-2 text-left"><%= photo["number"].presence || photo["filename"] %></td>
             <td class="px-4 py-2 text-left"><%= photo["subject"] %></td>
             <td class="px-4 py-2 text-center">
-              <a class="locus-photo-link flex justify-center" href="<%= Photo.photo_url(photo["number"], :medium) %>" data-lightbox="locus-photos">
-                <img class="locus-photo w-32 h-32 object-cover rounded" src="<%= Photo.photo_url(photo["number"], :thumb) %>" alt="" />
+              <a class="locus-photo-link flex justify-center" href="<%= medium %>" data-lightbox="locus-photos">
+                <img class="locus-photo w-32 h-32 object-cover rounded" src="<%= thumb %>" alt="" />
               </a>
             </td>
           </tr>

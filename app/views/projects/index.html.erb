@@ -1,0 +1,44 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="flex items-end flex-wrap gap-4 mb-8">
+    <div>
+      <h1 class="font-serif text-4xl text-[#2a231b]">Projects</h1>
+      <p class="text-[#6a5d4c] mt-1">Create and manage digs, cover photos, and descriptions.</p>
+    </div>
+    <div class="ml-auto">
+      <%= link_to new_project_path, class: "inline-flex items-center gap-2 rounded-full bg-[#b1542b] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#8d3f1d] transition-colors" do %>
+        <span class="text-lg leading-none">+</span> New project
+      <% end %>
+    </div>
+  </div>
+
+  <% if @projects.empty? %>
+    <div class="rounded-xl border border-dashed border-[#ddcfb4] bg-[#fbf6ec] p-12 text-center">
+      <p class="font-serif text-2xl text-[#2a231b] mb-1">No projects yet</p>
+      <p class="text-[#6a5d4c]">Create your first project to get started.</p>
+    </div>
+  <% else %>
+    <div class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(260px,1fr))]">
+      <% @projects.each do |p| %>
+        <div class="bg-[#fbf6ec] border border-[#ddcfb4] rounded-xl overflow-hidden flex flex-col">
+          <% if p[:cover_url].present? %>
+            <img src="<%= p[:cover_url] %>" alt="" class="h-32 w-full object-cover">
+          <% else %>
+            <div class="h-32 w-full bg-[#e8dcc5] flex items-center justify-center text-[#9c6b3f] text-sm">No cover photo</div>
+          <% end %>
+          <div class="p-4 flex flex-col gap-2 flex-1">
+            <div class="font-serif text-xl text-[#2a231b]"><%= p[:name] %></div>
+            <div class="text-xs text-[#9c6b3f] uppercase tracking-wide"><%= p[:key] %></div>
+            <% if p[:description].present? %>
+              <p class="text-sm text-[#6a5d4c] line-clamp-3"><%= p[:description] %></p>
+            <% end %>
+            <div class="mt-auto flex items-center gap-3 pt-2">
+              <%= link_to "Edit", edit_project_path(p[:key]), class: "text-[#b1542b] font-medium text-sm hover:underline" %>
+              <% port = request.optional_port ? ":#{request.optional_port}" : "" %>
+              <a class="text-[#6a5d4c] text-sm hover:underline" href="<%= "#{request.protocol}#{p[:key]}.#{request.domain}#{port}/" %>">Open dig →</a>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
