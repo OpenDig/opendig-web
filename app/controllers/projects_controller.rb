@@ -18,6 +18,10 @@ class ProjectsController < ApplicationController
 
   def new; end
 
+  def edit
+    load_project
+  end
+
   def create
     key = Project.create!(
       params[:key],
@@ -41,10 +45,6 @@ class ProjectsController < ApplicationController
   rescue StandardError => e
     flash.now[:error] = "Could not create project: #{e.message}"
     render :new, status: :unprocessable_entity
-  end
-
-  def edit
-    load_project
   end
 
   def update

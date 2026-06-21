@@ -43,7 +43,7 @@ RSpec.describe PhotoName, type: :model do
       [
         { area: '08', square: '92', code: '1', id: 'locA' },
         { area: '8',  square: '92', code: '2', id: 'locB' }, # numeric-normalized match
-        { area: '9',  square: '1',  code: '1', id: 'locZ' },
+        { area: '9',  square: '1',  code: '1', id: 'locZ' }
       ]
     end
 

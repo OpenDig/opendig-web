@@ -13,9 +13,7 @@ module Api
         square = params[:square].to_s
 
         return render_unauthorized unless device_can_access?(project)
-        if area.blank? || square.blank?
-          return render(json: { error: 'area and square are required' }, status: :unprocessable_entity)
-        end
+        return render(json: { error: 'area and square are required' }, status: :unprocessable_entity) if area.blank? || square.blank?
 
         photos = CouchDB.with_project(project) do
           BulkPhoto.pending_for_square(area, square).map do |entry|

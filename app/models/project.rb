@@ -110,8 +110,12 @@ class Project
 
     # Update presentation metadata for an existing project.
     def update_metadata(key, name: nil, description: nil, cover_photo: nil, env: CouchDB.env)
-      db = CouchDB.main_db(key)
-      doc = (db.get(META_DOC_ID) rescue nil) || { '_id' => META_DOC_ID, 'type' => 'project' }
+      db = CouchDB.new(env: env, db_name: database_name(key, env: env))
+      doc = begin
+        db.get(META_DOC_ID)
+      rescue StandardError
+        nil
+      end || { '_id' => META_DOC_ID, 'type' => 'project' }
       doc['name'] = name unless name.nil?
       doc['description'] = description unless description.nil?
       doc['cover_photo'] = cover_photo unless cover_photo.nil?

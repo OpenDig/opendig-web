@@ -28,7 +28,11 @@ namespace :photos do
         loci_changed = 0
         photos_fixed = 0
         ids.each do |id|
-          doc = (db.get(id) rescue nil)
+          doc = begin
+            db.get(id)
+          rescue StandardError
+            nil
+          end
           next unless doc && doc['photos'].is_a?(Array)
 
           changed = false

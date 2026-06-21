@@ -11,7 +11,7 @@ class PhotosController < ApplicationController
       candidates = entry.name.suggest_loci(loci)
       {
         entry: entry,
-        candidates: candidates.reject { |l| entry.linked_to.include?("#{l[:area]}.#{l[:square]}.#{l[:code]}") },
+        candidates: candidates.reject { |l| entry.linked_to.include?("#{l[:area]}.#{l[:square]}.#{l[:code]}") }
       }
     end
     @photos.sort_by! { |p| [p[:candidates].empty? ? 1 : 0, p[:entry].key] }
@@ -22,11 +22,9 @@ class PhotosController < ApplicationController
   # appending it to each locus doc's photos[].
   def associate
     key = params[:key].to_s
-    locus_ids = Array(params[:locus_ids]).reject(&:blank?)
+    locus_ids = Array(params[:locus_ids]).compact_blank
     return_to = params[:return_to].presence || photos_review_path
-    if key.blank? || locus_ids.empty?
-      return redirect_to(return_to, alert: 'Pick at least one locus for the photo.')
-    end
+    return redirect_to(return_to, alert: 'Pick at least one locus for the photo.') if key.blank? || locus_ids.empty?
 
     name = PhotoName.parse(File.basename(key))
     linked = []
