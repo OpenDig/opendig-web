@@ -175,45 +175,21 @@ RSpec.describe ApplicationController, type: :controller do
       end
     end
 
-    describe "check_session_timeout" do
+    describe "session persistence (no inactivity timeout)" do
       before do
         routes.draw do
           get 'index' => 'anonymous#index'
         end
       end
 
-      it "resets session and sets alert flash if session has expired" do
-        past_time = 31.minutes.ago
-        session[:last_seen] = past_time
+      it "keeps a long-idle session signed in (no timeout, no expiry flash)" do
+        session[:user_id] = 'someone'
+        session[:last_seen] = 100.days.ago # a stale value from before the timeout was removed
 
-        expect(session).to receive(:destroy)
         get :index
-        expect(flash[:alert]).to eq("Your session has expired due to inactivity.")
-      end
 
-      it "does not reset session if session is still valid" do
-        recent_time = 10.minutes.ago
-        session[:last_seen] = recent_time
-
-        expect(session).not_to receive(:destroy)
-        get :index
+        expect(session[:user_id]).to eq('someone')
         expect(flash[:alert]).to be_nil
-      end
-    end
-
-    describe "update_session_timestamp" do
-      before do
-        routes.draw do
-          get 'index' => 'anonymous#index'
-        end
-      end
-
-      it "updates session[:last_seen] to current time" do
-        travel_to Time.current do
-          get :index
-
-          expect(session[:last_seen]).to be_within(5.seconds).of(Time.current)
-        end
       end
     end
   end
