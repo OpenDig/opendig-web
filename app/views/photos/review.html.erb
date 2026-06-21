@@ -2,8 +2,9 @@
   <div class="mb-6">
     <h1 class="font-serif text-4xl text-[#2a231b]">Photos</h1>
     <p class="text-[#6a5d4c] mt-1">
-      All convention-named photos in the bucket and the loci they're linked to.
-      Per-square triage happens on each square's page.
+      Convention-named photos waiting to be linked to a locus. Tick the loci a
+      photo belongs to (it can belong to several) and link it — it drops off this
+      list once linked. Per-square triage also lives on each square's page.
     </p>
   </div>
 
@@ -13,12 +14,12 @@
     </div>
   <% end %>
 
-  <p class="text-sm text-[#6a5d4c] mb-3"><span class="font-semibold"><%= @unlinked_count %></span> not yet linked to any locus.</p>
+  <p class="text-sm text-[#6a5d4c] mb-3"><span class="font-semibold"><%= @unlinked_count %></span> photo<%= 's' unless @unlinked_count == 1 %> waiting to be linked.</p>
 
   <% if @photos.empty? %>
     <div class="rounded-xl border border-dashed border-[#ddcfb4] bg-[#fbf6ec] p-12 text-center">
-      <p class="font-serif text-2xl text-[#2a231b] mb-1">No photos found</p>
-      <p class="text-[#6a5d4c]">Upload convention-named photos to the project's <code>daily_photos/</code> prefix to see them here.</p>
+      <p class="font-serif text-2xl text-[#2a231b] mb-1">Nothing to link</p>
+      <p class="text-[#6a5d4c]">Every convention-named photo in <code>daily_photos/</code> is linked to a locus. New uploads appear here until they're linked.</p>
     </div>
   <% else %>
     <div class="overflow-x-auto rounded-xl border border-[#ddcfb4]">
@@ -44,17 +45,15 @@
                 <div class="font-mono text-xs text-[#2a231b] break-all"><%= entry.filename %></div>
                 <% if name.subject.present? %><div class="text-[#9c8e78] text-xs mt-1"><%= name.subject %></div><% end %>
               </td>
-              <td class="px-3 py-3 text-[#6a5d4c]">
-                <%= name.valid? ? "#{name.area}.#{name.square}" : '—' %>
+              <td class="px-3 py-3">
+                <% if name.valid? %>
+                  <%= link_to "#{name.area}.#{name.square}", area_square_loci_path(name.area, name.square),
+                        class: "text-[#b1542b] hover:underline font-medium" %>
+                <% else %>
+                  <span class="text-[#6a5d4c]">—</span>
+                <% end %>
               </td>
               <td class="px-3 py-3">
-                <% if entry.linked_to.any? %>
-                  <div class="flex flex-wrap gap-1 mb-2">
-                    <% entry.linked_to.each do |code| %>
-                      <span class="inline-flex items-center gap-1 rounded-full bg-[#e7f0e3] px-2.5 py-1 text-xs text-[#3f7d3f] font-medium">✓ <%= code %></span>
-                    <% end %>
-                  </div>
-                <% end %>
                 <% if p[:candidates].any? %>
                   <%= form_with url: photo_associate_path, method: :post, local: true do %>
                     <%= hidden_field_tag :key, entry.key %>
@@ -68,7 +67,7 @@
                     </div>
                     <%= submit_tag 'Link selected', class: "rounded-full bg-[#b1542b] px-3 py-1.5 text-white text-sm font-medium hover:bg-[#8d3f1d] cursor-pointer" %>
                   <% end %>
-                <% elsif entry.linked_to.empty? %>
+                <% else %>
                   <span class="text-xs text-[#9c8e78]"><%= name.valid? ? "No loci in #{name.area}.#{name.square} yet" : 'Unrecognized filename' %></span>
                 <% end %>
               </td>

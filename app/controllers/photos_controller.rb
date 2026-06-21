@@ -7,15 +7,16 @@ class PhotosController < ApplicationController
   def review
     @bucket_configured = Rails.application.config.try(:s3_bucket).present?
     loci = locus_index
-    @photos = BulkPhoto.all.map do |entry|
-      candidates = entry.name.suggest_loci(loci)
+    # Triage lists only photos still waiting to be linked; once a photo is
+    # linked to any locus it drops off this page on the next load.
+    @photos = BulkPhoto.all.select(&:pending?).map do |entry|
       {
         entry: entry,
-        candidates: candidates.reject { |l| entry.linked_to.include?("#{l[:area]}.#{l[:square]}.#{l[:code]}") }
+        candidates: entry.name.suggest_loci(loci)
       }
     end
     @photos.sort_by! { |p| [p[:candidates].empty? ? 1 : 0, p[:entry].key] }
-    @unlinked_count = @photos.count { |p| p[:entry].pending? }
+    @unlinked_count = @photos.size
   end
 
   # Link an S3 photo to one or more loci (a photo can belong to many) by
