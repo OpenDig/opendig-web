@@ -36,7 +36,9 @@
             <% entry = p[:entry]; name = entry.name %>
             <tr class="hover:bg-[#fbf6ec] align-top">
               <td class="px-3 py-3">
-                <img src="<%= entry.thumb_url %>" alt="" class="w-20 h-20 object-cover rounded" loading="lazy">
+                <a href="<%= entry.full_url %>" target="_blank" rel="noopener" title="Open full size">
+                  <img src="<%= entry.preview_url %>" alt="" class="w-28 h-28 object-cover rounded ring-1 ring-[#e7dcc4] hover:opacity-90 transition" loading="lazy">
+                </a>
               </td>
               <td class="px-3 py-3">
                 <div class="font-mono text-xs text-[#2a231b] break-all"><%= entry.filename %></div>

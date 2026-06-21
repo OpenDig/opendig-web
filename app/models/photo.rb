@@ -5,6 +5,14 @@ class Photo
         height: 1000,
         width: 1000
       },
+      # Crisp on-the-fly preview for photo grids/cards. Larger than `thumb` so it
+      # stays sharp on hi-DPI screens; `fit` keeps the whole frame (CSS crops it).
+      preview: {
+        height: 600,
+        width: 600,
+        resizing_type: 'fit',
+        quality: 82
+      },
       thumb: {
         height: 100,
         width: 100

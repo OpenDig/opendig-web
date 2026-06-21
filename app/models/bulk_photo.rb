@@ -5,6 +5,8 @@ class BulkPhoto
   Entry = Struct.new(:key, :name, :linked_to, keyword_init: true) do
     def filename = File.basename(key)
     def thumb_url = Photo.url_for_key(key, :thumb)
+    def preview_url = Photo.url_for_key(key, :preview)
+    def full_url = Photo.url_for_key(key, :original)
     def pending? = linked_to.empty?
   end
 

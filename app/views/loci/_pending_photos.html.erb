@@ -10,7 +10,9 @@
   <div class="grid gap-3 grid-cols-[repeat(auto-fill,minmax(240px,1fr))]">
     <% @pending_photos.each do |photo| %>
       <div class="bg-white border border-[#ddcfb4] rounded-lg overflow-hidden flex flex-col">
-        <img src="<%= photo.thumb_url %>" alt="" class="h-36 w-full object-cover" loading="lazy">
+        <a href="<%= photo.full_url %>" target="_blank" rel="noopener" title="Open full size">
+          <img src="<%= photo.preview_url %>" alt="" class="h-44 w-full object-cover hover:opacity-90 transition" loading="lazy">
+        </a>
         <div class="p-3 flex flex-col gap-2 flex-1">
           <div class="font-mono text-[11px] text-[#6a5d4c] break-all"><%= photo.filename %></div>
           <% if photo.name.subject.present? %>

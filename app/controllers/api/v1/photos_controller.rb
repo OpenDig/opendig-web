@@ -22,8 +22,12 @@ module Api
               filename: entry.filename,
               subject: entry.name.subject,
               date: entry.name.date,
-              thumb_url: Photo.url_for_key(entry.key, :thumb),
-              url: Photo.url_for_key(entry.key, :medium)
+              # thumb_url is bumped to the crisp `preview` size so existing app
+              # builds (which read thumb_url) get sharp images with no rebuild.
+              thumb_url: Photo.url_for_key(entry.key, :preview),
+              preview_url: Photo.url_for_key(entry.key, :preview),
+              url: Photo.url_for_key(entry.key, :medium),
+              full_url: Photo.url_for_key(entry.key, :original)
             }
           end
         end
