@@ -25,6 +25,25 @@ RSpec.describe AdminController, type: :controller do
     end
   end
 
+  describe 'GET manage_users (rendered)' do
+    render_views
+
+    before do
+      session[:user_id] = users[:dig_director].id
+      # role_scopes_for stubbed to avoid the areas/squares views
+      allow(User).to receive_messages(find_all: [users[:dig_director], users[:viewer]], role_scopes_for: {})
+      allow(Invitation).to receive(:for_project).and_return([])
+    end
+
+    it 'renders the members table and invite form' do
+      get :manage_users
+      expect(response).to be_successful
+      expect(response.body).to include('User Management')
+      expect(response.body).to include('Invite a user')
+      expect(response.body).to include('Members')
+    end
+  end
+
   describe 'PATCH update_user' do
     let(:target) { users[:viewer] }
 

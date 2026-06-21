@@ -1,79 +1,75 @@
-<div>
-<%# create an update notice %>
-  <h1 class="text-3xl font-bold mb-4 text-center">User Management</h1>
+<div class="container mx-auto max-w-4xl px-2 py-8">
+  <h1 class="font-serif text-4xl text-[#2a231b] mb-6 text-center">User Management</h1>
 
   <%= render 'admin/invite_form' %>
 
-  <div class="space-y-4">
-  <table class="w-full mt-6 border-collapse border border-gray-300">
-    <thead>
-      <tr class="bg-gray-200">
-        <th class="border border-gray-300 p-2 text-center">User</th>
-        <th class="border border-gray-300 p-2 text-center">Role</th>
-        <th class="border border-gray-300 p-2 text-center">Email</th>
-        <!-- TODO implement "view log"
-        <th class="border border-gray-300 p-2 text-center">Access Log</th>
-        -->
-      </tr>
-    </thead>
-    <tbody>
-      <% @users.each do |user| %>
-        <tr>
-          <td class="border border-gray-300 p-2 text-center w-1/3">
-            <span><%= user.name %></span>
-            <% if user == current_user %>
-                <span class="text-sm text-gray-500">(You)</span>
-            <% end %>
-          </td>
-          <td class="border border-gray-300 p-2 w-1/3">
-            <%= render partial: 'admin/manage_users_role_form', locals: { user: user, open: false } %>
-          </td>
-          <td class="border border-gray-300 p-2"><%= user.email %></td>
-          <!-- TODO implement "view log"
-          <td class="border border-gray-300 p-2">
-            <a href="#" class="text-blue-600 hover:underline">View Log</a>
-          </td>
-          -->
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-  </div>
-
-  <% if @invitations.present? %>
-    <div class="mt-10">
-      <h2 class="text-2xl font-bold mb-3">Pending Invitations</h2>
-      <table class="w-full border-collapse border border-gray-300">
-        <thead>
-          <tr class="bg-gray-200">
-            <th class="border border-gray-300 p-2 text-center">Email</th>
-            <th class="border border-gray-300 p-2 text-center">Role</th>
-            <th class="border border-gray-300 p-2 text-center">Invited By</th>
-            <th class="border border-gray-300 p-2 text-center">Action</th>
+  <div class="mt-8">
+    <h2 class="font-serif text-2xl text-[#2a231b] mb-3">Members</h2>
+    <div class="overflow-x-auto rounded-xl border border-[#ddcfb4]">
+      <table class="w-full text-sm">
+        <thead class="bg-[#f1e9d8] text-left text-[#6a5d4c]">
+          <tr>
+            <th class="px-4 py-3 font-medium">User</th>
+            <th class="px-4 py-3 font-medium">Role</th>
+            <th class="px-4 py-3 font-medium">Email</th>
           </tr>
         </thead>
-        <tbody>
-          <% @invitations.each do |invitation| %>
-            <tr>
-              <td class="border border-gray-300 p-2"><%= invitation.email %></td>
-              <td class="border border-gray-300 p-2 text-center">
-                <%= invitation.role.humanize %>
-                <% if invitation.scopes.present? %>
-                  <span class="text-sm text-gray-500">(<%= invitation.scopes.join(', ') %>)</span>
+        <tbody class="divide-y divide-[#e7dcc4] bg-white">
+          <% @users.each do |user| %>
+            <tr class="align-top hover:bg-[#fbf6ec]">
+              <td class="px-4 py-3">
+                <span class="text-[#2a231b]"><%= user.name %></span>
+                <% if user == current_user %>
+                  <span class="text-xs text-[#9c8e78]">(You)</span>
                 <% end %>
               </td>
-              <td class="border border-gray-300 p-2 text-center"><%= invitation.invited_by %></td>
-              <td class="border border-gray-300 p-2 text-center">
-                <%= button_to 'Revoke', revoke_invitation_path(email: invitation.email),
-                              method: :delete,
-                              form: { class: 'inline' },
-                              class: 'px-3 py-1 bg-red-500 text-white rounded',
-                              data: { confirm: 'Revoke this invitation?' } %>
+              <td class="px-4 py-3 w-1/3">
+                <%= render partial: 'admin/manage_users_role_form', locals: { user: user, open: false } %>
               </td>
+              <td class="px-4 py-3 text-[#6a5d4c]"><%= user.email %></td>
             </tr>
           <% end %>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <% if @invitations.present? %>
+    <div class="mt-10">
+      <h2 class="font-serif text-2xl text-[#2a231b] mb-3">Pending Invitations</h2>
+      <div class="overflow-x-auto rounded-xl border border-[#ddcfb4]">
+        <table class="w-full text-sm">
+          <thead class="bg-[#f1e9d8] text-left text-[#6a5d4c]">
+            <tr>
+              <th class="px-4 py-3 font-medium">Email</th>
+              <th class="px-4 py-3 font-medium">Role</th>
+              <th class="px-4 py-3 font-medium">Invited by</th>
+              <th class="px-4 py-3 font-medium text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#e7dcc4] bg-white">
+            <% @invitations.each do |invitation| %>
+              <tr class="hover:bg-[#fbf6ec]">
+                <td class="px-4 py-3 text-[#2a231b]"><%= invitation.email %></td>
+                <td class="px-4 py-3 text-[#2a231b]">
+                  <%= invitation.role.humanize %>
+                  <% if invitation.scopes.present? %>
+                    <span class="text-xs text-[#9c8e78]">(<%= invitation.scopes.join(', ') %>)</span>
+                  <% end %>
+                </td>
+                <td class="px-4 py-3 text-[#6a5d4c]"><%= invitation.invited_by %></td>
+                <td class="px-4 py-3 text-right">
+                  <%= button_to 'Revoke', revoke_invitation_path(email: invitation.email),
+                                method: :delete,
+                                form: { class: 'inline' },
+                                class: 'rounded-full border border-[#f0c5bd] bg-[#fdecea] px-3 py-1 text-sm font-medium text-[#9c2a1c] hover:bg-[#f8d7d2] cursor-pointer',
+                                data: { confirm: 'Revoke this invitation?' } %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     </div>
   <% end %>
 </div>
