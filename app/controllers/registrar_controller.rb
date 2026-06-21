@@ -5,24 +5,22 @@ class RegistrarController < ApplicationController
   before_action :set_item, only: [:show, :edit, :update]
 
   def index
-    @seasons = @db.view('opendig/seasons', { group: true })['rows'].map { |row| row['key'] }.sort.reverse
+    # Seasons present in the data, plus the current one so a new season is
+    # selectable before any finds exist for it. Default to the current season.
+    current_season = Date.current.year
+    data_seasons = @db.view('opendig/seasons', { group: true })['rows'].map { |row| row['key'].to_i }
+    @seasons = (data_seasons + [current_season]).uniq.sort.reverse
+    @selected_season = (params[:season].presence || current_season).to_i
 
-    status = {
-      all: 'all',
-      unregistered: 'unregistered',
-      initial: 'initial registration',
-      wip: 'WIP',
-      completed: 'registrarion complete'
-    }
+    @stages = Registrar::STAGES
+    all_finds = Registrar.all_by_season(@selected_season)
 
-    @status = status[params[:status]&.to_sym] || status[:unregistered]
+    @stage_counts = Hash.new(0)
+    all_finds.each { |find| @stage_counts[find.stage] += 1 }
+    @stage_counts['all'] = all_finds.size
 
-    @selected_season = params[:season] || @seasons.first
-    @finds = if @status == 'all'
-               Registrar.all_by_season(@selected_season.to_i)
-             else
-               Registrar.all_by_season(@selected_season.to_i).select { |reg| reg.state == @status }
-             end
+    @selected_stage = params[:status].presence || @stages.first[:key]
+    @finds = @selected_stage == 'all' ? all_finds : all_finds.select { |find| find.stage == @selected_stage }
     @finds.sort_by! { |find| [find.formatted_locus_code, find.pail_number] }
   end
 
