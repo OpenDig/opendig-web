@@ -1,42 +1,27 @@
 <!-- Document ID: <%= @locus['_id'] %> -->
-<div class="container mx-auto">
-  <div class="flex items-center mb-4">
-    <h1 class="text-3xl">Locus <%= @area %>.<%= @square %>.<%= @locus_code %></h1>
+<div class="locus-show container mx-auto max-w-4xl px-2 py-8">
+  <nav class="text-sm text-[#6a5d4c] mb-2">
+    <%= link_to "Home", root_path, class: "hover:text-[#b1542b]" %>
+    <span class="mx-1" aria-hidden="true">/</span>
+    <%= link_to "Area #{@area}", area_squares_path(@area), class: "hover:text-[#b1542b]" %>
+    <span class="mx-1" aria-hidden="true">/</span>
+    <%= link_to "Square #{@square}", area_square_loci_path(@area, @square), class: "hover:text-[#b1542b]" %>
+    <span class="mx-1" aria-hidden="true">/</span>
+    <span class="text-[#2a231b]">Locus <%= @locus_code %></span>
+  </nav>
+
+  <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+    <div>
+      <h1 class="font-serif text-4xl text-[#2a231b]">Locus <%= @area %>.<%= @square %>.<%= @locus_code %></h1>
+      <p class="text-[#6a5d4c] mt-1">
+        <%= @locus['locus_type'].presence || 'Locus' %><%= " &middot; #{@locus['designation']}".html_safe if @locus['designation'].present? %>
+      </p>
+    </div>
     <% if current_user&.can_edit_dig_data?(area: @area, square: @square) %>
-      <div class="ml-auto">
-        <%= link_to "Edit", edit_area_square_locus_path(@area, @square, @locus_code), class: "btn btn-primary float-right" %>
-      </div>
+      <%= link_to "Edit locus", edit_area_square_locus_path(@area, @square, @locus_code),
+                  class: "inline-flex items-center rounded-full bg-[#b1542b] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#8d3f1d]" %>
     <% end %>
   </div>
-
-<div class="flex mb-4">
-  <nav class="text-sm">
-    <ol class="flex items-center space-x-2">
-      <li>
-        <a href="/" class="text-gray-500 hover:text-gray-700">Home</a>
-      </li>
-      <li>
-        >
-      </li>
-      <li>
-        <a href="<%= area_squares_path(@area) %>" class="text-gray-500 hover:text-gray-700">Area <%= @area %></a>
-      </li>
-      <li>
-        >
-      </li>
-      <li>
-        <a href="<%= area_square_loci_path(@area, @square) %>" class="text-gray-500 hover:text-gray-700">Square <%= @square %></a>
-      </li>
-      <li>
-        >
-      </li>
-      <li class="text-gray-700">
-        Locus <%= @area %>.<%= @square %>.<%= @locus_code %>
-      </li>
-    </ol>
-  </nav>
-</div>
-
 
   <%= render 'general' %>
   <%= render 'interpretation' %>
@@ -49,3 +34,38 @@
   <%= render 'photos' if @locus["photos"] %>
   <%= render 'user_photos' if @locus["user_photos"].present? %>
 </div>
+
+<style>
+  /* Locus display theme (parchment / terracotta). Scoped to .locus-show. */
+  .locus-show .ls-card {
+    margin-bottom: 1.5rem; border: 1px solid #ddcfb4; background: #fbf6ec;
+    border-radius: 0.9rem; padding: 1.5rem; box-shadow: 0 1px 2px rgba(42, 35, 27, 0.04);
+  }
+  .locus-show .ls-card h2 {
+    font-family: 'Spectral', serif; font-size: 1.4rem; font-weight: 600; color: #2a231b;
+    margin: 0 0 1rem; padding-bottom: 0.55rem; border-bottom: 1px solid #e7dcc4;
+  }
+  .locus-show .ls-card h3, .locus-show .ls-card h4 {
+    font-family: 'Spectral', serif; font-weight: 600; color: #2a231b;
+  }
+
+  /* Label / value rows */
+  .locus-show .ls-field {
+    display: grid; grid-template-columns: minmax(8rem, 14rem) 1fr; gap: 1rem;
+    padding: 0.45rem 0; border-bottom: 1px solid #e7dcc4;
+  }
+  .locus-show .ls-field:last-child { border-bottom: 0; }
+  .locus-show .ls-label { font-weight: 500; color: #6a5d4c; }
+  .locus-show .ls-value { color: #2a231b; }
+  .locus-show .ls-empty { color: #9c8e78; }
+
+  /* Tables */
+  .locus-show table { width: 100%; font-size: 0.875rem; border-collapse: collapse; }
+  .locus-show thead th { background: #f1e9d8; color: #6a5d4c; text-align: left; font-weight: 500; padding: 0.5rem 0.75rem; }
+  .locus-show tbody td { padding: 0.5rem 0.75rem; border-top: 1px solid #e7dcc4; color: #2a231b; vertical-align: top; }
+  .locus-show tbody tr:hover { background: #fbf6ec; }
+
+  /* Description cards (Bootstrap .card markup) */
+  .locus-show .card { border: 1px solid #e7dcc4; background: #fff; border-radius: 0.7rem; margin-bottom: 0.75rem; }
+  .locus-show .card-body { padding: 1rem; }
+</style>

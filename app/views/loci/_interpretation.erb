@@ -1,9 +1,9 @@
-<div class="flex flex-col mb-8 bg-gray-100 p-4 rounded-lg shadow">
-  <h2 class="text-2xl font-semibold mb-4">Interpretation</h2>
+<div class="ls-card">
+  <h2>Interpretation</h2>
   <% @descriptions['interpretation'].each do |interpretation| %>
-    <div class="flex mb-2">
-      <p class="w-40 font-semibold"><%= interpretation["label"] %>:</p>
-      <p><%= output(@locus.dig(interpretation["key"]), interpretation["type"]) %></p>
+    <div class="ls-field">
+      <span class="ls-label"><%= interpretation["label"] %></span>
+      <span class="ls-value"><%= output(@locus.dig(interpretation["key"]), interpretation["type"]).presence || tag.span("—", class: "ls-empty") %></span>
     </div>
   <% end %>
 </div>
