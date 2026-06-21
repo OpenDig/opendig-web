@@ -6,7 +6,13 @@
 # the request host -- "opendig.org" in production and "lvh.me" in development --
 # which are both two-label registrable domains. (This cookie tld_length is
 # independent of config.action_dispatch.tld_length, used for subdomain parsing.)
+# `expire_after` keeps people signed in across browser restarts (without it the
+# cookie is session-only and dies when the browser closes). It's a sliding window
+# refreshed on each request, so an active user effectively stays logged in until
+# they explicitly sign out; only ~a year of total inactivity ends the session.
+# There is no inactivity timeout -- this is a field tool, not a bank.
 Rails.application.config.session_store :cookie_store,
                                        key: '_opendig_session',
                                        domain: :all,
-                                       tld_length: 2
+                                       tld_length: 2,
+                                       expire_after: 1.year

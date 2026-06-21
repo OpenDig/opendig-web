@@ -2,8 +2,6 @@ class ApplicationController < ActionController::Base
   before_action :resolve_project
   before_action :set_db, :set_descriptions, :set_edit_mode
   before_action :check_editing_mode, only: %i[new edit create update destroy]
-  before_action :check_session_timeout
-  before_action :update_session_timestamp
 
   helper_method :current_user, :user_signed_in?, :require_authentication, :user_role?, :require_role,
                 :require_superuser, :require_dig_director, :require_area_supervisor, :require_square_supervisor,
@@ -106,20 +104,6 @@ class ApplicationController < ActionController::Base
   def favorited?(**categories)
     categories.all? do |category, resource_id|
       @favorites[category.to_s]&.include?(resource_id.to_s)
-    end
-  end
-
-  def update_session_timestamp
-    session[:last_seen] = Time.current
-  end
-
-  # 30-minute sliding expiration
-  def check_session_timeout
-    timeout_minutes = 30.minutes
-
-    if session[:last_seen].present? && (Time.current - Time.zone.parse(session[:last_seen].to_s)) > timeout_minutes
-      reset_session
-      flash[:alert] = "Your session has expired due to inactivity."
     end
   end
 
