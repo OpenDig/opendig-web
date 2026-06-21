@@ -1,11 +1,12 @@
-<%= render 'general_form', locus_form: locus_form %>
-<%= render 'interpretation_form', locus_form: locus_form %>
-<%= render 'descriptions_form', locus_form: locus_form %>
-<%= render 'stratigraphy_form', locus_form: locus_form %>
-<%= render 'levels_form', locus_form: locus_form %>
-<%= render 'photos_form', locus_form: locus_form %>
-<%= render 'pails_form', locus_form: locus_form %>
+<% %w[general_form interpretation_form descriptions_form stratigraphy_form levels_form photos_form pails_form].each do |partial| %>
+  <section class="ls-section">
+    <%= render partial, locus_form: locus_form %>
+  </section>
+<% end %>
 
-<div class="fixed bottom-0 right-0 p-4 bg-white z-50 border-t border-gray-200">
-	<%= submit_tag 'Save', class: 'bg-blue-500 text-white border-none px-4 py-2 rounded cursor-pointer hover:bg-blue-600' %>
+<div class="sticky bottom-0 -mx-2 mt-2 flex justify-end gap-3 border-t border-[#ddcfb4] bg-[#fbf6ec]/95 px-4 py-3 backdrop-blur">
+  <%= link_to 'Cancel', area_square_locus_path(@area, @square, @locus_code),
+              class: 'inline-flex items-center rounded-full border border-[#ddcfb4] px-4 py-2 text-sm font-medium text-[#6a5d4c] hover:border-[#c8a87f] hover:text-[#b1542b]' %>
+  <%= submit_tag 'Save changes',
+                 class: 'inline-flex items-center rounded-full bg-[#b1542b] px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#8d3f1d] cursor-pointer border-0' %>
 </div>
