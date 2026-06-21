@@ -1,23 +1,99 @@
-<div class="container">
-  <div class="flex flex-row items-center justify-between mb-4">
-    <h1 class="text-3xl font-bold">Editing Locus <%= @area %>.<%= @square %>.<%= @locus_code %></h1>
-    <div></div>
+<div class="container mx-auto max-w-4xl px-2 py-8">
+  <nav class="text-sm text-[#6a5d4c] mb-2">
+    <%= link_to "Home", root_path, class: "hover:text-[#b1542b]" %>
+    <span class="mx-1" aria-hidden="true">/</span>
+    <%= link_to "Area #{@area}", area_squares_path(@area), class: "hover:text-[#b1542b]" %>
+    <span class="mx-1" aria-hidden="true">/</span>
+    <%= link_to "Square #{@square}", area_square_loci_path(@area, @square), class: "hover:text-[#b1542b]" %>
+    <span class="mx-1" aria-hidden="true">/</span>
+    <%= link_to "Locus #{@area}.#{@square}.#{@locus_code}", area_square_locus_path(@area, @square, @locus_code), class: "hover:text-[#b1542b]" %>
+  </nav>
+  <h1 class="font-serif text-4xl text-[#2a231b] mb-6">Editing Locus <%= @area %>.<%= @square %>.<%= @locus_code %></h1>
+
+  <div class="locus-form">
+    <%= form_with(url: area_square_locus_path(@area, @square, @locus_code), method: 'patch', local: true) do |locus_form| %>
+      <%= render 'form', locus_form: locus_form %>
+    <% end %>
   </div>
-  <div class="flex mb-4">
-    <nav aria-label="breadcrumb">
-      <ol class="flex flex-row">
-        <li class="mr-2"><%= link_to 'Home', root_path, class: "text-blue-500" %></li>
-        <li class="mr-2"><%= link_to "Area #{@area}", area_squares_path(@area), class: "text-blue-500" %></li>
-        <li class="mr-2"><%= link_to "Square #{@square}", area_square_loci_path(@area, @square), class: "text-blue-500" %></li>
-        <li class="mr-2"><%= link_to "Locus #{@area}.#{@square}.#{@locus_code}", area_square_locus_path(@area, @square, @locus_code), class: "text-blue-500" %></li>
-        <li class="text-gray-500" aria-current="page">Editing Locus <%= @area %>.<%= @square %>.<%= @locus_code %></li>
-      </ol>
-    </nav>
-  </div>
+
+  <%= render 'shared/navigation_safety' %>
 </div>
 
-<%= form_with(url: area_square_locus_path(@area, @square, @locus_code), method: 'patch', local: true, class: "mb-4") do |locus_form| %>
-  <%= render 'form', locus_form: locus_form %>
-<% end %>
+<style>
+  /* Scoped form theme for the locus editor (parchment / terracotta). Themes the
+     legacy Bootstrap-flavoured markup (.form-control, .row, .col, .btn, ...) that
+     is otherwise unstyled, plus the new section structure, in one place. */
+  .locus-form { color: #2a231b; }
 
-<%= render 'shared/navigation_safety' %>
+  /* Section cards */
+  .locus-form .ls-section {
+    background: #fbf6ec; border: 1px solid #ddcfb4; border-radius: 0.9rem;
+    padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 2px rgba(42, 35, 27, 0.04);
+  }
+  .locus-form .ls-section h1 {
+    font-family: 'Spectral', serif; font-size: 1.55rem; font-weight: 600; color: #2a231b;
+    margin: 0 0 1.1rem; padding-bottom: 0.6rem; border-bottom: 1px solid #e7dcc4;
+  }
+  .locus-form .ls-sub {
+    font-family: 'Spectral', serif; font-size: 1.1rem; font-weight: 600;
+    color: #6a5d4c; margin: 1.4rem 0 0.8rem;
+  }
+  .locus-form .ls-sub:first-child { margin-top: 0; }
+
+  /* Labels */
+  .locus-form label, .locus-form .col-form-label {
+    display: block; font-weight: 500; color: #6a5d4c; font-size: 0.85rem; margin-bottom: 0.35rem;
+  }
+
+  /* Inputs */
+  .locus-form input[type="text"], .locus-form input[type="date"], .locus-form input[type="number"],
+  .locus-form input:not([type]), .locus-form textarea, .locus-form select, .locus-form .form-control {
+    display: block; width: 100%; box-sizing: border-box;
+    border: 1px solid #ddcfb4; border-radius: 0.55rem; background: #fff; color: #2a231b;
+    padding: 0.5rem 0.7rem; font-size: 0.92rem; line-height: 1.4;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .locus-form input:focus, .locus-form textarea:focus, .locus-form select:focus, .locus-form .form-control:focus {
+    outline: none; border-color: #9c6b3f; box-shadow: 0 0 0 3px rgba(177, 84, 43, 0.14);
+  }
+  .locus-form input[readonly] { background: #f1e9d8; color: #7a6c57; cursor: not-allowed; }
+  .locus-form textarea { min-height: 5.5rem; resize: vertical; }
+
+  /* Layout helpers (Bootstrap-compat) */
+  .locus-form .form-group { margin-bottom: 1rem; }
+  .locus-form .row, .locus-form .form-row { display: flex; flex-wrap: wrap; gap: 1rem; margin: 0; }
+  .locus-form .col { flex: 1 1 0; min-width: 0; }
+  .locus-form .col-sm-12 { flex: 0 0 100%; }
+  .locus-form .col-md-2 { flex: 1 1 7rem; }
+  .locus-form .col-md-3 { flex: 1 1 11rem; }
+  .locus-form .form-row .form-group, .locus-form .row .form-group { margin-bottom: 0; }
+
+  /* Repeatable rows become tidy inner cards */
+  .locus-form .stratigraphy-row, .locus-form .level-row, .locus-form .photo-row, .locus-form .pail-row {
+    display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;
+    background: #fff; border: 1px solid #e7dcc4; border-radius: 0.7rem; padding: 1rem; margin-bottom: 0.85rem;
+  }
+
+  /* Choice chips (radios) */
+  .locus-form .ls-choices { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .locus-form .ls-choice {
+    display: inline-flex; align-items: center; gap: 0.4rem; margin: 0;
+    border: 1px solid #ddcfb4; background: #fff; border-radius: 9999px;
+    padding: 0.35rem 0.8rem; cursor: pointer; font-size: 0.85rem; font-weight: 500; color: #6a5d4c;
+  }
+  .locus-form .ls-choice:hover { border-color: #c8a87f; }
+  .locus-form .ls-choice input { width: auto; accent-color: #b1542b; margin: 0; }
+
+  /* Buttons (Bootstrap-compat) */
+  .locus-form .btn {
+    display: inline-flex; align-items: center; justify-content: center; border: none;
+    border-radius: 9999px; padding: 0.45rem 1rem; font-weight: 500; font-size: 0.85rem; cursor: pointer;
+  }
+  .locus-form .btn-danger { background: #fdecea; color: #9c2a1c; border: 1px solid #f0c5bd; }
+  .locus-form .btn-danger:hover { background: #f8d7d2; }
+  .locus-form .btn-sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+
+  /* Accordions (description) flush within the section card */
+  .locus-form details { border: 1px solid #e7dcc4; background: #fff; border-radius: 0.7rem; padding: 1rem; margin-bottom: 0.75rem; box-shadow: none; }
+  .locus-form details summary { color: #2a231b; }
+</style>
