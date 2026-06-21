@@ -4,46 +4,47 @@
 
 <style>[x-cloak] { display: none !important; }</style>
 
+<% input_class = 'w-full rounded-md border border-[#ddcfb4] bg-white px-3 py-2 text-sm text-[#2a231b] focus:border-[#9c6b3f] focus:outline-none' %>
+<% label_class = 'block text-sm font-medium text-[#6a5d4c] mb-1' %>
+
 <div x-data="{ role: '<%= @invitation.role %>' }"
-     class="border border-gray-300 rounded p-4 mb-6 max-w-xl mx-auto">
-  <h2 class="text-xl font-bold mb-3">Invite a user</h2>
-  <p class="text-sm text-gray-500 mb-3">
+     class="max-w-xl mx-auto rounded-xl border border-[#ddcfb4] bg-[#fbf6ec] p-6 shadow-sm">
+  <h2 class="font-serif text-2xl text-[#2a231b] mb-1">Invite a user</h2>
+  <p class="text-sm text-[#6a5d4c] mb-4">
     The invited person gets this role the next time they sign in with this email address.
   </p>
 
   <%= form_with model: @invitation, url: invitations_path, method: :post, class: 'space-y-3' do |f| %>
     <div>
-      <%= f.label :email, 'Email', class: 'block text-sm text-gray-600 mb-1' %>
-      <%= f.email_field :email, required: true, placeholder: 'person@example.com',
-                        class: 'w-full px-2 py-1 border-2 rounded border-gray-300' %>
+      <%= f.label :email, 'Email', class: label_class %>
+      <%= f.email_field :email, required: true, placeholder: 'person@example.com', class: input_class %>
     </div>
 
     <div>
-      <%= f.label :role, 'Role', class: 'block text-sm text-gray-600 mb-1' %>
+      <%= f.label :role, 'Role', class: label_class %>
       <%= f.select :role,
                    options_for_select(assignable_roles.map { |role| [role.humanize, role] }, @invitation.role),
                    {},
-                   { 'x-model': 'role', class: 'w-full px-2 py-1 border-2 rounded border-gray-300' } %>
+                   { 'x-model': 'role', class: input_class } %>
     </div>
 
     <div x-show="role === 'area_supervisor'" x-cloak>
-      <%= f.label :scopes, 'Areas', class: 'block text-sm text-gray-600 mb-1' %>
+      <%= f.label :scopes, 'Areas', class: label_class %>
       <%= f.select :scopes, options_for_select(area_scopes),
                    { include_hidden: false },
                    { multiple: true, size: [area_scopes.size, 5].min,
-                     ':disabled': "role !== 'area_supervisor'",
-                     class: 'w-full px-2 py-2 border-2 rounded border-gray-300' } %>
+                     ':disabled': "role !== 'area_supervisor'", class: input_class } %>
     </div>
 
     <div x-show="role === 'square_supervisor'" x-cloak>
-      <%= f.label :scopes, 'Squares', class: 'block text-sm text-gray-600 mb-1' %>
+      <%= f.label :scopes, 'Squares', class: label_class %>
       <%= f.select :scopes, options_for_select(square_scopes),
                    { include_hidden: false },
                    { multiple: true, size: [square_scopes.size, 5].min,
-                     ':disabled': "role !== 'square_supervisor'",
-                     class: 'w-full px-2 py-2 border-2 rounded border-gray-300' } %>
+                     ':disabled': "role !== 'square_supervisor'", class: input_class } %>
     </div>
 
-    <%= f.submit 'Send invitation', class: 'px-4 py-2 bg-blue-500 text-white rounded cursor-pointer' %>
+    <%= f.submit 'Send invitation',
+                 class: 'inline-flex items-center rounded-full bg-[#b1542b] px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#8d3f1d] cursor-pointer border-0' %>
   <% end %>
 </div>
