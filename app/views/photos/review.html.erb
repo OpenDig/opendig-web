@@ -39,9 +39,13 @@
             <% entry = p[:entry]; name = entry.name %>
             <tr class="hover:bg-[#fbf6ec] align-top">
               <td class="px-3 py-3">
-                <a href="<%= entry.full_url %>" target="_blank" rel="noopener" title="Open full size">
-                  <img src="<%= entry.preview_url %>" alt="" class="w-28 h-28 object-cover rounded ring-1 ring-[#e7dcc4] hover:opacity-90 transition" loading="lazy">
-                </a>
+                <img src="<%= entry.preview_url %>" alt=""
+                     data-full="<%= entry.full_url %>"
+                     data-filename="<%= entry.filename %>"
+                     data-subject="<%= name.subject %>"
+                     data-square="<%= name.valid? ? "#{name.area}.#{name.square}" : '' %>"
+                     @click="open=true; img=$el.dataset.full; filename=$el.dataset.filename; subject=$el.dataset.subject; square=$el.dataset.square"
+                     class="w-28 h-28 object-cover rounded ring-1 ring-[#e7dcc4] hover:opacity-90 transition cursor-pointer" loading="lazy" title="View full size">
               </td>
               <td class="px-3 py-3">
                 <div class="font-mono text-xs text-[#2a231b] break-all"><%= entry.filename %></div>
