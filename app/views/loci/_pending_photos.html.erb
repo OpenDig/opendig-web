@@ -1,4 +1,6 @@
-<div class="rounded-xl border border-[#e0c9a0] bg-[#fcf3e0] p-4 mb-6">
+<style>[x-cloak]{display:none !important;}</style>
+<div class="rounded-xl border border-[#e0c9a0] bg-[#fcf3e0] p-4 mb-6"
+     x-data="{ open:false, img:'', filename:'', subject:'' }">
   <h2 class="font-serif text-2xl text-[#2a231b] mb-1">
     <%= @pending_photos.size %> pending photo<%= 's' unless @pending_photos.size == 1 %>
   </h2>
@@ -10,9 +12,12 @@
   <div class="grid gap-3 grid-cols-[repeat(auto-fill,minmax(240px,1fr))]">
     <% @pending_photos.each do |photo| %>
       <div class="bg-white border border-[#ddcfb4] rounded-lg overflow-hidden flex flex-col">
-        <a href="<%= photo.full_url %>" target="_blank" rel="noopener" title="Open full size">
-          <img src="<%= photo.preview_url %>" alt="" class="h-44 w-full object-cover hover:opacity-90 transition" loading="lazy">
-        </a>
+        <img src="<%= photo.preview_url %>" alt=""
+             data-full="<%= photo.full_url %>"
+             data-filename="<%= photo.filename %>"
+             data-subject="<%= photo.name.subject %>"
+             @click="open=true; img=$el.dataset.full; filename=$el.dataset.filename; subject=$el.dataset.subject"
+             class="h-44 w-full object-cover hover:opacity-90 transition cursor-pointer" loading="lazy" title="View full size">
         <div class="p-3 flex flex-col gap-2 flex-1">
           <div class="font-mono text-[11px] text-[#6a5d4c] break-all"><%= photo.filename %></div>
           <% if photo.name.subject.present? %>
@@ -40,5 +45,22 @@
         </div>
       </div>
     <% end %>
+  </div>
+
+  <%# Full-size photo lightbox (Alpine). Click backdrop or ✕ or Esc to close. %>
+  <div x-show="open" x-cloak
+       @click="open=false" @keydown.escape.window="open=false"
+       class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+    <div @click.stop class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto shadow-xl">
+      <div class="flex justify-end p-2">
+        <button type="button" @click="open=false" aria-label="Close"
+                class="text-[#6a5d4c] hover:text-[#2a231b] text-3xl leading-none px-2">&times;</button>
+      </div>
+      <img :src="img" alt="" class="w-full max-h-[70vh] object-contain bg-black">
+      <div class="p-4 border-t border-[#e7dcc4]">
+        <div class="font-mono text-sm text-[#2a231b] break-all" x-text="filename"></div>
+        <div class="text-sm text-[#6a5d4c] mt-1" x-show="subject"><span class="font-medium">Subject:</span> <span x-text="subject"></span></div>
+      </div>
+    </div>
   </div>
 </div>
