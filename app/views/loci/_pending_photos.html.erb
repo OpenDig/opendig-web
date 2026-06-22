@@ -1,4 +1,6 @@
-<div class="rounded-xl border border-[#e0c9a0] bg-[#fcf3e0] p-4 mb-6">
+<style>[x-cloak]{display:none !important;}</style>
+<div class="rounded-xl border border-[#e0c9a0] bg-[#fcf3e0] p-4 mb-6"
+     x-data="{ open:false, img:'', filename:'', subject:'' }">
   <h2 class="font-serif text-2xl text-[#2a231b] mb-1">
     <%= @pending_photos.size %> pending photo<%= 's' unless @pending_photos.size == 1 %>
   </h2>
@@ -40,5 +42,22 @@
         </div>
       </div>
     <% end %>
+  </div>
+
+  <%# Full-size photo lightbox (Alpine). Click backdrop or ✕ or Esc to close. %>
+  <div x-show="open" x-cloak
+       @click="open=false" @keydown.escape.window="open=false"
+       class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+    <div @click.stop class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto shadow-xl">
+      <div class="flex justify-end p-2">
+        <button type="button" @click="open=false" aria-label="Close"
+                class="text-[#6a5d4c] hover:text-[#2a231b] text-3xl leading-none px-2">&times;</button>
+      </div>
+      <img :src="img" alt="" class="w-full max-h-[70vh] object-contain bg-black">
+      <div class="p-4 border-t border-[#e7dcc4]">
+        <div class="font-mono text-sm text-[#2a231b] break-all" x-text="filename"></div>
+        <div class="text-sm text-[#6a5d4c] mt-1" x-show="subject"><span class="font-medium">Subject:</span> <span x-text="subject"></span></div>
+      </div>
+    </div>
   </div>
 </div>
