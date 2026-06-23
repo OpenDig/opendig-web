@@ -15,7 +15,7 @@
         </tr>
       </thead>
       <tbody>
-        <% @locus.dig('pails').each do |pail| %>
+        <% hash_rows(@locus['pails']).each do |pail| %>
           <tr class="hover:bg-gray-200">
             <td class="px-4 py-2"><%= pail["pail_number"] %></td>
             <td class="px-4 py-2"><%= read_date(pail["pail_date"]) %></td>
@@ -25,7 +25,7 @@
             <td class="px-4 py-2"><%= pail["publish"] %></td>
           </tr>
           <!-- ... -->
-          <% if pail['readings'].present? %>
+          <% if hash_rows(pail['readings']).any? %>
             <tr>
               <td></td>
               <td colspan="5" class="px-4 py-2">
@@ -42,7 +42,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <% pail.dig('readings').each do |reading| %>
+                    <% hash_rows(pail['readings']).each do |reading| %>
                       <tr class="hover:bg-gray-200">
                         <td class="pl-4 pr-10 text-left"><%= reading['count'] %></td>
                         <td class="pl-4 pr-10 text-left"><%= reading['quantity_modifier'] %></td>
@@ -59,7 +59,7 @@
           <% end %>
           <!-- ... -->
 
-          <% if pail['finds'].present? %>
+          <% if hash_rows(pail['finds']).any? %>
             <tr>
               <td></td>
               <td colspan="5" class="px-4 py-2">
@@ -78,7 +78,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <% pail.dig('finds').each do |find| %>
+                    <% hash_rows(pail['finds']).each do |find| %>
                       <tr class="hover:bg-gray-200">
                         <td><%= find['field_number'] %></td>
                         <td><%= find['registration_number'] %></td>
