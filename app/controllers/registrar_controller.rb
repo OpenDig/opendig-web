@@ -29,9 +29,11 @@ class RegistrarController < ApplicationController
   def edit; end
 
   def update
-    pails = @doc['pails']
-    pail = pails.select { |p| p['pail_number'].to_s == @pail_id.to_s }.first
-    item = pail['finds'].select { |inner_item| inner_item['field_number'] == @item_number }.first
+    pail = embedded_rows(@doc['pails']).find { |p| p['pail_number'].to_s == @pail_id.to_s }
+    item = pail && embedded_rows(pail['finds']).find { |i| i['field_number'].to_s == @item_number }
+
+    return redirect_to(registrar_index_path, alert: 'That find could no longer be located.') if item.nil?
+
     item.merge!(params[:locus][:find].to_enum.to_h)
 
     if @doc.save
@@ -46,14 +48,28 @@ class RegistrarController < ApplicationController
 
   def set_item
     @item_id = params[:id]
-    @item_number = params[:item_number]
+    @item_number = params[:item_number].to_s
     @item_locus_code = params[:item_locus_code]
-    @area, @square, @locus_code = @item_locus_code.split('.')
+    @area, @square, @locus_code = @item_locus_code.to_s.split('.')
     @pail_id = params[:pail_id]
     @doc = @db.get(@item_id)
-    pail = @doc['pails'].select do |p|
-      p['pail_number'].to_s == @pail_id.to_s
-    end
-    @find = pail.first['finds'].select { |item| item['field_number'] == @item_number }.first
+
+    pail = embedded_rows(@doc['pails']).find { |p| p['pail_number'].to_s == @pail_id.to_s }
+    # Compare as strings: field_number may be stored as a number while the URL
+    # param is a string, which otherwise silently misses and leaves @find nil.
+    @find = pail && embedded_rows(pail['finds']).find { |item| item['field_number'].to_s == @item_number }
+
+    return if @find
+
+    redirect_to registrar_index_path, alert: 'That find could not be located.'
+  end
+
+  # Coerce an embedded collection (pails, finds) into an array of hashes. Some
+  # legacy docs store these as a Hash keyed by id rather than an array; iterating
+  # that yields [key, value] pairs and breaks item['field'] lookups. Returns the
+  # same hash objects (not copies) so in-place mutation + @doc.save still works.
+  def embedded_rows(collection)
+    rows = collection.is_a?(Hash) ? collection.values : collection
+    Array(rows).select { |row| row.is_a?(Hash) }
   end
 end
