@@ -1,4 +1,13 @@
 module ApplicationHelper
+  # Normalize an embedded collection (pails, readings, finds) into an array of
+  # hashes for iteration. Most docs store these as an array, but some legacy
+  # docs store them as a Hash keyed by id -- iterating that yields [key, value]
+  # pairs and blows up on item['field']. Coerce both shapes and drop non-hashes.
+  def hash_rows(collection)
+    rows = collection.is_a?(Hash) ? collection.values : collection
+    Array(rows).select { |row| row.is_a?(Hash) }
+  end
+
   # Always begin the OAuth handshake on the apex domain (opendig.org), so the
   # provider (Google) needs only one registered redirect URI instead of one per
   # subdomain. The `origin` carries the user back to the subdomain they started
