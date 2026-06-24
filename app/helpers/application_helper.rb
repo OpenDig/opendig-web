@@ -195,7 +195,8 @@ module ApplicationHelper
     when 'text_field'
       text_field_tag full_param_name.to_s, value, class: 'form-control'
     when 'date'
-      text_field_tag full_param_name.to_s, value, class: 'form-control'
+      # Day-granularity only: strip any stored timestamp to a clean date.
+      text_field_tag full_param_name.to_s, read_date(value), class: 'form-control'
     when 'checkbox'
       check_box_tag full_param_name.to_s, true, false, class: 'form-control'
     when 'text_area'
