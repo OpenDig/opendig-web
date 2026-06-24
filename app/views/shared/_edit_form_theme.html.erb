@@ -48,10 +48,18 @@
   .od-form .col-md-3 { flex: 1 1 11rem; }
   .od-form .form-row .form-group, .od-form .row .form-group { margin-bottom: 0; }
 
-  /* Repeatable rows become tidy inner cards */
+  /* Repeatable rows become tidy inner cards, each with a labelled header so it
+     is always clear which item a Remove button belongs to. */
   .od-form .stratigraphy-row, .od-form .level-row, .od-form .photo-row, .od-form .pail-row {
     display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;
     background: #fff; border: 1px solid #e7dcc4; border-radius: 0.7rem; padding: 1rem; margin-bottom: 0.85rem;
+  }
+  .od-form .repeat-row__head {
+    flex: 0 0 100%; display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; padding-bottom: 0.6rem; border-bottom: 1px dashed #e7dcc4;
+  }
+  .od-form .repeat-row__title {
+    font-family: 'Spectral', serif; font-weight: 600; color: #2a231b; font-size: 0.95rem; margin: 0;
   }
 
   /* Choice chips (radios) */

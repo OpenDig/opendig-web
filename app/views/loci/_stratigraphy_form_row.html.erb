@@ -1,4 +1,8 @@
 <div class="form-row stratigraphy-row">
+  <div class="repeat-row__head">
+    <p class="repeat-row__title">Relationship</p>
+    <button name="button" onclick="removeThis(this);" type="button" class="btn btn-danger btn-sm">Remove relationship</button>
+  </div>
   <div class="form-group col-md-3">
     <%= label_tag "locus[stratigraphies[][is_related]]", "How is it related?" %>
     <%= select_tag "locus[stratigraphies[][is_related]]", options_for_select(stratigraphic_relationships, stratigraphy['is_related']), include_blank: true, class: 'form-control' %>
@@ -10,8 +14,5 @@
   <div class="form-group col-md-3">
     <%= label_tag "locus[stratigraphies[][related_locus]]", "Related Locus" %>
     <%= select_tag "locus[stratigraphies[][related_locus]]", options_for_select(all_loci, sanitize_locus(stratigraphy['related_locus'])), include_blank: true, class: 'form-control' %>
-  </div>
-  <div class="form-group col-md-3 text-bottom d-flex flex-column">
-    <button name="button" onclick="removeThis(this);" type="button" class="mt-auto btn btn-danger btn-sm">Delete</button>
   </div>
 </div>

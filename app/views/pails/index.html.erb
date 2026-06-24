@@ -36,7 +36,7 @@
         <%= link_to "#{pail.locus}", area_square_locus_path(@area, @square, pail.locus), class: "text-blue-500 hover:text-blue-700" %>
       </div>
       <div class="w-6/12">
-        <%= pail.pail_date %>
+        <%= read_date pail.pail_date %>
       </div>
     </div>
   <% end %>

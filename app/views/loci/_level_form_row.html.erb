@@ -1,4 +1,8 @@
 <div class="form-row level-row">
+  <div class="repeat-row__head">
+    <p class="repeat-row__title">Level</p>
+    <button name="button" onclick="removeThisLevel(this);" type="button" class="btn btn-danger btn-sm">Remove level</button>
+  </div>
   <div class="form-group col-md-2">
     <%= label_tag "locus[levels[][top_level]]", "Top Level" %>
     <%= text_field_tag "locus[levels[][top_level]]", level['top_level'], class: 'form-control' %>
@@ -14,8 +18,5 @@
     <div class="form-group col-md-3">
     <%= label_tag "locus[levels[][method_bottom]]", "Recorded with" %>
     <%= select_tag "locus[levels[][method_bottom]]", options_for_select(survey_instruments, level['method_bottom']), include_blank: true, class: 'form-control' %>
-  </div>
-  <div class="form-group col-md-2 text-bottom d-flex flex-column">
-    <button name="button" onclick="removeThisLevel(this);" type="button" class="mt-auto btn btn-danger btn-sm">Delete</button>
   </div>
 </div>

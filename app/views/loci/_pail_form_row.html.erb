@@ -1,4 +1,8 @@
 <div class="form-row pail-row" data-pail-index=<%= index %>>
+  <div class="repeat-row__head">
+    <p class="repeat-row__title">Pail<%= " #{pail['pail_number']}" if pail['pail_number'].present? %></p>
+    <button name="button" onclick="removeThisPail(this);" type="button" class="btn btn-danger btn-sm">Remove pail</button>
+  </div>
   <div class="form-group col-md-2">
     <%= label_tag "locus[pails[#{index}][pail_number]]", "Number" %>
     <%= text_field_tag "locus[pails[#{index}][pail_number]]", pail['pail_number'], class: 'form-control' %>
@@ -27,10 +31,6 @@
   <div class="form-group col-md-10">
     <%= label_tag "locus[pails[#{index}][pottery_comments]]", "Comments" %>
     <%= text_area_tag "locus[pails[#{index}][pottery_comments]]", pail['pottery_comments'], class: 'form-control' %>
-  </div>
-  <div class="form-group col-md-1"></div>
-  <div class="form-group col-md-1 text-bottom d-flex flex-column">
-    <button name="button" onclick="removeThisPail(this);" type="button" class="mt-auto btn btn-danger btn-sm">Delete</button>
   </div>
   <div class="col">
     <div class="row">
