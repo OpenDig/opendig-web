@@ -11,7 +11,7 @@
 </div>
 <div class="row">
   <div class="col pail-container">
-    <% @locus['pails']&.each_with_index do |pail, index| %>
+    <% hash_rows(@locus['pails']).each_with_index do |pail, index| %>
       <%= render 'pail_form_row', pail: pail, index: index  %>
     <% end %>
   </div>

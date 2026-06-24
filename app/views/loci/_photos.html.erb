@@ -11,7 +11,7 @@
         </tr>
       </thead>
       <tbody>
-        <% @locus.dig('photos').each do |photo| %>
+        <% hash_rows(@locus['photos']).each do |photo| %>
           <%
             # Convention-named/bulk photos reference an S3 key; legacy daily
             # photos reference a number.

@@ -1,0 +1,36 @@
+<% supplements = hash_rows(@locus['supplements']) %>
+<% if supplements.any? %>
+  <div class="ls-card">
+    <h2>Supplements</h2>
+    <p class="text-sm text-[#6a5d4c] mb-4">Additional descriptions recorded later as the locus was further excavated.</p>
+    <% supplements.each_with_index do |supp, i| %>
+      <% stype = supp['supplement_type'].to_s %>
+      <% field_set = supplement_types[stype] %>
+      <div class="card">
+        <div class="card-body">
+          <h3 class="card-title text-xl font-semibold"><%= stype.titleize.presence || "Supplement #{i + 1}" %></h3>
+          <% if supp['supplement_date'].present? || supp['recorder'].present? %>
+            <p class="text-sm text-[#6a5d4c] mb-2">
+              <% if supp['supplement_date'].present? %>Recorded <%= read_date(supp['supplement_date']) %><% end %>
+              <% if supp['recorder'].present? %><%= ' &middot; by '.html_safe if supp['supplement_date'].present? %><%= supp['recorder'] %><% end %>
+            </p>
+          <% end %>
+          <% if field_set && @descriptions[field_set].present? %>
+            <% @descriptions[field_set].each do |section| %>
+              <% rows = section[1].select { |entry| supp[entry['key']].to_s.present? } %>
+              <% if rows.any? %>
+                <h4 class="font-semibold mt-3 mb-1"><%= section[0] %></h4>
+                <% rows.each do |entry| %>
+                  <div class="pl-4 flex mb-1">
+                    <p class="w-80 font-semibold"><%= entry['label'] %>:</p>
+                    <p><%= output(supp[entry['key']], entry['type']) %></p>
+                  </div>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

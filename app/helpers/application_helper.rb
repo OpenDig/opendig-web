@@ -134,6 +134,37 @@ module ApplicationHelper
     end
   end
 
+  # supplement_type => description field-set it reuses (architecture_description, etc.)
+  def supplement_types
+    @descriptions['supplements'] || {}
+  end
+
+  # Renders one supplement field, scoped to a specific supplement row index so
+  # each supplement is an independent hash in locus[supplements]. Mirrors
+  # input_for but with explicit array indices (locus[supplements][i][key]) so
+  # heterogeneous supplement types don't get column-zipped together.
+  def supplement_input_for(entry, value, index)
+    name = "locus[supplements][#{index}][#{entry['key']}]"
+    case entry['type']
+    when 'picker', 'munsel_picker'
+      options = if entry['values'].is_a?(Hash)
+                  @descriptions['lookups'][entry['values']['from']]
+                else
+                  entry['values']
+                end
+      select_tag name, options_for_select(options || [], value), include_blank: true, class: 'form-control'
+    when 'checkbox'
+      hidden_field_tag(name, '0', id: nil) +
+        check_box_tag(name, '1', ActiveModel::Type::Boolean.new.cast(value), class: 'form-control')
+    when 'text_area'
+      text_area_tag name, value, rows: 3, class: 'form-control'
+    when 'date'
+      text_field_tag name, value, type: 'date', class: 'form-control'
+    else
+      text_field_tag name, value, class: 'form-control'
+    end
+  end
+
   def input_with_full_param_name(form_definition_hash, value, full_param_name)
     puts "input_with_full_param_name: #{form_definition_hash.inspect}"
 

@@ -16,7 +16,7 @@
         </tr>
       </thead>
       <tbody>
-        <% @locus.dig('user_photos').each do |photo| %>
+        <% hash_rows(@locus['user_photos']).each do |photo| %>
           <tr class="hover:bg-amber-100">
             <td class="px-4 py-2 text-left"><%= read_date(photo["taken_at"]) %></td>
             <td class="px-4 py-2 text-left"><%= photo["user_name"].presence || photo["user"] %></td>

@@ -1,0 +1,35 @@
+<%# Editable block for one supplement. `index` is the row index (or the literal
+    __INDEX__ token when rendered inside an add-template that JS clones). %>
+<% field_set = supplement_types[stype] %>
+<div class="supplement-block border border-[#ddcfb4] rounded-lg p-3 mb-4 bg-white">
+  <div class="flex justify-between items-center mb-2">
+    <h2 class="font-serif text-lg font-semibold text-[#2a231b]"><%= stype.titleize %></h2>
+    <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.supplement-block').remove();">Remove</button>
+  </div>
+  <input type="hidden" name="locus[supplements][<%= index %>][supplement_type]" value="<%= stype %>">
+  <div class="form-row flex flex-wrap gap-3 mb-2">
+    <div class="form-group">
+      <label>Date</label>
+      <input type="date" name="locus[supplements][<%= index %>][supplement_date]" value="<%= supp['supplement_date'] %>" class="form-control">
+    </div>
+    <div class="form-group">
+      <label>Recorder</label>
+      <input type="text" name="locus[supplements][<%= index %>][recorder]" value="<%= supp['recorder'] %>" class="form-control">
+    </div>
+  </div>
+  <% if field_set && @descriptions[field_set].present? %>
+    <% @descriptions[field_set].each do |section| %>
+      <details class="group mt-2">
+        <summary class="cursor-pointer font-serif font-semibold text-[#2a231b] hover:text-[#b1542b]"><%= section[0] %></summary>
+        <div class="mt-2 space-y-2">
+          <% section[1].each do |entry| %>
+            <div class="form-group">
+              <label><%= entry['label'] %></label>
+              <%= supplement_input_for(entry, supp[entry['key']], index) %>
+            </div>
+          <% end %>
+        </div>
+      </details>
+    <% end %>
+  <% end %>
+</div>
