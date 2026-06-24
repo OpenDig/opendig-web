@@ -10,7 +10,7 @@
         </tr>
       </thead>
       <tbody>
-        <% @locus.dig('stratigraphies').each do |stratigraphy_row| %>
+        <% hash_rows(@locus['stratigraphies']).each do |stratigraphy_row| %>
           <tr>
             <td><%= stratigraphy_row["is_related"] %></td>
             <td><%= stratigraphy_row["related"] %></td>

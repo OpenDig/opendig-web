@@ -5,7 +5,7 @@
 </div>
 <div class="row">
   <div class="col photo-container">
-    <% @locus['photos']&.each_with_index do |photo, index| %>
+    <% hash_rows(@locus['photos']).each_with_index do |photo, index| %>
       <%= render 'photo_form_row', photo: photo, index: index  %>
     <% end %>
   </div>

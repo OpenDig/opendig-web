@@ -12,7 +12,7 @@
         </tr>
       </thead>
       <tbody>
-        <% @locus.dig('levels').each do |level| %>
+        <% hash_rows(@locus['levels']).each do |level| %>
           <tr>
             <td class="px-4 py-2"><%= level["location"] %></td>
             <td class="px-4 py-2"><%= level_or_nil(level["top_level"]) %></td>

@@ -1,0 +1,51 @@
+<div class="row">
+  <div class="col">
+    <h1 class="text-xl font-bold">Supplements</h1>
+    <p class="text-sm text-[#6a5d4c]">Record an additional description for this locus as it is further excavated. Each supplement reuses the field set for its type.</p>
+  </div>
+</div>
+
+<div id="supplements-container">
+  <% hash_rows(@locus['supplements']).each_with_index do |supp, i| %>
+    <%= render 'supplement_block', supp: supp, index: i, stype: supp['supplement_type'].to_s %>
+  <% end %>
+</div>
+
+<div class="form-row flex flex-wrap items-end gap-2 my-3">
+  <div class="form-group">
+    <label for="supplement-type-select">Add supplement</label>
+    <select id="supplement-type-select" class="form-control">
+      <% supplement_types.each_key do |stype| %>
+        <option value="<%= stype %>"><%= stype.titleize %></option>
+      <% end %>
+    </select>
+  </div>
+  <button type="button" id="add-supplement"
+          class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 cursor-pointer">Add</button>
+</div>
+
+<% supplement_types.each_key do |stype| %>
+  <template id="supplement-template-<%= stype %>">
+    <%= render 'supplement_block', supp: {}, index: '__INDEX__', stype: stype %>
+  </template>
+<% end %>
+
+<script>
+  (function () {
+    var container = document.getElementById('supplements-container');
+    var addBtn = document.getElementById('add-supplement');
+    var typeSelect = document.getElementById('supplement-type-select');
+    if (!container || !addBtn || !typeSelect) return;
+
+    // Continue numbering past any server-rendered rows so indices stay unique.
+    var nextIndex = container.querySelectorAll('.supplement-block').length;
+
+    addBtn.addEventListener('click', function () {
+      var tpl = document.getElementById('supplement-template-' + typeSelect.value);
+      if (!tpl) return;
+      var html = tpl.innerHTML.split('__INDEX__').join(String(nextIndex));
+      container.insertAdjacentHTML('beforeend', html);
+      nextIndex += 1;
+    });
+  })();
+</script>

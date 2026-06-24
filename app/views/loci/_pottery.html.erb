@@ -15,7 +15,7 @@
         </tr>
       </thead>
       <tbody>
-        <% @locus.dig('pails').each do |pail| %>
+        <% hash_rows(@locus['pails']).each do |pail| %>
           <tr class="hover:bg-gray-200">
             <td class="px-4 py-2"><%= l read_date(pail["pail_date"]) %></td>
             <td class="px-4 py-2"><%= pail["pail_number"] %></td>
@@ -31,8 +31,8 @@
               </td>
             </tr>
           <% end %>
-          <% if pail["readings"] %>
-            <% pail["readings"].group_by { |reading| reading["age"] }.each do |age, readings| %>
+          <% if hash_rows(pail["readings"]).any? %>
+            <% hash_rows(pail["readings"]).group_by { |reading| reading["age"] }.each do |age, readings| %>
               <tr>
                 <td colspan="6" class="px-4 py-2">
                   <h3 class="text-lg font-semibold mb-2">Age: <%= age %></h3>

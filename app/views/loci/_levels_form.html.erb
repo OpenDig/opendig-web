@@ -5,7 +5,7 @@
 </div>
 <div class="row">
   <div class="col level-container">
-    <% @locus['levels']&.each do |level| %>
+    <% hash_rows(@locus['levels']).each do |level| %>
       <%= render 'level_form_row', level: level %>
     <% end %>
   </div>

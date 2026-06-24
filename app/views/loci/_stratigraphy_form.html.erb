@@ -5,7 +5,7 @@
 </div>
 <div class="row">
   <div class="col stratigraphy-container">
-    <% @locus['stratigraphies']&.each do |stratigraphy| %>
+    <% hash_rows(@locus['stratigraphies']).each do |stratigraphy| %>
       <%= render 'stratigraphy_form_row', stratigraphy: stratigraphy %>
     <% end %>
   </div>
