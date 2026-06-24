@@ -21,8 +21,8 @@ RSpec.describe 'loci/_user_photos', type: :view do
     expect(rendered).to match(/Unofficial/i)
     expect(rendered).to include('Field Lead')   # uploader attribution
     expect(rendered).to include('north baulk')  # subject
-    expect(rendered).to include('19 Jun, 2026') # read_date(taken_at)
-    expect(rendered).to include('https://img.test/balua/user_photos/L1-u8-20260619T143355Z-3b9c.jpg/thumb')
+    expect(rendered).to include('19 June, 2026') # read_date(taken_at)
+    expect(rendered).to include('https://img.test/balua/user_photos/L1-u8-20260619T143355Z-3b9c.jpg/preview')
   end
 
   it 'falls back to the user id when no display name is recorded' do

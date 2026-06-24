@@ -30,29 +30,8 @@
   };
 
   $(function($) {
-    var html = `
-    <div class="form-row stratigraphy-row">
-      <div class="form-group col-md-3">
-        <%= label_tag "locus[stratigraphies[][is_related]]", "How is it related?" %>
-        <%= select_tag "locus[stratigraphies[][is_related]]", options_for_select(stratigraphic_relationships), include_blank: true, class: 'form-control' %>
-      </div>
-      <div class="form-group col-md-3">
-        <%= label_tag "locus[stratigraphies[][related]]", "What is it related to?" %>
-        <%= select_tag "locus[stratigraphies[][related]]", options_for_select(stratigraphy_relatation_types), include_blank: true, class: 'form-control' %>
-      </div>
-      <div class="form-group col-md-3">
-        <%= label_tag "locus[stratigraphies[][related_locus]]", "Related Locus" %>
-        <%= select_tag "locus[stratigraphies[][related_locus]]", options_for_select(all_loci), include_blank: true, class: 'form-control' %>
-      </div>
-      <div class="form-group col-md-3 text-bottom d-flex flex-column">
-        <button name="button" onclick="removeThis(this);" type="button" class="mt-auto btn btn-danger btn-sm">Delete</button>
-      </div>
-    </div>
-    `
-
-   function removeThis(_this){
-        $(_this).parents('.stratigraphy-row').remove();
-    };
+    // Render the same partial used for existing rows so added rows match.
+    var html = "<%= j render 'stratigraphy_form_row', stratigraphy: {} %>"
 
     var $button = $('#add-row')
 

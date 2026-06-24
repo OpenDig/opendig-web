@@ -99,8 +99,15 @@ module ApplicationHelper
     end
   end
 
+  # Day-granularity dates only — never a timestamp. Renders clearly, e.g.
+  # "24 June, 2026". Falls back to the raw value if it can't be parsed so a bad
+  # date string never 500s a page.
   def read_date(date_string)
-    Date.parse(date_string).strftime('%d %b, %Y') if date_string.present?
+    return if date_string.blank?
+
+    Date.parse(date_string.to_s).strftime('%-d %B, %Y')
+  rescue ArgumentError, TypeError
+    date_string
   end
 
   def output(value, type)

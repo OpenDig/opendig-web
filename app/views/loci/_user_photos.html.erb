@@ -23,7 +23,7 @@
             <td class="px-4 py-2 text-left"><%= photo["subject"] %></td>
             <td class="px-4 py-2 text-center">
               <a class="locus-photo-link flex justify-center" href="<%= Photo.url_for_key(photo["key"], :medium) %>" data-lightbox="locus-field-photos">
-                <img class="locus-photo w-32 h-32 object-cover rounded" src="<%= Photo.url_for_key(photo["key"], :thumb) %>" alt="" />
+                <img class="locus-photo w-32 h-32 object-cover rounded" src="<%= Photo.url_for_key(photo["key"], :preview) %>" alt="" />
               </a>
             </td>
           </tr>

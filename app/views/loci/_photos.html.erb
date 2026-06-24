@@ -16,7 +16,9 @@
             # Convention-named/bulk photos reference an S3 key; legacy daily
             # photos reference a number.
             medium = photo["key"].present? ? Photo.url_for_key(photo["key"], :medium) : Photo.photo_url(photo["number"], :medium)
-            thumb  = photo["key"].present? ? Photo.url_for_key(photo["key"], :thumb)  : Photo.photo_url(photo["number"], :thumb)
+            # `preview` (600px, fit) instead of `thumb` (100px): the grid renders
+            # these at ~128px and 2x on hi-DPI, so a 100px thumb looks blurry.
+            thumb  = photo["key"].present? ? Photo.url_for_key(photo["key"], :preview) : Photo.photo_url(photo["number"], :preview)
           %>
           <tr class="hover:bg-gray-200">
             <td class="px-4 py-2 text-left"><%= read_date photo["date"] %></td>

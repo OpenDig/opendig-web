@@ -22,29 +22,8 @@
   };
 
   $(function($) {
-    var html = `
-      <div class="form-row level-row">
-        <div class="form-group col-md-2">
-          <%= label_tag "locus[levels[][top_level]]", "Top Level" %>
-          <%= text_field_tag "locus[levels[][top_level]]", '', class: 'form-control' %>
-        </div>
-        <div class="form-group col-md-3">
-          <%= label_tag "locus[levels[][method_top]]", "Recorded with" %>
-          <%= select_tag "locus[levels[][method_top]]", options_for_select(survey_instruments), include_blank: true, class: 'form-control' %>
-        </div>
-        <div class="form-group col-md-2">
-          <%= label_tag "locus[levels[][bottom_level]]", "Bottom Level" %>
-          <%= text_field_tag "locus[levels[][bottom_level]]", '', class: 'form-control' %>
-        </div>
-          <div class="form-group col-md-3">
-          <%= label_tag "locus[levels[][method_bottom]]", "Recorded with" %>
-          <%= select_tag "locus[levels[][method_bottom]]", options_for_select(survey_instruments), include_blank: true, class: 'form-control' %>
-        </div>
-        <div class="form-group col-md-2 text-bottom d-flex flex-column">
-          <button name="button" onclick="removeThisLevel(this);" type="button" class="mt-auto btn btn-danger btn-sm">Delete</button>
-        </div>
-      </div>
-    `
+    // Render the same partial used for existing rows so added rows match.
+    var html = "<%= j render 'level_form_row', level: {} %>"
     var $button = $('#add-level-row')
 
     $button.click(function() {
