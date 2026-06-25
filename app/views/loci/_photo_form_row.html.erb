@@ -5,7 +5,7 @@
   </div>
   <div class="form-group col-md-3">
     <%= label_tag "locus[photos[#{index}][date]]", "Date" %>
-    <%= text_field_tag "locus[photos[#{index}][date]]", read_date(photo['date']), class: 'form-control' %>
+    <%= text_field_tag "locus[photos[#{index}][date]]", iso_date(photo['date']), type: 'date', class: 'form-control' %>
   </div>
   <div class="form-group col-md-3">
     <%= label_tag "locus[photos[#{index}][number]]", "Number" %>
@@ -16,9 +16,3 @@
     <%= text_field_tag "locus[photos[#{index}][subject]]", photo['subject'], class: 'form-control' %>
   </div>
 </div>
-
-<script>
-  $( "#locus_photos_<%= index %>_date" ).datepicker({
-    dateFormat: "d MM, yy"
-  });
-</script>

@@ -110,6 +110,17 @@ module ApplicationHelper
     date_string
   end
 
+  # Normalize any stored date or timestamp to YYYY-MM-DD for a native
+  # <input type="date">. Returns '' when unparseable so the picker isn't left in
+  # a broken state.
+  def iso_date(date_string)
+    return '' if date_string.blank?
+
+    Date.parse(date_string.to_s).strftime('%Y-%m-%d')
+  rescue ArgumentError, TypeError
+    ''
+  end
+
   def output(value, type)
     case type
     when 'date'
@@ -195,8 +206,8 @@ module ApplicationHelper
     when 'text_field'
       text_field_tag full_param_name.to_s, value, class: 'form-control'
     when 'date'
-      # Day-granularity only: strip any stored timestamp to a clean date.
-      text_field_tag full_param_name.to_s, read_date(value), class: 'form-control'
+      # Native date picker; day-granularity only (strips any stored timestamp).
+      text_field_tag full_param_name.to_s, iso_date(value), type: 'date', class: 'form-control'
     when 'checkbox'
       check_box_tag full_param_name.to_s, true, false, class: 'form-control'
     when 'text_area'

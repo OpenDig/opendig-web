@@ -24,11 +24,11 @@
   </div>
   <div>
     <label for="start_date">Start Date</label>
-    <input type="text" id="start_date" name="locus[start_date]" value="<%= read_date @locus['start_date'] %>" autocomplete="off">
+    <input type="date" id="start_date" name="locus[start_date]" value="<%= iso_date @locus['start_date'] %>" autocomplete="off">
   </div>
   <div>
     <label for="end_date">End Date</label>
-    <input type="text" id="end_date" name="locus[end_date]" value="<%= read_date @locus['end_date'] %>" autocomplete="off">
+    <input type="date" id="end_date" name="locus[end_date]" value="<%= iso_date @locus['end_date'] %>" autocomplete="off">
   </div>
 </div>
 
@@ -66,10 +66,3 @@
     <% end %>
   </div>
 </div>
-
-<script>
-  $(function () {
-    $("#start_date").datepicker({ dateFormat: "d MM, yy" });
-    $("#end_date").datepicker({ dateFormat: "d MM, yy" });
-  });
-</script>
