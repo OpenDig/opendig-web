@@ -65,7 +65,8 @@
 <script>
 
   $(function($) {
-    var nextPailReadingIndex = $('.pail-<%= index %>-reading-row').last().data('pail-<% index %>-reading-index') + 1
+    var lastReadingIndex = $('.pail-<%= index %>-reading-row').last().data('pail-<%= index %>-reading-index')
+    var nextPailReadingIndex = (lastReadingIndex === undefined ? -1 : Number(lastReadingIndex)) + 1
 
     var html = "<%= j render 'pail_reading_form_row', pail: pail, reading: {}, pail_index: index, reading_index: 'TEMPREADINGROW' %>".replace('TEMPREADINGROW', nextPailReadingIndex)
 

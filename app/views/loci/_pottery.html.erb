@@ -38,7 +38,8 @@
                   <h3 class="text-lg font-semibold mb-2">Age: <%= age %></h3>
                   <ul class="list-disc ml-6">
                     <% readings.each do |reading| %>
-                      <li><%= reading["reading_data"] %></li>
+                      <% summary = [reading["count"], reading["quantity_modifier"], reading["time_level"], reading["pot_form"], reading["question"]].map(&:presence).compact.join(' ') %>
+                      <li><%= summary.presence || '—' %></li>
                     <% end %>
                   </ul>
                 </td>
