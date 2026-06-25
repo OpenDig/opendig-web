@@ -16,7 +16,6 @@
   function removeThisPail<%= pail_index %>Find(_this){
     $(_this).parents('.pail-<%= pail_index %>-find-row').remove();
   };
-  $( "#locus_pails_<%= pail_index %>_finds_<%= find_index %>_date" ).datepicker({ dateFormat: "d MM, yy" });
   $( "#locus_pails_<%= pail_index %>_finds_<%= find_index %>_pot_form" ).autocomplete({
     source: potFormValues,
     minLength: 0,
