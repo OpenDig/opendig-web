@@ -1,8 +1,8 @@
 class RegistrarController < ApplicationController
   # Supervisors may read the registrar; only registrar/dig_director/superuser may write.
   before_action :require_registrar_read
-  before_action :require_registrar_write, only: %i[new create edit update destroy]
-  before_action :set_item, only: [:show, :edit, :update]
+  before_action :require_registrar_write, only: %i[new create edit update destroy discard restore]
+  before_action :set_item, only: %i[show edit update discard restore]
 
   def index
     # Seasons present in the data, plus the current one so a new season is
@@ -46,6 +46,47 @@ class RegistrarController < ApplicationController
     end
   end
 
+  # Discard a find the registrar decided is not a find: it's returned to the
+  # field with a recorded reason. The find stays on the board in the Discarded
+  # stage rather than being deleted, so the decision is auditable.
+  def discard
+    reason = params[:discard_reason].to_s.strip
+    if reason.blank?
+      redirect_to registrar_path(**find_path_params),
+                  alert: 'Please provide a reason for discarding this find.'
+      return
+    end
+
+    @find.merge!(
+      'state' => Registrar::DISCARDED_STATE,
+      'discard_reason' => reason,
+      'discarded_at' => Time.current.iso8601,
+      'discarded_by' => current_user&.email
+    )
+
+    if @doc.save
+      redirect_to registrar_index_path(season: params[:season]),
+                  notice: "Find ##{@find['field_number']} discarded and returned to the field."
+    else
+      redirect_to registrar_path(**find_path_params), alert: 'Something went wrong discarding the find.'
+    end
+  end
+
+  # Undo a discard: the find returns to Incoming and the discard metadata is
+  # cleared, so a mistaken discard isn't a dead end.
+  def restore
+    @find.merge!('state' => Registrar::RESTORED_STATE)
+    @find.delete('discard_reason')
+    @find.delete('discarded_at')
+    @find.delete('discarded_by')
+
+    if @doc.save
+      redirect_to registrar_path(**find_path_params), notice: 'Find restored to Incoming.'
+    else
+      redirect_to registrar_path(**find_path_params), alert: 'Something went wrong restoring the find.'
+    end
+  end
+
   def set_item
     @item_id = params[:id]
     @item_number = params[:item_number].to_s
@@ -62,6 +103,11 @@ class RegistrarController < ApplicationController
     return if @find
 
     redirect_to registrar_index_path, alert: 'That find could not be located.'
+  end
+
+  # The composite params that identify a find across registrar routes.
+  def find_path_params
+    { id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code }
   end
 
   # Coerce an embedded collection (pails, finds) into an array of hashes. Some

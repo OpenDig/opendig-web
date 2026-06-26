@@ -70,6 +70,67 @@ RSpec.describe RegistrarController, type: :controller do
     end
   end
 
+  describe 'PATCH discard' do
+    let(:item) { { 'field_number' => '1', 'state' => 'unregistered' } }
+    let(:doc) do
+      d = { 'pails' => [{ 'pail_number' => '1', 'finds' => [item] }] }
+      def d.save = true
+      d
+    end
+    let(:params) { { id: 'doc1', pail_id: '1', item_number: '1', item_locus_code: '1.1.001' } }
+
+    before { allow(db).to receive(:get).with('doc1').and_return(doc) }
+
+    it 'discards with a reason and records metadata' do
+      session[:user_id] = users[:registrar].id
+      patch :discard, params: params.merge(discard_reason: 'modern intrusion')
+      expect(item['state']).to eq('discarded')
+      expect(item['discard_reason']).to eq('modern intrusion')
+      expect(item['discarded_by']).to eq(users[:registrar].email)
+      expect(item['discarded_at']).to be_present
+      expect(response).to redirect_to(registrar_index_path)
+    end
+
+    it 'requires a reason' do
+      session[:user_id] = users[:registrar].id
+      patch :discard, params: params.merge(discard_reason: '   ')
+      expect(item['state']).to eq('unregistered')
+      expect(response).to redirect_to(registrar_path(**params))
+    end
+
+    it 'forbids a read-only area supervisor' do
+      session[:user_id] = users[:area_supervisor].id
+      patch :discard, params: params.merge(discard_reason: 'x')
+      expect(response).to redirect_to(controller.root_path)
+      expect(item['state']).to eq('unregistered')
+    end
+  end
+
+  describe 'PATCH restore' do
+    let(:item) do
+      { 'field_number' => '1', 'state' => 'discarded', 'discard_reason' => 'oops',
+        'discarded_by' => 'r@example.com', 'discarded_at' => '2026-06-26T00:00:00Z' }
+    end
+    let(:doc) do
+      d = { 'pails' => [{ 'pail_number' => '1', 'finds' => [item] }] }
+      def d.save = true
+      d
+    end
+    let(:params) { { id: 'doc1', pail_id: '1', item_number: '1', item_locus_code: '1.1.001' } }
+
+    before { allow(db).to receive(:get).with('doc1').and_return(doc) }
+
+    it 'restores to incoming and clears the discard metadata' do
+      session[:user_id] = users[:registrar].id
+      patch :restore, params: params
+      expect(item['state']).to eq('unregistered')
+      expect(item).not_to have_key('discard_reason')
+      expect(item).not_to have_key('discarded_by')
+      expect(item).not_to have_key('discarded_at')
+      expect(response).to redirect_to(registrar_path(**params))
+    end
+  end
+
   describe 'GET edit (write access)' do
     let(:params) { { id: 'doc1', pail_id: '1', item_number: '1', item_locus_code: '1.1.001' } }
 

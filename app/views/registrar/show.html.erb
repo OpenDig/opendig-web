@@ -7,16 +7,63 @@
     <span class="text-[#2a231b]">Pail <%= @pail_id %></span>
   </nav>
 
-  <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+  <% discarded = @find['state'] == Registrar::DISCARDED_STATE %>
+  <div class="flex flex-wrap items-end justify-between gap-4 mb-6" x-data="{ discardOpen: false }">
     <div>
       <h1 class="font-serif text-4xl text-[#2a231b]">Field Find #<%= @find['field_number'] %></h1>
       <p class="text-[#6a5d4c] mt-1">Locus <%= @area %>.<%= @square %>.<%= @locus_code %> &middot; Pail <%= @pail_id %></p>
     </div>
     <% if current_user&.can_edit_registrar? %>
-      <%= link_to "Edit find", edit_registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code),
-                  class: "inline-flex items-center rounded-full bg-[#b1542b] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#8d3f1d]" %>
+      <div class="flex flex-wrap items-center gap-2">
+        <% if discarded %>
+          <%= button_to "Restore to Incoming", restore_registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code),
+                        method: :patch,
+                        class: "inline-flex items-center rounded-full border border-[#ddcfb4] px-4 py-2 text-sm font-medium text-[#6a5d4c] hover:border-[#c8a87f] hover:text-[#b1542b] cursor-pointer" %>
+        <% else %>
+          <%= link_to "Edit find", edit_registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code),
+                      class: "inline-flex items-center rounded-full bg-[#b1542b] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#8d3f1d]" %>
+          <button type="button" @click="discardOpen = true"
+                  class="inline-flex items-center rounded-full border border-[#d8a99a] px-4 py-2 text-sm font-medium text-[#9c2a1c] hover:bg-[#fdecea] cursor-pointer">
+            Discard find
+          </button>
+        <% end %>
+      </div>
+
+      <%# Discard modal: requires a reason before the find is returned to the field. %>
+      <div x-show="discardOpen" x-cloak style="display:none"
+           @click="discardOpen = false" @keydown.escape.window="discardOpen = false"
+           class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+        <div @click.stop class="w-full max-w-md rounded-xl border border-[#ddcfb4] bg-[#fbf6ec] p-6 shadow-xl">
+          <h2 class="font-serif text-2xl text-[#2a231b] mb-1">Discard this find?</h2>
+          <p class="text-sm text-[#6a5d4c] mb-4">It will be returned to the field and moved to the Discarded stage. Please record why.</p>
+          <%= form_with(url: discard_registrar_path(id: @item_id, pail_id: @pail_id, item_number: @item_number, item_locus_code: @item_locus_code), method: :patch, local: true) do %>
+            <textarea name="discard_reason" rows="4" required
+                      placeholder="Reason for discarding (e.g. natural stone, modern intrusion)…"
+                      class="w-full rounded-md border border-[#ddcfb4] bg-white px-3 py-2 text-sm text-[#2a231b] focus:border-[#9c6b3f] focus:outline-none"></textarea>
+            <div class="mt-4 flex justify-end gap-2">
+              <button type="button" @click="discardOpen = false"
+                      class="inline-flex items-center rounded-full border border-[#ddcfb4] px-4 py-2 text-sm font-medium text-[#6a5d4c] hover:border-[#c8a87f] hover:text-[#b1542b] cursor-pointer">Cancel</button>
+              <%= submit_tag "Discard find",
+                             class: "inline-flex items-center rounded-full bg-[#9c2a1c] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#7a1f15] cursor-pointer border-0" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
     <% end %>
   </div>
+
+  <% if discarded %>
+    <div class="mb-6 rounded-xl border border-[#e0c9a0] bg-[#fcf3e0] p-4">
+      <p class="font-serif text-lg text-[#8d3f1d] mb-1">Discarded &middot; returned to the field</p>
+      <% if @find['discard_reason'].present? %>
+        <p class="text-sm text-[#6a5d4c]"><span class="font-medium">Reason:</span> <%= @find['discard_reason'] %></p>
+      <% end %>
+      <p class="text-xs text-[#9c8e78] mt-1">
+        <%= "by #{@find['discarded_by']}" if @find['discarded_by'].present? %>
+        <%= "on #{read_date(@find['discarded_at'])}" if @find['discarded_at'].present? %>
+      </p>
+    </div>
+  <% end %>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
     <div class="lg:col-span-2 rounded-xl border border-[#ddcfb4] bg-[#fbf6ec] p-6">

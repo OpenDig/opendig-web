@@ -12,6 +12,7 @@ RSpec.describe Registrar, type: :model do
       expect(find_with('initial registration').stage).to eq('initial')
       expect(find_with('WIP').stage).to eq('pending')
       expect(find_with('registrarion complete').stage).to eq('completed')
+      expect(find_with('discarded').stage).to eq('discarded')
     end
 
     it 'falls back to the first stage for an unrecognised state' do
