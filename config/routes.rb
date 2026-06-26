@@ -32,7 +32,12 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :registrar
+  resources :registrar do
+    member do
+      patch :discard
+      patch :restore
+    end
+  end
   resources :bulk_uploads, only: %i[new create]
 
   # Bulk locus-photo association (parse convention-named photos -> suggest loci).

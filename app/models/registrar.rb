@@ -9,8 +9,15 @@ class Registrar
     { key: 'incoming',  label: 'Incoming',             states: %w[unregistered] },
     { key: 'initial',   label: 'Initial Registration', states: ['initial registration'] },
     { key: 'pending',   label: 'Pending Approval',     states: %w[WIP] },
-    { key: 'completed', label: 'Completed',            states: ['registrarion complete'] }
+    { key: 'completed', label: 'Completed',            states: ['registrarion complete'] },
+    # Finds the registrar decided are not finds: returned to the field with a
+    # recorded reason. Kept on the board (not deleted) for the record.
+    { key: 'discarded', label: 'Discarded',            states: %w[discarded] }
   ].freeze
+
+  # The state a discarded find carries, and the one it returns to when restored.
+  DISCARDED_STATE = 'discarded'.freeze
+  RESTORED_STATE = 'unregistered'.freeze
 
   def initialize(row_values)
     @area, @square, @code, @pail_number, @field_number, @registration_number, @type, @remarks, @state, @id = row_values
