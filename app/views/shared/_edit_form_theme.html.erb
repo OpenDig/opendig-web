@@ -39,6 +39,22 @@
   .od-form input[readonly] { background: #f1e9d8; color: #7a6c57; cursor: not-allowed; }
   .od-form textarea { min-height: 5.5rem; resize: vertical; }
 
+  /* Native selects: hide the OS arrow and draw our own chevron so they match
+     the theme cross-browser. */
+  .od-form select {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    padding-right: 2.1rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%239c6b3f'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.25a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08Z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 0.6rem center; background-size: 1.1rem;
+  }
+
+  /* Checkboxes & radios keep their natural size — the width:100% input rule and
+     the legacy .form-control class would otherwise stretch them into bars. */
+  .od-form input[type="checkbox"], .od-form input[type="radio"],
+  .od-form input[type="checkbox"].form-control, .od-form input[type="radio"].form-control {
+    width: auto; display: inline-block; padding: 0; box-shadow: none; accent-color: #b1542b;
+  }
+
   /* Layout helpers (Bootstrap-compat) */
   .od-form .form-group { margin-bottom: 1rem; }
   .od-form .row, .od-form .form-row { display: flex; flex-wrap: wrap; gap: 1rem; margin: 0; }
@@ -62,15 +78,21 @@
     font-family: 'Spectral', serif; font-weight: 600; color: #2a231b; font-size: 0.95rem; margin: 0;
   }
 
-  /* Choice chips (radios) */
+  /* Choice chips: the whole chip is the control. The radio is visually hidden;
+     selecting a chip fills the entire chip (no separate radio bar). */
   .od-form .ls-choices { display: flex; flex-wrap: wrap; gap: 0.45rem; }
   .od-form .ls-choice {
-    display: inline-flex; align-items: center; gap: 0.4rem; margin: 0;
+    position: relative; display: inline-flex; align-items: center; margin: 0;
     border: 1px solid #ddcfb4; background: #fff; border-radius: 9999px;
-    padding: 0.35rem 0.8rem; cursor: pointer; font-size: 0.85rem; font-weight: 500; color: #6a5d4c;
+    padding: 0.4rem 0.95rem; cursor: pointer; font-size: 0.85rem; font-weight: 500; color: #6a5d4c;
+    transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
   }
-  .od-form .ls-choice:hover { border-color: #c8a87f; }
-  .od-form .ls-choice input { width: auto; accent-color: #b1542b; margin: 0; }
+  .od-form .ls-choice input {
+    position: absolute; opacity: 0; width: 0; height: 0; margin: 0; pointer-events: none;
+  }
+  .od-form .ls-choice:hover { border-color: #c8a87f; background: #f7eee1; }
+  .od-form .ls-choice:has(input:checked) { background: #b1542b; border-color: #b1542b; color: #fff; }
+  .od-form .ls-choice:has(input:focus-visible) { box-shadow: 0 0 0 3px rgba(177, 84, 43, 0.22); }
 
   /* Buttons (Bootstrap-compat) */
   .od-form .btn {
@@ -84,4 +106,25 @@
   /* Accordions (description) flush within the section card */
   .od-form details { border: 1px solid #e7dcc4; background: #fff; border-radius: 0.7rem; padding: 1rem; margin-bottom: 0.75rem; box-shadow: none; }
   .od-form details summary { color: #2a231b; }
+
+  /* jQuery UI autocomplete menu (pottery Form / Period / Period modifier /
+     Question). The jQuery UI stylesheet isn't loaded, so without this the menu
+     is transparent and bleeds through the page. The <ul> is appended to <body>,
+     so these rules are intentionally NOT scoped to .od-form. */
+  .ui-autocomplete.ui-menu {
+    position: absolute; z-index: 1100; list-style: none; margin: 0; padding: 0.25rem;
+    max-height: 16rem; overflow-y: auto; overflow-x: hidden;
+    background: #fff; border: 1px solid #ddcfb4; border-radius: 0.6rem;
+    box-shadow: 0 10px 28px rgba(42, 35, 27, 0.18);
+    font-family: inherit; font-size: 0.92rem; color: #2a231b;
+  }
+  .ui-autocomplete .ui-menu-item { margin: 0; list-style: none; }
+  .ui-autocomplete .ui-menu-item-wrapper, .ui-autocomplete .ui-menu-item a {
+    display: block; padding: 0.4rem 0.6rem; border-radius: 0.4rem; border: 0;
+    color: #2a231b; text-decoration: none; cursor: pointer;
+  }
+  .ui-autocomplete .ui-menu-item-wrapper.ui-state-active,
+  .ui-autocomplete .ui-menu-item-wrapper:hover,
+  .ui-autocomplete .ui-menu-item a.ui-state-active,
+  .ui-autocomplete .ui-menu-item a:hover { background: #b1542b; color: #fff; }
 </style>
