@@ -70,6 +70,7 @@ Rails.application.routes.draw do
       delete 'devices/current', to: 'devices#destroy'
       get    'config',          to: 'config#show'
       get    'photos/pending',  to: 'photos#pending'
+      post   'photos',          to: 'photos#create'
     end
   end
 
