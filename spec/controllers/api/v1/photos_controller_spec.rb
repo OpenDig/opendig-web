@@ -59,8 +59,9 @@ RSpec.describe Api::V1::PhotosController, type: :controller do
     end
 
     it 'rejects a project the device user has no role on' do
-      device = authenticate_as(users[:google_oauth2]) # no roles
-      post :create, params: { project: 'opendig', kind: 'user', locus: '9.5.001', file: image_upload }
+      # dig_director has a role on 'opendig' only, not on 'other_project'.
+      device = authenticate_as(users[:dig_director])
+      post :create, params: { project: 'other_project', kind: 'user', locus: '9.5.001', file: image_upload }
       expect(response).to have_http_status(:unauthorized)
     ensure
       device&.revoke!
