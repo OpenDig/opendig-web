@@ -7,7 +7,7 @@ RSpec.describe Api::V1::PhotosController, type: :controller do
 
   before do
     allow(Project).to receive(:all).and_return(['opendig'])
-    allow(Rails.application.config).to receive(:s3_bucket).and_return(bucket)
+    allow(controller).to receive(:s3_bucket).and_return(bucket)
     allow(Photo).to receive(:url_for_key).and_return('https://img.test/x/preview')
   end
 

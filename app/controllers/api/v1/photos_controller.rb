@@ -31,12 +31,11 @@ module Api
         return render(json: { error: 'unsupported file type' }, status: :unprocessable_entity) unless content_type.start_with?('image/')
         return render(json: { error: 'file too large' }, status: :unprocessable_entity) if file.tempfile.size > MAX_UPLOAD_BYTES
 
-        bucket = Rails.application.config.try(:s3_bucket)
-        return render(json: { error: 'storage not configured' }, status: :service_unavailable) if bucket.nil?
+        return render(json: { error: 'storage not configured' }, status: :service_unavailable) if s3_bucket.nil?
 
         key = CouchDB.with_project(project) do
           object_key = build_object_key(file)
-          bucket.object(object_key).upload_file(file.tempfile.path, acl: 'public-read', content_type: content_type)
+          s3_bucket.object(object_key).upload_file(file.tempfile.path, acl: 'public-read', content_type: content_type)
           object_key
         end
 
@@ -76,6 +75,13 @@ module Api
       end
 
       private
+
+      # The configured project bucket (nil until the s3 initializer has run,
+      # e.g. when credentials are absent). Wrapped in a method so it's a single
+      # seam to stub in tests.
+      def s3_bucket
+        Rails.application.config.try(:s3_bucket)
+      end
 
       # Build the object key for an upload. Must run inside CouchDB.with_project
       # so ProjectStorage resolves the right prefixes. For official daily photos
