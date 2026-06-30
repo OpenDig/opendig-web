@@ -143,11 +143,9 @@ RSpec.describe RegistrarController, type: :controller do
     end
     let(:params) { { id: 'doc1', pail_id: '1', item_number: '1', item_locus_code: '1.1.001' } }
 
-    before do
-      allow(db).to receive(:get).with('doc1').and_return(doc)
-      # Skip the S3 prefix lookup; the find's own photos[] is enough here.
-      allow(Find).to receive(:can_have_image?).and_return(false)
-    end
+    # The find has no registration_number, so Find.can_have_image? short-circuits
+    # on the blank check (no bucket lookup) and find_photos uses photos[] only.
+    before { allow(db).to receive(:get).with('doc1').and_return(doc) }
 
     it "sets the cover to one of the find's photos" do
       session[:user_id] = users[:registrar].id
