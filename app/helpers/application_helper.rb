@@ -36,9 +36,8 @@ module ApplicationHelper
   def find_photos(find)
     by_key = {}
     reg = find['registration_number']
-    if reg.present? && Find.can_have_image?(reg)
-      Find.get_image_keys(reg).each { |k| by_key[k] = { 'key' => k, 'type' => 'official' } }
-    end
+    official_keys = reg.present? && Find.can_have_image?(reg) ? Find.get_image_keys(reg) : []
+    official_keys.each { |k| by_key[k] = { 'key' => k, 'type' => 'official' } }
     hash_rows(find['photos']).each do |p|
       by_key[p['key']] = p if p['key'].present?
     end
