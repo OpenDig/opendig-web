@@ -16,7 +16,7 @@
       </div>
       <div class="col-3">
         <% if Find.can_have_image?(row.dig('registration_number')) %>
-          <%= image_tag(Find.get_presigned_url(row.dig('registration_number')), class: 'find-img-small') %>
+          <%= image_tag(Find.image_url(row.dig('registration_number'), :preview), class: 'find-img-small', loading: 'lazy') %>
         <% end %>
       </div>
     </div>

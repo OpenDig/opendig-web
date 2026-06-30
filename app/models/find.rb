@@ -42,16 +42,14 @@ class Find
 
   NO_IMAGE_PLACEHOLDER = 'https://via.placeholder.com/250x250.png?text=No+Image'.freeze
 
-  def self.get_presigned_urls(registration_number)
-    bucket = Rails.application.config.try(:s3_bucket)
-    return [NO_IMAGE_PLACEHOLDER] if bucket.nil? || !Find.can_have_image?(registration_number)
+  # Imgproxy URL for a find's representative (first) image at the given style, or
+  # the placeholder when it has none. Use wherever a single find image is shown
+  # (reports, lists) so a resized image is served — never the full original.
+  def self.image_url(registration_number, style = :medium)
+    return NO_IMAGE_PLACEHOLDER unless can_have_image?(registration_number)
 
-    Rails.cache.fetch("#{ProjectStorage.storage_project}/#{registration_number}_presigned_urls", expires_in: 5.minutes) do
-      get_image_keys(registration_number).map { |key| bucket.object(key).presigned_url(:get) }
-    end
-  rescue StandardError => e
-    Rails.logger.warn("Find.get_presigned_urls failed for #{registration_number}: #{e.class}: #{e.message}")
-    [NO_IMAGE_PLACEHOLDER]
+    key = get_image_keys(registration_number).first
+    key ? url(key, style) : NO_IMAGE_PLACEHOLDER
   end
 
   def self.url(key, style = :original)
@@ -68,6 +66,5 @@ class Find
     prefix = ProjectStorage.storage_project
     Rails.cache.delete("#{prefix}/#{registration_number}_images")
     Rails.cache.delete("#{prefix}/#{registration_number}_has_keys")
-    Rails.cache.delete("#{prefix}/#{registration_number}_presigned_urls")
   end
 end
