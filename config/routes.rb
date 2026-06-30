@@ -75,6 +75,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resource :descriptions, only: %i[edit update destroy], controller: 'descriptions'
+
   resources :reports, only: %i[index show]
 
   root to: 'areas#index'

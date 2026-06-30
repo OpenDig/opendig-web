@@ -329,6 +329,9 @@ class User
   # Assigning roles to users for the project.
   def can_manage_roles? = superuser? || dig_director?
 
+  # Editing the project's descriptions config (form fields & lookups).
+  def can_edit_descriptions? = superuser? || dig_director?
+
   # A dig director may assign any project role except superuser; only a superuser
   # can grant superuser.
   def can_assign_role?(target_role)
