@@ -67,6 +67,9 @@
               <% if current_user.can_manage_roles? %>
                 <li><%= link_to("Users", manage_users_admin_index_path, class: "hover:text-[#b1542b]") %></li>
               <% end %>
+              <% if current_user.can_edit_descriptions? %>
+                <li><%= link_to("Descriptions", edit_descriptions_path, class: "hover:text-[#b1542b]") %></li>
+              <% end %>
               <li><%= link_to((current_user.name.presence || "Account"), account_path, class: "hover:text-[#b1542b]") %></li>
               <li>
                 <%= button_to "Sign out",
@@ -127,6 +130,9 @@
             <% end %>
             <% if current_user.can_manage_roles? %>
               <li><%= link_to("Users", manage_users_admin_index_path, class: "block rounded px-3 py-2 hover:bg-[#efe3cf] hover:text-[#b1542b]") %></li>
+            <% end %>
+            <% if current_user.can_edit_descriptions? %>
+              <li><%= link_to("Descriptions", edit_descriptions_path, class: "block rounded px-3 py-2 hover:bg-[#efe3cf] hover:text-[#b1542b]") %></li>
             <% end %>
             <li><%= link_to((current_user.name.presence || "Account"), account_path, class: "block rounded px-3 py-2 hover:bg-[#efe3cf] hover:text-[#b1542b]") %></li>
             <li>

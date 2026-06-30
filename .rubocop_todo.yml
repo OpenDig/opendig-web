@@ -367,6 +367,7 @@ Rails/I18nLocaleTexts:
     - 'app/controllers/admin_controller.rb'
     - 'app/controllers/application_controller.rb'
     - 'app/controllers/areas_controller.rb'
+    - 'app/controllers/descriptions_controller.rb'
     - 'app/controllers/invitations_controller.rb'
     - 'app/controllers/loci_controller.rb'
     - 'app/controllers/pails_controller.rb'

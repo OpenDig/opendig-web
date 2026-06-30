@@ -44,7 +44,7 @@ class ApplicationController < ActionController::Base
   end
 
   def set_descriptions
-    @descriptions = Rails.application.config.descriptions
+    @descriptions = ProjectDescriptions.effective(current_project)
   end
 
   def set_edit_mode
@@ -202,6 +202,8 @@ class ApplicationController < ActionController::Base
 
   # User role management for the project.
   def require_manage_users = require_capability(:can_manage_roles?, "manage users")
+
+  def require_edit_descriptions = require_capability(:can_edit_descriptions?, "edit descriptions")
 
   def require_dig_data_edit(role_label, area:, square: nil)
     require_authentication
