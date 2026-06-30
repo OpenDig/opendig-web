@@ -188,6 +188,20 @@ module ApplicationHelper
                   form_definition_hash['values']
                 end
       select_tag name, options_for_select(options || [], value), include_blank: true, class: 'form-control'
+    # 'combo' is a picker you can also type into: the lookup values are offered
+    # as suggestions (datalist) but any value is accepted — e.g. registrar
+    # designations like "Ceramic Tech" or "Radiocarbon" that aren't in the list.
+    when 'combo'
+      options = if form_definition_hash['values'].is_a?(Hash)
+                  @descriptions['lookups'][form_definition_hash['values']['from']]
+                else
+                  form_definition_hash['values']
+                end
+      list_id = "datalist-#{description_type}-#{form_definition_hash['key']}"
+      datalist = content_tag(:datalist, id: list_id) do
+        safe_join(Array(options).compact_blank.map { |opt| tag.option(value: opt) })
+      end
+      text_field_tag(name, value, list: list_id, autocomplete: 'off', class: 'form-control') + datalist
     when 'checkbox'
       check_box_tag name, true, ActiveModel::Type::Boolean.new.cast(value), class: 'form-control'
     when 'text_area'
