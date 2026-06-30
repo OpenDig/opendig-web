@@ -26,6 +26,34 @@ module ApplicationHelper
     hash_rows(locus['photos']).reject { |p| field_note_photo?(p) }
   end
 
+  # Assemble an artifact (find)'s photos for display, de-duped by key:
+  #   - official images discovered by the registration-number bucket prefix
+  #     (the registrar's catalogue uploads), kept as-is, type 'official';
+  #   - the find's own photos[] entries (official or note), which take
+  #     precedence over a prefix-derived entry with the same key so their
+  #     type/metadata wins;
+  #   - the legacy single photo_key (a field note from older mobile builds).
+  def find_photos(find)
+    by_key = {}
+    reg = find['registration_number']
+    Find.get_image_keys(reg).each { |k| by_key[k] = { 'key' => k, 'type' => 'official' } } if Find.can_have_image?(reg)
+    hash_rows(find['photos']).each do |p|
+      by_key[p['key']] = p if p['key'].present?
+    end
+    legacy = find['photo_key']
+    by_key[legacy] ||= { 'key' => legacy, 'type' => 'user_photo' } if legacy.present?
+    by_key.values
+  end
+
+  # The key of the find's cover (main) photo: the stored cover_key if it still
+  # points at a present photo, else the first official, else the first photo.
+  def find_cover_key(find, photos = find_photos(find))
+    explicit = find['cover_key']
+    return explicit if explicit.present? && photos.any? { |p| p['key'] == explicit }
+
+    (photos.find { |p| !field_note_photo?(p) } || photos.first)&.dig('key')
+  end
+
   # Always begin the OAuth handshake on the apex domain (opendig.org), so the
   # provider (Google) needs only one registered redirect URI instead of one per
   # subdomain. The `origin` carries the user back to the subdomain they started

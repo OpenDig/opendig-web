@@ -131,6 +131,46 @@ RSpec.describe RegistrarController, type: :controller do
     end
   end
 
+  describe 'PATCH set_cover' do
+    let(:item) do
+      { 'field_number' => '1',
+        'photos' => [{ 'key' => 'balua/finds/k1.jpg', 'type' => 'official' }] }
+    end
+    let(:doc) do
+      d = { 'pails' => [{ 'pail_number' => '1', 'finds' => [item] }] }
+      def d.save = true
+      d
+    end
+    let(:params) { { id: 'doc1', pail_id: '1', item_number: '1', item_locus_code: '1.1.001' } }
+
+    before do
+      allow(db).to receive(:get).with('doc1').and_return(doc)
+      # Skip the S3 prefix lookup; the find's own photos[] is enough here.
+      allow(Find).to receive(:can_have_image?).and_return(false)
+    end
+
+    it "sets the cover to one of the find's photos" do
+      session[:user_id] = users[:registrar].id
+      patch :set_cover, params: params.merge(cover_key: 'balua/finds/k1.jpg')
+      expect(item['cover_key']).to eq('balua/finds/k1.jpg')
+      expect(response).to redirect_to(registrar_path(**params))
+    end
+
+    it "rejects a key that isn't one of the find's photos" do
+      session[:user_id] = users[:registrar].id
+      patch :set_cover, params: params.merge(cover_key: 'balua/finds/evil.jpg')
+      expect(item).not_to have_key('cover_key')
+      expect(response).to redirect_to(registrar_path(**params))
+    end
+
+    it 'forbids a read-only area supervisor' do
+      session[:user_id] = users[:area_supervisor].id
+      patch :set_cover, params: params.merge(cover_key: 'balua/finds/k1.jpg')
+      expect(response).to redirect_to(controller.root_path)
+      expect(item).not_to have_key('cover_key')
+    end
+  end
+
   describe 'GET edit (write access)' do
     let(:params) { { id: 'doc1', pail_id: '1', item_number: '1', item_locus_code: '1.1.001' } }
 

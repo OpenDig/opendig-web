@@ -36,6 +36,7 @@ Rails.application.routes.draw do
     member do
       patch :discard
       patch :restore
+      patch :set_cover
     end
   end
   resources :bulk_uploads, only: %i[new create]
