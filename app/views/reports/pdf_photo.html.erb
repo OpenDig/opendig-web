@@ -20,7 +20,7 @@
       </td>
       <td class="report_image">
         <% if Find.can_have_image?(row.dig('registration_number')) %>
-          <%= image_tag(Find.get_presigned_url(row.dig('registration_number')), class: 'find-img') %>
+          <%= image_tag(Find.image_url(row.dig('registration_number'), :medium), class: 'find-img') %>
         <% end %>
       </td>
     </tr>

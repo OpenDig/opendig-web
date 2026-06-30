@@ -88,7 +88,7 @@
         <%# Cover (main) photo — click to open full size in a popup. %>
         <img src="<%= Photo.url_for_key(cover['key'], :medium) %>" alt="Find cover photo" loading="lazy"
              class="w-full rounded-lg border border-[#e7dcc4] cursor-pointer hover:opacity-95 transition"
-             data-full="<%= Photo.url_for_key(cover['key'], :original) %>"
+             data-full="<%= Photo.url_for_key(cover['key'], :medium) %>"
              data-caption="<%= field_note_photo?(cover) ? 'Note' : 'Official' %>"
              @click="open=true; img=$el.dataset.full; caption=$el.dataset.caption; meta=''" />
         <%# Gallery — every photo; the cover is highlighted, notes are badged. %>
@@ -101,7 +101,7 @@
                 <div class="relative">
                   <img src="<%= Photo.url_for_key(p['key'], :preview) %>" alt="" loading="lazy"
                        class="w-full h-20 object-cover rounded cursor-pointer hover:opacity-90 ring-1 <%= is_cover ? 'ring-2 ring-[#b1542b]' : 'ring-[#e7dcc4]' %>"
-                       data-full="<%= Photo.url_for_key(p['key'], :original) %>"
+                       data-full="<%= Photo.url_for_key(p['key'], :medium) %>"
                        data-caption="<%= note ? 'Note' : 'Official' %>"
                        @click="open=true; img=$el.dataset.full; caption=$el.dataset.caption; meta=''" />
                   <% if note %>
