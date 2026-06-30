@@ -57,4 +57,27 @@ RSpec.describe DeviceConfiguration do
     expect(config['descriptions']).to be_present
     expect(config['user']).to include('email', 'name')
   end
+
+  describe 'per-project descriptions' do
+    it 'reports a version for every project and omits the map when unoverridden' do
+      allow(ProjectDescriptions).to receive(:version).and_return(0)
+      config = described_class.new(users[:superuser]).as_json
+
+      config['projects'].each do |project|
+        expect(project['descriptions_version']).to eq(0)
+        expect(project).not_to have_key('descriptions')
+      end
+    end
+
+    it 'ships the effective map and version for an overridden project' do
+      effective = { 'lookups' => { 'designation' => %w[Bead Milestone] }, 'description_types' => {} }
+      allow(ProjectDescriptions).to receive(:version).and_return(0)
+      allow(ProjectDescriptions).to receive(:version).with('opendig').and_return(3)
+      allow(ProjectDescriptions).to receive(:effective).with('opendig').and_return(effective)
+
+      opendig = described_class.new(users[:superuser]).as_json['projects'].find { |p| p['key'] == 'opendig' }
+      expect(opendig['descriptions_version']).to eq(3)
+      expect(opendig['descriptions']).to eq(effective)
+    end
+  end
 end
