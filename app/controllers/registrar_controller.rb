@@ -1,8 +1,8 @@
 class RegistrarController < ApplicationController
   # Supervisors may read the registrar; only registrar/dig_director/superuser may write.
   before_action :require_registrar_read
-  before_action :require_registrar_write, only: %i[new create edit update destroy discard restore]
-  before_action :set_item, only: %i[show edit update discard restore]
+  before_action :require_registrar_write, only: %i[new create edit update destroy discard restore set_cover]
+  before_action :set_item, only: %i[show edit update discard restore set_cover]
 
   def index
     # Seasons present in the data, plus the current one so a new season is
@@ -84,6 +84,20 @@ class RegistrarController < ApplicationController
       redirect_to registrar_path(**find_path_params), notice: 'Find restored to Incoming.'
     else
       redirect_to registrar_path(**find_path_params), alert: 'Something went wrong restoring the find.'
+    end
+  end
+
+  # Choose which of a find's photos is the cover (main) image. The cover_key
+  # must be one of the find's actual photos, so a bad value can't be stored.
+  def set_cover
+    key = params[:cover_key].to_s
+    return redirect_to registrar_path(**find_path_params), alert: 'That photo could not be found.' unless helpers.find_photos(@find).any? { |p| p['key'] == key }
+
+    @find['cover_key'] = key
+    if @doc.save
+      redirect_to registrar_path(**find_path_params), notice: 'Cover photo updated.'
+    else
+      redirect_to registrar_path(**find_path_params), alert: 'Could not update the cover photo.'
     end
   end
 
