@@ -1,0 +1,18 @@
+<%# Shared full-size photo popup for the locus page. The enclosing .locus-show
+    sets x-data; each thumbnail sets open/img/caption/meta on click. Click the
+    backdrop, the ✕, or Esc to close. %>
+<div x-show="open" x-cloak
+     @click="open=false" @keydown.escape.window="open=false"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+  <div @click.stop class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto shadow-xl">
+    <div class="flex justify-end p-2">
+      <button type="button" @click="open=false" aria-label="Close"
+              class="text-[#6a5d4c] hover:text-[#2a231b] text-3xl leading-none px-2">&times;</button>
+    </div>
+    <img :src="img" alt="" class="w-full max-h-[70vh] object-contain bg-black">
+    <div class="p-4 border-t border-[#e7dcc4]">
+      <div class="font-medium text-[#2a231b]" x-text="caption"></div>
+      <div class="text-sm text-[#6a5d4c] mt-1" x-show="meta" x-text="meta"></div>
+    </div>
+  </div>
+</div>

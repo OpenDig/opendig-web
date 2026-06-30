@@ -1,5 +1,5 @@
 <!-- Document ID: <%= @locus['_id'] %> -->
-<div class="locus-show container mx-auto max-w-4xl px-2 py-8">
+<div class="locus-show container mx-auto max-w-4xl px-2 py-8" x-data="{ open:false, img:'', caption:'', meta:'' }">
   <nav class="text-sm text-[#6a5d4c] mb-2">
     <%= link_to "Home", root_path, class: "hover:text-[#b1542b]" %>
     <span class="mx-1" aria-hidden="true">/</span>
@@ -31,11 +31,14 @@
   <%= render 'stratigraphy' if @locus["stratigraphies"] %>
   <%= render 'pottery' if @locus["pottery"] %>
   <%= render 'pails' if @locus["pails"] %>
-  <%= render 'photos' if @locus["photos"] %>
-  <%= render 'user_photos' if @locus["user_photos"].present? %>
+  <%= render 'photos' if official_photos(@locus).any? %>
+  <%= render 'user_photos' if field_note_photos(@locus).any? %>
+
+  <%= render 'photo_lightbox' %>
 </div>
 
 <style>
+  [x-cloak] { display: none !important; }
   /* Locus display theme (parchment / terracotta). Scoped to .locus-show. */
   .locus-show .ls-card {
     margin-bottom: 1.5rem; border: 1px solid #ddcfb4; background: #fbf6ec;

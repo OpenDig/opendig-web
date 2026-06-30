@@ -8,6 +8,24 @@ module ApplicationHelper
     Array(rows).select { |row| row.is_a?(Hash) }
   end
 
+  # A field-note ("user") photo vs an official daily photo. Field notes are
+  # tagged with a type by the device ('user_photo'; legacy 'field_note').
+  def field_note_photo?(photo)
+    %w[user_photo field_note].include?(photo['type'].to_s)
+  end
+
+  # Every field-note photo for a locus: the dedicated user_photos[] array plus
+  # any photos[] entries the device tagged as field notes (the mobile app writes
+  # field notes into photos[]).
+  def field_note_photos(locus)
+    hash_rows(locus['user_photos']) + hash_rows(locus['photos']).select { |p| field_note_photo?(p) }
+  end
+
+  # Official photos only: photos[] entries that aren't field notes.
+  def official_photos(locus)
+    hash_rows(locus['photos']).reject { |p| field_note_photo?(p) }
+  end
+
   # Always begin the OAuth handshake on the apex domain (opendig.org), so the
   # provider (Google) needs only one registered redirect URI instead of one per
   # subdomain. The `origin` carries the user back to the subdomain they started

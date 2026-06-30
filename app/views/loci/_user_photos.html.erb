@@ -16,15 +16,29 @@
         </tr>
       </thead>
       <tbody>
-        <% hash_rows(@locus['user_photos']).each do |photo| %>
+        <% field_note_photos(@locus).each do |photo| %>
+          <%
+            # Field notes come from two shapes: the dedicated user_photos[] array
+            # (taken_at + user_name) and photos[] entries the device tagged as
+            # field notes (date, usually no uploader).
+            date     = read_date(photo["taken_at"].presence || photo["date"])
+            uploader = photo["user_name"].presence || photo["user"].presence
+          %>
           <tr class="hover:bg-amber-100">
-            <td class="px-4 py-2 text-left"><%= read_date(photo["taken_at"]) %></td>
-            <td class="px-4 py-2 text-left"><%= photo["user_name"].presence || photo["user"] %></td>
+            <td class="px-4 py-2 text-left"><%= date %></td>
+            <td class="px-4 py-2 text-left"><%= uploader || '—' %></td>
             <td class="px-4 py-2 text-left"><%= photo["subject"] %></td>
             <td class="px-4 py-2 text-center">
-              <a class="locus-photo-link flex justify-center" href="<%= Photo.url_for_key(photo["key"], :medium) %>" data-lightbox="locus-field-photos">
-                <img class="locus-photo w-32 h-32 object-cover rounded" src="<%= Photo.url_for_key(photo["key"], :preview) %>" alt="" />
-              </a>
+              <% if photo["key"].present? %>
+                <img class="locus-photo w-32 h-32 object-cover rounded mx-auto cursor-pointer hover:opacity-90 transition"
+                     src="<%= Photo.url_for_key(photo["key"], :preview) %>" alt="" loading="lazy"
+                     data-full="<%= Photo.url_for_key(photo["key"], :medium) %>"
+                     data-caption="<%= [photo['subject'].presence, 'Field note'].compact.join(' · ') %>"
+                     data-meta="<%= [date, uploader].map(&:presence).compact.join(' · ') %>"
+                     @click="open=true; img=$el.dataset.full; caption=$el.dataset.caption; meta=$el.dataset.meta" />
+              <% else %>
+                <span class="text-amber-700 text-xs">No image</span>
+              <% end %>
             </td>
           </tr>
         <% end %>
