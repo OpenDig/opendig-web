@@ -19,7 +19,10 @@ class DeviceConfiguration
       'imgproxy' => imgproxy_config,
       'couchdb' => couchdb_config,
       's3' => s3_config,
-      'descriptions' => Rails.application.config.descriptions,
+      # Shared base descriptions (the deploy-time defaults). Each project entry
+      # may carry its own effective `descriptions` + `descriptions_version`; the
+      # device uses the per-project map when present and falls back to this base.
+      'descriptions' => ProjectDescriptions.base,
       'projects' => projects
     }
   end
@@ -35,7 +38,7 @@ class DeviceConfiguration
   def projects
     superuser = @user.superuser?
     project_keys.map do |key|
-      {
+      entry = {
         'key' => key,
         'name' => Project.display_name(key),
         'description' => Project.description(key),
@@ -47,7 +50,20 @@ class DeviceConfiguration
         'database' => Project.database_name(key),
         'storage' => storage_prefixes(key)
       }
+      entry.merge!(descriptions_for(key))
     end
+  end
+
+  # Per-project descriptions: always report the override `version` (0 when the
+  # project has no override) so the device can cheaply detect a change. Only ship
+  # the full effective `descriptions` map when the project actually overrides the
+  # defaults — otherwise the device falls back to the top-level base, keeping the
+  # bundle small for the common (unmodified) case.
+  def descriptions_for(key)
+    version = ProjectDescriptions.version(key)
+    out = { 'descriptions_version' => version }
+    out['descriptions'] = ProjectDescriptions.effective(key) if version.positive?
+    out
   end
 
   # Where this project's files live in the shared bucket. Resolved through
