@@ -89,8 +89,11 @@ RSpec.describe ApplicationHelper, type: :helper do
       expect(html).to match(/background-color:#[0-9a-f]{6}/)
     end
 
-    it 'falls back to plain text for a non-Munsell colour value' do
-      expect(helper.output('Brown', 'munsell_swatch')).to eq('Brown')
+    it 'shows a non-Munsell colour value as text with no swatch' do
+      html = helper.output('Brown', 'munsell_swatch')
+
+      expect(html).to include('Brown')
+      expect(html).not_to include('background-color')
     end
 
     it 'renders a swatch per notation for a multi-value colour array' do
