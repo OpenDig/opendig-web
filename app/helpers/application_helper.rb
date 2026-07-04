@@ -234,8 +234,12 @@ module ApplicationHelper
       hidden = hidden_field_tag(name, value, data: { "munsell-picker-target": 'input' })
       swatch_class = 'munsell-picker__swatch'
       swatch_class += ' is-empty' unless hex
+      # Inline flex so the swatch/text layout wins over the theme's
+      # `.od-form .form-control { display:block }` (higher specificity than the
+      # picker's own class rule, which otherwise collapsed the gap).
       trigger = tag.button(type: 'button',
                            class: 'munsell-picker__trigger form-control',
+                           style: 'display:flex;align-items:center;gap:0.85rem;text-align:left',
                            data: { action: 'munsell-picker#toggle',
                                    "munsell-picker-target": 'trigger' }) do
         tag.span('', class: swatch_class,
