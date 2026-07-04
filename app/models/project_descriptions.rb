@@ -59,6 +59,44 @@ module ProjectDescriptions
     doc['version']
   end
 
+  # Append a value to one lookup list for the project (idempotent). Seeds the
+  # override from the current EFFECTIVE list so we don't drop the base values
+  # (override arrays replace, they don't merge). Returns the new version, or nil
+  # when the value is blank or already present.
+  def add_lookup_value(project, lookup, value)
+    value = value.to_s.strip
+    return if value.blank?
+
+    list = lookup_list(project, lookup)
+    return if list.include?(value)
+
+    write_lookup_list(project, lookup, list + [value])
+  end
+
+  # Remove a value from one lookup list for the project. Returns the new version,
+  # or nil when the value isn't present.
+  def remove_lookup_value(project, lookup, value)
+    value = value.to_s
+    list = lookup_list(project, lookup)
+    return unless list.include?(value)
+
+    write_lookup_list(project, lookup, list - [value])
+  end
+
+  # The effective values for one lookup (base + override), always an array.
+  def lookup_list(project, lookup)
+    Array(effective(project).dig('lookups', lookup))
+  end
+
+  # Persist a lookup list into the override (seeded from effective so base values
+  # survive the array-replace merge).
+  def write_lookup_list(project, lookup, values)
+    override = override(project).deep_dup
+    override['lookups'] ||= {}
+    override['lookups'][lookup] = values
+    save(project, override)
+  end
+
   # Remove the override so the project re-inherits the static defaults.
   def reset(project)
     db = CouchDB.main_db(project)
