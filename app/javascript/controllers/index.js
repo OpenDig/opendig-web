@@ -7,6 +7,12 @@ import { eagerLoadControllersFrom } from "@hotwired/stimulus-loading"
 eagerLoadControllersFrom("controllers", application)
 console.log("[stimulus] index loaded")
 
+// Explicit registration as well, so the Munsell picker works even if eager
+// loading doesn't pick it up in this app's importmap setup. Re-registering the
+// same identifier is harmless.
+import MunsellPickerController from "controllers/munsell_picker_controller"
+application.register("munsell-picker", MunsellPickerController)
+
 // Lazy load controllers as they appear in the DOM (remember not to preload controllers in import map!)
 // import { lazyLoadControllersFrom } from "@hotwired/stimulus-loading"
 // lazyLoadControllersFrom("controllers", application)
