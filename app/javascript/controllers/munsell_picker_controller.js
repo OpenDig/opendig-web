@@ -9,12 +9,15 @@ import { Controller } from "@hotwired/stimulus"
 // the server-rendered markup stays tiny.
 export default class extends Controller {
   static targets = ["input", "trigger", "swatch", "label"]
-  static values = { colors: Array }
+  static values = { colors: Array, lookup: String }
 
   // Cap rendered rows so a bare/short query can't paint all 1498 at once.
   MAX_ROWS = 400
 
   connect() {
+    // Work on a local copy so add/delete don't re-serialize the (large) colors
+    // attribute. Custom (project) colours carry no hex; base Munsell chips do.
+    this.colors = Array.isArray(this.colorsValue) ? this.colorsValue.slice() : []
     this.injectStylesOnce()
     this.buildPanel()
     this.open = false
@@ -81,6 +84,28 @@ export default class extends Controller {
 
     this.panel.appendChild(this.search)
     this.panel.appendChild(this.list)
+
+    // "Add colour" footer — only when this picker is backed by a managed lookup.
+    if (this.lookupValue) {
+      const foot = document.createElement("div")
+      foot.className = "munsell-picker__addcolor"
+      this.addInput = document.createElement("input")
+      this.addInput.type = "text"
+      this.addInput.className = "form-control"
+      this.addInput.placeholder = "Add a custom colour…"
+      this.addInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); this.addColor() }
+      })
+      const btn = document.createElement("button")
+      btn.type = "button"
+      btn.className = "btn btn-sm munsell-picker__addbtn"
+      btn.textContent = "Add"
+      btn.addEventListener("click", () => this.addColor())
+      foot.appendChild(this.addInput)
+      foot.appendChild(btn)
+      this.panel.appendChild(foot)
+    }
+
     this.element.appendChild(this.panel)
   }
 
@@ -88,17 +113,25 @@ export default class extends Controller {
     const norm = (s) => s.toLowerCase().replace(/\s+/g, "")
     const q = norm(query)
     const matches = q
-      ? this.colorsValue.filter((c) => norm(c.n).includes(q))
-      : this.colorsValue
+      ? this.colors.filter((c) => norm(c.n).includes(q))
+      : this.colors
     const shown = matches.slice(0, this.MAX_ROWS)
 
     const rows = shown
-      .map(
-        (c) =>
-          `<button type="button" class="munsell-picker__row" data-value="${c.n}" data-hex="${c.hex}" data-action="click->munsell-picker#choose">` +
-          `<span class="munsell-picker__swatch" style="background-color:${c.hex}"></span>` +
-          `<span>${c.n}</span></button>`
-      )
+      .map((c) => {
+        const n = this.esc(c.n)
+        const swatch = c.hex
+          ? `<span class="munsell-picker__swatch" style="background-color:${this.esc(c.hex)}"></span>`
+          : `<span class="munsell-picker__swatch munsell-picker__swatch--custom"></span>`
+        const choose =
+          `<button type="button" class="munsell-picker__row" data-value="${n}" data-hex="${this.esc(c.hex || "")}" data-action="click->munsell-picker#choose">` +
+          `${swatch}<span>${n}</span></button>`
+        // Only custom (project) colours — those without a hex — can be deleted.
+        const del = c.hex
+          ? ""
+          : `<button type="button" class="munsell-picker__rowdel" data-del="${n}" aria-label="Delete ${n}" data-action="click->munsell-picker#deleteColor">×</button>`
+        return `<div class="munsell-picker__rowwrap">${choose}${del}</div>`
+      })
       .join("")
 
     const more =
@@ -110,6 +143,62 @@ export default class extends Controller {
     this.list.innerHTML = rows + more + empty
   }
 
+  async addColor() {
+    const value = this.addInput.value.trim()
+    if (!value) return
+    const ok = await this.send("POST", value)
+    if (!ok) return
+    if (!this.colors.some((c) => c.n === value)) {
+      this.colors.unshift({ n: value, hex: null, custom: true })
+    }
+    this.addInput.value = ""
+    this.render(this.search.value)
+  }
+
+  deleteColor(event) {
+    event.stopPropagation()
+    const value = event.currentTarget.dataset.del
+    this.send("DELETE", value).then((ok) => {
+      if (!ok) return
+      this.colors = this.colors.filter((c) => c.n !== value)
+      // If the deleted colour was the selected one, clear the field (without
+      // closing the panel, so the user can keep managing the list).
+      if (this.inputTarget.value === value) {
+        this.inputTarget.value = ""
+        this.labelTarget.textContent = "Select a colour…"
+        this.swatchTarget.classList.add("is-empty")
+      }
+      this.render(this.search.value)
+    })
+  }
+
+  async send(method, value) {
+    try {
+      const res = await fetch("/lookup_values", {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-CSRF-Token": this.csrf()
+        },
+        body: JSON.stringify({ lookup: this.lookupValue, value })
+      })
+      return res.ok
+    } catch (_e) {
+      return false
+    }
+  }
+
+  csrf() {
+    return document.querySelector('meta[name="csrf-token"]')?.content || ""
+  }
+
+  esc(s) {
+    return String(s).replace(/[&<>"']/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+    )
+  }
+
   choose(event) {
     const el = event.currentTarget
     this.pick(el.dataset.value, el.dataset.hex)
@@ -117,9 +206,14 @@ export default class extends Controller {
 
   pick(value, hex) {
     this.inputTarget.value = value
-    this.labelTarget.textContent = value
-    this.swatchTarget.classList.remove("is-empty")
-    this.swatchTarget.style.backgroundColor = hex || "transparent"
+    this.labelTarget.textContent = value || "Select a colour…"
+    if (hex) {
+      this.swatchTarget.classList.remove("is-empty")
+      this.swatchTarget.style.backgroundColor = hex
+    } else {
+      // Custom colours (and the empty reset) show no swatch.
+      this.swatchTarget.classList.add("is-empty")
+    }
     this.close()
     this.triggerTarget.focus()
   }
@@ -145,6 +239,16 @@ export default class extends Controller {
         border-radius:6px; font-size:.9rem; }
       .munsell-picker__row:hover, .munsell-picker__row:focus {
         background:#f2e9d6; outline:none; }
+      .munsell-picker__swatch--custom { border-style:dashed; background:transparent; }
+      .munsell-picker__rowwrap { display:flex; align-items:center; }
+      .munsell-picker__rowwrap .munsell-picker__row { flex:1 1 auto; }
+      .munsell-picker__rowdel { flex:0 0 auto; border:0; background:transparent; color:#9c2a1c;
+        cursor:pointer; font-size:1.1rem; line-height:1; padding:0 8px; border-radius:6px; }
+      .munsell-picker__rowdel:hover { background:#fdecea; }
+      .munsell-picker__addcolor { display:flex; gap:6px; margin-top:6px; padding-top:8px;
+        border-top:1px solid #eadfc9; }
+      .munsell-picker__addbtn { flex:0 0 auto; background:#b1542b; color:#fff; border:0;
+        border-radius:9999px; padding:0 0.9rem; cursor:pointer; }
       .munsell-picker__more { padding:6px 8px; color:#6a5d4c; font-size:.8rem; }
     `
     document.head.appendChild(style)
