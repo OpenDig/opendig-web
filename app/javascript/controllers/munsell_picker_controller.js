@@ -15,9 +15,6 @@ export default class extends Controller {
   MAX_ROWS = 400
 
   connect() {
-    // Temporary breadcrumb so we can confirm on the live site that the
-    // controller registers and connects (remove once verified).
-    console.log("[munsell-picker] connected", this.element)
     this.injectStylesOnce()
     this.buildPanel()
     this.open = false
@@ -121,6 +118,7 @@ export default class extends Controller {
   pick(value, hex) {
     this.inputTarget.value = value
     this.labelTarget.textContent = value
+    this.swatchTarget.classList.remove("is-empty")
     this.swatchTarget.style.backgroundColor = hex || "transparent"
     this.close()
     this.triggerTarget.focus()
@@ -132,8 +130,11 @@ export default class extends Controller {
     style.id = "munsell-picker-styles"
     style.textContent = `
       .munsell-picker { position: relative; }
+      .munsell-picker__trigger { display:flex; align-items:center; gap:0.55rem; text-align:left; }
+      .munsell-picker__value { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .munsell-picker__swatch { display:inline-block; width:1.1rem; height:1.1rem;
         border:1px solid rgba(0,0,0,.35); border-radius:3px; flex:0 0 auto; }
+      .munsell-picker__swatch.is-empty { display:none; }
       .munsell-picker__panel { position:absolute; z-index:50; left:0; right:0; margin-top:4px;
         background:#fff; border:1px solid #c9ba9c; border-radius:8px;
         box-shadow:0 8px 24px rgba(0,0,0,.18); padding:8px; }
