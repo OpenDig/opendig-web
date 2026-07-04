@@ -2437,7 +2437,8 @@
             "key": "munsell",
             "label": "Color",
             "type": "munsell_swatch",
-            "value_type": "string"
+            "value_type": "string",
+            "multi": true
         },
         {
             "key": "preservation",
@@ -2471,7 +2472,7 @@
             "label": "Decoration",
             "type": "picker",
             "value_type": "string",
-            "manageable": "decoration",
+            "multi": true,
             "values": {
                 "from": "decoration"
             }

@@ -94,6 +94,20 @@
   .od-form .ls-choice:has(input:checked) { background: #b1542b; border-color: #b1542b; color: #fff; }
   .od-form .ls-choice:has(input:focus-visible) { box-shadow: 0 0 0 3px rgba(177, 84, 43, 0.22); }
 
+  /* Repeatable fields (Colour / Decoration: unlimited entries) */
+  .od-form .repeatable__entry { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .od-form .repeatable__entry > :first-child { flex: 1 1 auto; min-width: 0; }
+  .od-form .repeatable__del {
+    flex: 0 0 auto; border: 0; background: transparent; color: #9c2a1c;
+    font-size: 1.15rem; line-height: 1; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+  }
+  .od-form .repeatable__del:hover { background: #fdecea; }
+  .od-form .repeatable__add {
+    border: 0; background: transparent; color: #9c6b3f; font-size: 0.82rem;
+    font-weight: 500; cursor: pointer; padding: 2px 0;
+  }
+  .od-form .repeatable__add:hover { text-decoration: underline; }
+
   /* Buttons (Bootstrap-compat) */
   .od-form .btn {
     display: inline-flex; align-items: center; justify-content: center; border: none;

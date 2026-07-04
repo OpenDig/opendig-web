@@ -175,7 +175,8 @@ module ApplicationHelper
     when 'munsell_swatch'
       munsell_value(value)
     else
-      value
+      # Multi-value fields (e.g. Decoration) store an array; show them comma-joined.
+      value.is_a?(Array) ? value.compact_blank.join(', ') : value
     end
   end
 
@@ -184,14 +185,8 @@ module ApplicationHelper
   # and identical for every project, so it lives outside the per-project
   # descriptions system. Memoized per request.
   def munsell_colors
-    @munsell_colors ||= begin
-      base = JSON.parse(Rails.root.join("config/munsell_colors.json").read)
-      # Project-specific extras a registrar added on the fly. They aren't real
-      # Munsell chips, so they carry no hex (shown as plain text, no swatch) and
-      # are the only entries the picker lets you delete. Listed first.
-      custom = Array(@descriptions&.dig('lookups', 'custom_colors')).map(&:to_s).compact_blank
-      custom.map { |name| { 'n' => name, 'hex' => nil, 'custom' => true } } + base
-    end
+    @munsell_colors ||=
+      JSON.parse(Rails.root.join("config/munsell_colors.json").read)
   end
 
   # sRGB hex for a Munsell notation, or nil if it isn't a known chip (e.g. a
@@ -203,13 +198,21 @@ module ApplicationHelper
     @munsell_hex_index[notation.to_s]
   end
 
-  # Read-only display of a stored colour: a swatch of the notation's real colour
-  # next to the notation text. Falls back to plain text for unknown values.
+  # Read-only display of stored colour(s): a swatch of each notation's real
+  # colour next to its text. Accepts a single value or an array (multi-value
+  # fields). Falls back to plain text for unknown values.
   def munsell_value(value)
-    return if value.blank?
+    values = Array(value).compact_blank
+    return if values.empty?
 
+    tag.span(class: 'inline-flex flex-wrap items-center gap-3') do
+      safe_join(values.map { |v| munsell_swatch_display(v) })
+    end
+  end
+
+  def munsell_swatch_display(value)
     hex = munsell_hex(value)
-    return value unless hex
+    return tag.span(value) unless hex
 
     tag.span(class: 'inline-flex items-center gap-2') do
       tag.span('', style: "display:inline-block;width:0.9rem;height:0.9rem;" \
@@ -226,8 +229,7 @@ module ApplicationHelper
     hex = munsell_hex(value)
     tag.div(class: 'munsell-picker', data: {
               controller: 'munsell-picker',
-              "munsell-picker-colors-value": munsell_colors.to_json,
-              "munsell-picker-lookup-value": 'custom_colors'
+              "munsell-picker-colors-value": munsell_colors.to_json
             }) do
       hidden = hidden_field_tag(name, value, data: { "munsell-picker-target": 'input' })
       swatch_class = 'munsell-picker__swatch'
@@ -247,15 +249,37 @@ module ApplicationHelper
     end
   end
 
-  # A plain <select> plus inline add/delete of its options. The Stimulus
-  # controller builds the "add" input and the deletable list from the select's
-  # options, and POSTs changes to /lookup_values (persisted to the project).
-  def managed_picker_field(name, options, value, lookup)
-    tag.div(class: 'lookup-manager',
-            data: { controller: 'lookup-manager', "lookup-manager-lookup-value": lookup }) do
-      select_tag name, options_for_select(options, value), include_blank: true,
-                                                           class: 'form-control',
-                                                           data: { "lookup-manager-target": 'select' }
+  # Renders a repeatable field: one entry per stored value (at least one), a
+  # delete button per entry, and an "Add …" button that clones a blank entry.
+  # Each entry submits under `name[]`, so the field stores an array. The
+  # repeatable_controller handles add/remove client-side (no reload). The block
+  # renders the actual input for a single value.
+  def repeatable_field(name, value, label, &block)
+    entries = Array(value).compact_blank
+    entries = [nil] if entries.empty?
+    add_label = label.to_s.downcase.presence || 'entry'
+
+    tag.div(class: 'repeatable', data: { controller: 'repeatable' }) do
+      # Always submit the array key (even with zero visible entries) so that
+      # removing every entry actually clears the field. Blanks are dropped on save.
+      blank = hidden_field_tag("#{name}[]", '', id: nil)
+      list = tag.div(class: 'repeatable__entries', data: { "repeatable-target": 'entries' }) do
+        safe_join(entries.map { |v| repeatable_entry(v, &block) })
+      end
+      template = tag.template(data: { "repeatable-target": 'template' }) do
+        repeatable_entry(nil, &block)
+      end
+      add = tag.button("+ Add #{add_label}", type: 'button', class: 'repeatable__add',
+                                             data: { action: 'repeatable#add' })
+      blank + list + template + add
+    end
+  end
+
+  def repeatable_entry(value, &block)
+    tag.div(class: 'repeatable__entry') do
+      block.call(value) +
+        tag.button('×', type: 'button', class: 'repeatable__del',
+                        "aria-label": 'Remove', data: { action: 'repeatable#remove' })
     end
   end
 
@@ -266,7 +290,13 @@ module ApplicationHelper
     # searchable picker that renders each notation's real sRGB colour. Data comes
     # from config/munsell_colors.json (not a lookup) — see munsell_colors.
     when 'munsell_swatch'
-      munsell_swatch_field(name, value)
+      if form_definition_hash['multi']
+        repeatable_field(name, value, form_definition_hash['label']) do |v|
+          munsell_swatch_field("#{name}[]", v)
+        end
+      else
+        munsell_swatch_field(name, value)
+      end
     # 'munsel_picker' (the Munsell colour list) is just a picker with inline values.
     when 'picker', 'munsel_picker'
       options = if form_definition_hash['values'].is_a?(Hash)
@@ -274,10 +304,10 @@ module ApplicationHelper
                 else
                   form_definition_hash['values']
                 end
-      # A 'manageable' field (e.g. Decoration) gets inline add/delete of its
-      # options, persisted to the project list. See lookup_manager_controller.
-      if form_definition_hash['manageable'].present?
-        managed_picker_field(name, Array(options), value, form_definition_hash['manageable'])
+      if form_definition_hash['multi']
+        repeatable_field(name, value, form_definition_hash['label']) do |v|
+          select_tag "#{name}[]", options_for_select(options || [], v), include_blank: true, class: 'form-control'
+        end
       else
         select_tag name, options_for_select(options || [], value), include_blank: true, class: 'form-control'
       end
