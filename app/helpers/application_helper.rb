@@ -223,14 +223,17 @@ module ApplicationHelper
               "munsell-picker-colors-value": munsell_colors.to_json
             }) do
       hidden = hidden_field_tag(name, value, data: { "munsell-picker-target": 'input' })
+      swatch_class = 'munsell-picker__swatch'
+      swatch_class += ' is-empty' unless hex
       trigger = tag.button(type: 'button',
-                           class: 'form-control d-flex align-items-center gap-2 text-start',
+                           class: 'munsell-picker__trigger form-control',
                            data: { action: 'munsell-picker#toggle',
                                    "munsell-picker-target": 'trigger' }) do
-        tag.span('', class: 'munsell-picker__swatch',
+        tag.span('', class: swatch_class,
                      data: { "munsell-picker-target": 'swatch' },
-                     style: hex ? "background-color:#{hex}" : 'background:transparent') +
+                     style: hex ? "background-color:#{hex}" : nil) +
           tag.span(value.presence || 'Select a colour…',
+                   class: 'munsell-picker__value',
                    data: { "munsell-picker-target": 'label' })
       end
       hidden + trigger
