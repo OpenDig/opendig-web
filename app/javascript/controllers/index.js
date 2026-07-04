@@ -13,9 +13,6 @@ console.log("[stimulus] index loaded")
 import MunsellPickerController from "controllers/munsell_picker_controller"
 application.register("munsell-picker", MunsellPickerController)
 
-import LookupManagerController from "controllers/lookup_manager_controller"
-application.register("lookup-manager", LookupManagerController)
-
 // Lazy load controllers as they appear in the DOM (remember not to preload controllers in import map!)
 // import { lazyLoadControllersFrom } from "@hotwired/stimulus-loading"
 // lazyLoadControllersFrom("controllers", application)

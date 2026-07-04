@@ -184,14 +184,8 @@ module ApplicationHelper
   # and identical for every project, so it lives outside the per-project
   # descriptions system. Memoized per request.
   def munsell_colors
-    @munsell_colors ||= begin
-      base = JSON.parse(Rails.root.join("config/munsell_colors.json").read)
-      # Project-specific extras a registrar added on the fly. They aren't real
-      # Munsell chips, so they carry no hex (shown as plain text, no swatch) and
-      # are the only entries the picker lets you delete. Listed first.
-      custom = Array(@descriptions&.dig('lookups', 'custom_colors')).map(&:to_s).compact_blank
-      custom.map { |name| { 'n' => name, 'hex' => nil, 'custom' => true } } + base
-    end
+    @munsell_colors ||=
+      JSON.parse(Rails.root.join("config/munsell_colors.json").read)
   end
 
   # sRGB hex for a Munsell notation, or nil if it isn't a known chip (e.g. a
@@ -226,8 +220,7 @@ module ApplicationHelper
     hex = munsell_hex(value)
     tag.div(class: 'munsell-picker', data: {
               controller: 'munsell-picker',
-              "munsell-picker-colors-value": munsell_colors.to_json,
-              "munsell-picker-lookup-value": 'custom_colors'
+              "munsell-picker-colors-value": munsell_colors.to_json
             }) do
       hidden = hidden_field_tag(name, value, data: { "munsell-picker-target": 'input' })
       swatch_class = 'munsell-picker__swatch'
@@ -247,18 +240,6 @@ module ApplicationHelper
     end
   end
 
-  # A plain <select> plus inline add/delete of its options. The Stimulus
-  # controller builds the "add" input and the deletable list from the select's
-  # options, and POSTs changes to /lookup_values (persisted to the project).
-  def managed_picker_field(name, options, value, lookup)
-    tag.div(class: 'lookup-manager',
-            data: { controller: 'lookup-manager', "lookup-manager-lookup-value": lookup }) do
-      select_tag name, options_for_select(options, value), include_blank: true,
-                                                           class: 'form-control',
-                                                           data: { "lookup-manager-target": 'select' }
-    end
-  end
-
   def input_for(form_definition_hash, value, description_type)
     name = "locus[#{description_type}][#{form_definition_hash['key']}]"
     case form_definition_hash['type']
@@ -274,13 +255,7 @@ module ApplicationHelper
                 else
                   form_definition_hash['values']
                 end
-      # A 'manageable' field (e.g. Decoration) gets inline add/delete of its
-      # options, persisted to the project list. See lookup_manager_controller.
-      if form_definition_hash['manageable'].present?
-        managed_picker_field(name, Array(options), value, form_definition_hash['manageable'])
-      else
-        select_tag name, options_for_select(options || [], value), include_blank: true, class: 'form-control'
-      end
+      select_tag name, options_for_select(options || [], value), include_blank: true, class: 'form-control'
     # 'combo' is a picker you can also type into: the lookup values are offered
     # as suggestions (datalist) but any value is accepted — e.g. registrar
     # designations like "Ceramic Tech" or "Radiocarbon" that aren't in the list.

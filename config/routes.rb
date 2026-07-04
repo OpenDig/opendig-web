@@ -77,11 +77,6 @@ Rails.application.routes.draw do
 
   resource :descriptions, only: %i[edit update destroy], controller: 'descriptions'
 
-  # Inline add/delete of the registrar's user-managed pick lists (Decoration,
-  # custom Colours). See LookupValuesController::MANAGEABLE.
-  post   '/lookup_values', to: 'lookup_values#create',  as: :lookup_values
-  delete '/lookup_values', to: 'lookup_values#destroy'
-
   resources :reports, only: %i[index show]
 
   root to: 'areas#index'
