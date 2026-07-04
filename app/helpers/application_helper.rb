@@ -172,14 +172,79 @@ module ApplicationHelper
     case type
     when 'date'
       read_date value if value
+    when 'munsell_swatch'
+      munsell_value(value)
     else
       value
+    end
+  end
+
+  # The full Munsell Book of Color: an ordered array of { 'n' => notation,
+  # 'hex' => '#rrggbb' } loaded once from config/munsell_colors.json. App-wide
+  # and identical for every project, so it lives outside the per-project
+  # descriptions system. Memoized per request.
+  def munsell_colors
+    @munsell_colors ||=
+      JSON.parse(Rails.root.join("config/munsell_colors.json").read)
+  end
+
+  # sRGB hex for a Munsell notation, or nil if it isn't a known chip (e.g. a
+  # legacy free-text colour like "Brown").
+  def munsell_hex(notation)
+    return if notation.blank?
+
+    @munsell_hex_index ||= munsell_colors.to_h { |c| [c['n'], c['hex']] }
+    @munsell_hex_index[notation.to_s]
+  end
+
+  # Read-only display of a stored colour: a swatch of the notation's real colour
+  # next to the notation text. Falls back to plain text for unknown values.
+  def munsell_value(value)
+    return if value.blank?
+
+    hex = munsell_hex(value)
+    return value unless hex
+
+    tag.span(class: 'inline-flex items-center gap-2') do
+      tag.span('', style: "display:inline-block;width:0.9rem;height:0.9rem;" \
+                          "border:1px solid rgba(0,0,0,.35);border-radius:3px;" \
+                          "background-color:#{hex}") +
+        tag.span(value)
+    end
+  end
+
+  # The searchable swatch picker. A hidden field carries the stored notation
+  # (same name/key as the old plain picker, so saving is unchanged); a Stimulus
+  # controller renders the filterable colour list. See munsell_picker_controller.
+  def munsell_swatch_field(name, value)
+    hex = munsell_hex(value)
+    tag.div(class: 'munsell-picker', data: {
+              controller: 'munsell-picker',
+              "munsell-picker-colors-value": munsell_colors.to_json
+            }) do
+      hidden = hidden_field_tag(name, value, data: { "munsell-picker-target": 'input' })
+      trigger = tag.button(type: 'button',
+                           class: 'form-control d-flex align-items-center gap-2 text-start',
+                           data: { action: 'munsell-picker#toggle',
+                                   "munsell-picker-target": 'trigger' }) do
+        tag.span('', class: 'munsell-picker__swatch',
+                     data: { "munsell-picker-target": 'swatch' },
+                     style: hex ? "background-color:#{hex}" : 'background:transparent') +
+          tag.span(value.presence || 'Select a colour…',
+                   data: { "munsell-picker-target": 'label' })
+      end
+      hidden + trigger
     end
   end
 
   def input_for(form_definition_hash, value, description_type)
     name = "locus[#{description_type}][#{form_definition_hash['key']}]"
     case form_definition_hash['type']
+    # 'munsell_swatch' is the full Munsell Book of Color (1498 chips) as a
+    # searchable picker that renders each notation's real sRGB colour. Data comes
+    # from config/munsell_colors.json (not a lookup) — see munsell_colors.
+    when 'munsell_swatch'
+      munsell_swatch_field(name, value)
     # 'munsel_picker' (the Munsell colour list) is just a picker with inline values.
     when 'picker', 'munsel_picker'
       options = if form_definition_hash['values'].is_a?(Hash)

@@ -37,5 +37,35 @@ RSpec.describe ApplicationHelper, type: :helper do
       expect(html).to include('name="locus[earth_description][foo]"')
       expect(html).to include('value="bar"')
     end
+
+    it 'renders the searchable swatch widget for a munsell_swatch field' do
+      field = { 'key' => 'munsell', 'type' => 'munsell_swatch' }
+
+      html = helper.input_for(field, '10YR 5/3', 'find')
+
+      expect(html).to include('data-controller="munsell-picker"')
+      # hidden field carries the stored notation under the same name the plain
+      # picker used, so saving is unchanged
+      expect(html).to include('type="hidden"')
+      expect(html).to include('name="locus[find][munsell]"')
+      expect(html).to include('value="10YR 5/3"')
+      # the full colour set is handed to the Stimulus controller as a value
+      expect(html).to include('data-munsell-picker-colors-value')
+      # current selection shows its real swatch colour
+      expect(html).to match(/munsell-picker__swatch.*background-color:#[0-9a-f]{6}/)
+    end
+  end
+
+  describe '#output' do
+    it 'shows a colour swatch next to a known Munsell notation' do
+      html = helper.output('10YR 5/3', 'munsell_swatch')
+
+      expect(html).to include('10YR 5/3')
+      expect(html).to match(/background-color:#[0-9a-f]{6}/)
+    end
+
+    it 'falls back to plain text for a non-Munsell colour value' do
+      expect(helper.output('Brown', 'munsell_swatch')).to eq('Brown')
+    end
   end
 end

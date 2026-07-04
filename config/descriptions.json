@@ -2436,11 +2436,8 @@
         {
             "key": "munsell",
             "label": "Color",
-            "type": "picker",
-            "value_type": "string",
-            "values": {
-                "from": "munsell"
-            }
+            "type": "munsell_swatch",
+            "value_type": "string"
         },
         {
             "key": "preservation",
