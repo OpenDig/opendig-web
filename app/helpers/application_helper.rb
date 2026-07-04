@@ -214,8 +214,8 @@ module ApplicationHelper
     hex = munsell_hex(value)
     return tag.span(value) unless hex
 
-    tag.span(class: 'inline-flex items-center gap-2') do
-      tag.span('', style: "display:inline-block;width:0.9rem;height:0.9rem;" \
+    tag.span(style: 'display:inline-flex;align-items:center') do
+      tag.span('', style: "display:inline-block;width:0.9rem;height:0.9rem;margin-right:0.6rem;" \
                           "border:1px solid rgba(0,0,0,.35);border-radius:3px;" \
                           "background-color:#{hex}") +
         tag.span(value)

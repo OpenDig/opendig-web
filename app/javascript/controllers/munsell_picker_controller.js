@@ -130,7 +130,7 @@ export default class extends Controller {
     style.id = "munsell-picker-styles"
     style.textContent = `
       .munsell-picker { position: relative; }
-      .munsell-picker__trigger { display:flex; align-items:center; gap:0.55rem; text-align:left; }
+      .munsell-picker__trigger { display:flex; align-items:center; gap:0.85rem; text-align:left; }
       .munsell-picker__value { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .munsell-picker__swatch { display:inline-block; width:1.1rem; height:1.1rem;
         border:1px solid rgba(0,0,0,.35); border-radius:3px; flex:0 0 auto; }
@@ -140,7 +140,7 @@ export default class extends Controller {
         box-shadow:0 8px 24px rgba(0,0,0,.18); padding:8px; }
       .munsell-picker__search { margin-bottom:6px; }
       .munsell-picker__list { max-height:min(50vh,340px); overflow-y:auto; }
-      .munsell-picker__row { display:flex; align-items:center; gap:8px; width:100%;
+      .munsell-picker__row { display:flex; align-items:center; gap:12px; width:100%;
         border:0; background:transparent; padding:5px 8px; text-align:left; cursor:pointer;
         border-radius:6px; font-size:.9rem; }
       .munsell-picker__row:hover, .munsell-picker__row:focus {
