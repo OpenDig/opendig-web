@@ -54,6 +54,31 @@ RSpec.describe ApplicationHelper, type: :helper do
       # current selection shows its real swatch colour
       expect(html).to match(/munsell-picker__swatch.*background-color:#[0-9a-f]{6}/)
     end
+
+    it 'renders a repeatable colour field (multi) with an array name and Add button' do
+      field = { 'key' => 'munsell', 'type' => 'munsell_swatch', 'label' => 'Color', 'multi' => true }
+
+      html = helper.input_for(field, ['10YR 5/3', '7.5YR 4/4'], 'find')
+
+      expect(html).to include('data-controller="repeatable"')
+      expect(html).to include('repeatable-target="template"')
+      expect(html).to include('name="locus[find][munsell][]"')
+      expect(html).to include('+ Add color')
+      # one picker per stored value, plus the (inert) template entry
+      expect(html.scan('munsell-picker__trigger').size).to eq(3)
+    end
+
+    it 'renders a repeatable decoration field (multi) with array-named selects' do
+      helper.instance_variable_set(:@descriptions, { 'lookups' => { 'decoration' => ['', 'Painted', 'Incised'] } })
+      field = { 'key' => 'decoration', 'type' => 'picker', 'label' => 'Decoration',
+                'multi' => true, 'values' => { 'from' => 'decoration' } }
+
+      html = helper.input_for(field, 'Painted', 'find')
+
+      expect(html).to include('data-controller="repeatable"')
+      expect(html).to include('name="locus[find][decoration][]"')
+      expect(html).to include('+ Add decoration')
+    end
   end
 
   describe '#output' do
@@ -66,6 +91,18 @@ RSpec.describe ApplicationHelper, type: :helper do
 
     it 'falls back to plain text for a non-Munsell colour value' do
       expect(helper.output('Brown', 'munsell_swatch')).to eq('Brown')
+    end
+
+    it 'renders a swatch per notation for a multi-value colour array' do
+      html = helper.output(['10YR 5/3', '2.5YR 4/6'], 'munsell_swatch')
+
+      expect(html).to include('10YR 5/3')
+      expect(html).to include('2.5YR 4/6')
+      expect(html.scan(/background-color:#[0-9a-f]{6}/).size).to eq(2)
+    end
+
+    it 'joins a multi-value plain field (e.g. Decoration) with commas' do
+      expect(helper.output(%w[Painted Incised], 'picker')).to eq('Painted, Incised')
     end
   end
 end

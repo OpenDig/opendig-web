@@ -35,6 +35,9 @@ class RegistrarController < ApplicationController
     return redirect_to(registrar_index_path, alert: 'That find could no longer be located.') if item.nil?
 
     item.merge!(params[:locus][:find].to_enum.to_h)
+    # Multi-value fields (Colour, Decoration) submit an array with a trailing
+    # blank placeholder; drop blanks so stored data stays clean.
+    item.transform_values! { |v| v.is_a?(Array) ? v.compact_blank : v }
 
     if @doc.save
       flash[:success] = 'Success! Find Updated'

@@ -2244,7 +2244,7 @@
         "preservation": ["Complete", "Fragmentary", "UD"],
         "preservation_percent": ["","UD", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"],
         "craftsmanship": ["Very crude", "Crude", "Moderate", "Fine", "Very Fine", "Natural"],
-        "decoration": ["", "Appliqued", "Burnished", "Drilled", "Engraved", "Etched", "Fluted", "Glazed", "Impressed", "Incised", "Inscribed", "Modeled", "Molded", "None", "Painted", "Punctured", "Stamped", "Striped"],
+        "decoration": ["", "Appliqued", "Burnished", "Drilled", "Engraved", "Etched", "Fluted", "Glazed", "Impressed", "Incised", "Inscribed", "Modeled", "Molded", "None", "Painted", "Punctured", "Stamped", "Striped", "Trailed", "Twisted"],
         "condition": ["", "Broken", "Complete", "Mendable", "Fragile"],
         "allocation": ["", "CNEA", "DoA - Kerak", "Field", "Missing"]
     },
@@ -2437,7 +2437,8 @@
             "key": "munsell",
             "label": "Color",
             "type": "munsell_swatch",
-            "value_type": "string"
+            "value_type": "string",
+            "multi": true
         },
         {
             "key": "preservation",
@@ -2471,6 +2472,7 @@
             "label": "Decoration",
             "type": "picker",
             "value_type": "string",
+            "multi": true,
             "values": {
                 "from": "decoration"
             }
