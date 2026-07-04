@@ -15,6 +15,9 @@ export default class extends Controller {
   MAX_ROWS = 400
 
   connect() {
+    // Temporary breadcrumb so we can confirm on the live site that the
+    // controller registers and connects (remove once verified).
+    console.log("[munsell-picker] connected", this.element)
     this.injectStylesOnce()
     this.buildPanel()
     this.open = false
