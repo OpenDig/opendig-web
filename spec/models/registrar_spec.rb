@@ -11,7 +11,10 @@ RSpec.describe Registrar, type: :model do
       expect(find_with('').stage).to eq('incoming')
       expect(find_with('initial registration').stage).to eq('initial')
       expect(find_with('WIP').stage).to eq('pending')
-      expect(find_with('registrarion complete').stage).to eq('completed')
+      expect(find_with('registration complete').stage).to eq('completed')
+      # Guard against the old typo'd matcher regressing: the real stored value is
+      # "registration complete" (the Status picker option), not "registrarion…".
+      expect(find_with('registrarion complete').stage).to eq('incoming')
       expect(find_with('discarded').stage).to eq('discarded')
     end
 
