@@ -100,4 +100,8 @@ if (document.readyState === 'loading') {
 // app/assets/javascripts/bulk_uploads.js
 
 import "@hotwired/turbo-rails"
-import "./controllers"
+// Bare specifier — the importmap resolves "controllers" to the digested
+// controllers/index. A relative "./controllers" is NOT remapped by the
+// importmap and 404s at /assets/controllers, which aborts this whole module
+// (so Stimulus never starts).
+import "controllers"
