@@ -70,6 +70,44 @@ RSpec.describe RegistrarController, type: :controller do
     end
   end
 
+  describe 'PATCH update (conflict-safe save)' do
+    let(:item) { { 'field_number' => '1', 'type' => 'Bead', 'photos' => ['keep'] } }
+    let(:params) do
+      { id: 'doc1', pail_id: '1', item_number: '1', item_locus_code: '1.1.001',
+        locus: { find: { 'type' => 'Loom weight' } } }
+    end
+
+    def doc_saving(&save)
+      d = { 'pails' => [{ 'pail_number' => '1', 'finds' => [item] }] }
+      d.define_singleton_method(:save, &save)
+      allow(db).to receive(:get).with('doc1').and_return(d)
+    end
+
+    before { session[:user_id] = users[:registrar].id }
+
+    it 'applies the submitted change, preserving unsubmitted fields' do
+      doc_saving { true }
+      patch :update, params: params
+      expect(item).to include('type' => 'Loom weight', 'photos' => ['keep'])
+      expect(flash[:success]).to be_present
+    end
+
+    it 'retries on a 409 conflict and still saves' do
+      n = 0
+      doc_saving { (n += 1) == 1 ? raise(CouchRest::Conflict) : true }
+      patch :update, params: params
+      expect(item['type']).to eq('Loom weight')
+      expect(flash[:success]).to be_present
+    end
+
+    it 'warns and re-renders instead of 500-ing when it keeps conflicting' do
+      doc_saving { raise CouchRest::Conflict }
+      patch :update, params: params
+      expect(flash.now[:error]).to include('could not be saved')
+      expect(response).to render_template(:edit)
+    end
+  end
+
   describe 'PATCH discard' do
     let(:item) { { 'field_number' => '1', 'state' => 'unregistered' } }
     let(:doc) do
