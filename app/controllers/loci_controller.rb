@@ -36,15 +36,15 @@ class LociController < ApplicationController
   end
 
   def update
-    locus_params = params[:locus].to_enum.to_h
-    locus_params = repair_nested_params(locus_params)
-    locus_params = @locus.deep_merge(locus_params)
+    repaired = repair_nested_params(params[:locus].to_enum.to_h)
+    merged = save_locus_with_retry(repaired)
 
-    if @db.save_doc(locus_params)
+    if merged
       flash[:success] = 'Success! Locus Updated'
-      redirect_to area_square_locus_path(@area, @square, locus_params['code'])
+      redirect_to area_square_locus_path(@area, @square, merged['code'])
     else
-      flash.now[:error] = 'Something went wrong'
+      flash.now[:error] = 'Someone else changed this locus while you were editing, ' \
+                          'so it was not saved. Please review the latest data and save again.'
       render :edit
     end
   end
@@ -93,6 +93,34 @@ class LociController < ApplicationController
     def locus_params
       params.require(:locus).permit!
     end
+
+  # Merge the form params into the CURRENT locus doc without dropping fields the
+  # form didn't render (find photos/state, etc. — see LocusMerge), and save with
+  # retry-on-conflict: on a 409 (someone else saved meanwhile) re-fetch the doc,
+  # re-merge onto it, and try again. Returns the saved doc, or false if it still
+  # conflicts after several tries (caller re-renders with a warning rather than
+  # 500-ing and losing the edit). CouchRest raises Conflict on 409; it never
+  # returns false, so the old `if @db.save_doc` else-branch was dead code.
+  def save_locus_with_retry(repaired, attempts: 3)
+    existing = @locus
+    attempts.times do
+      merged = LocusMerge.merge(existing, repaired)
+      begin
+        @db.save_doc(merged)
+        return merged
+      rescue CouchRest::Conflict
+        existing = refetch_locus(existing['_id'])
+        return false unless existing
+      end
+    end
+    false
+  end
+
+  def refetch_locus(id)
+    @db.get(id)
+  rescue CouchRest::Exception
+    nil
+  end
 
   def repair_nested_params(obj)
     obj.each do |key, value|

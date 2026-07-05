@@ -187,14 +187,15 @@ RSpec.describe LociController, type: :controller do
       end
     end
 
-    context 'when save fails' do
-      it 'sets error flash and renders edit template' do
-        expected_doc = locus_data.merge(updated_params)
-        expect(db).to receive(:save_doc).with(expected_doc).and_return(false)
+    context 'when the save keeps conflicting (someone else is editing)' do
+      it 'warns and re-renders edit without losing the edit (never 500s)' do
+        # CouchRest raises Conflict on a 409 — it does not return false.
+        allow(db).to receive(:save_doc).and_raise(CouchRest::Conflict)
+        allow(db).to receive(:get).with('locus_123').and_return(locus_data)
 
         patch :update, params: { area_id: area_id, square_id: square_id, id: locus_code, locus: updated_params }
 
-        expect(flash.now[:error]).to eq('Something went wrong')
+        expect(flash.now[:error]).to include('Someone else changed this locus')
         expect(response).to render_template(:edit)
       end
     end
