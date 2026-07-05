@@ -29,22 +29,21 @@ class RegistrarController < ApplicationController
   def edit; end
 
   def update
-    pail = embedded_rows(@doc['pails']).find { |p| p['pail_number'].to_s == @pail_id.to_s }
-    item = pail && embedded_rows(pail['finds']).find { |i| i['field_number'].to_s == @item_number }
+    submitted = params[:locus][:find].to_enum.to_h
+    ok = save_find_change do |find|
+      find.merge!(submitted)
+      # Multi-value fields (Colour, Decoration) submit an array with a trailing
+      # blank placeholder; drop blanks so stored data stays clean.
+      find.transform_values! { |v| v.is_a?(Array) ? v.compact_blank : v }
+    end
 
-    return redirect_to(registrar_index_path, alert: 'That find could no longer be located.') if item.nil?
-
-    item.merge!(params[:locus][:find].to_enum.to_h)
-    # Multi-value fields (Colour, Decoration) submit an array with a trailing
-    # blank placeholder; drop blanks so stored data stays clean.
-    item.transform_values! { |v| v.is_a?(Array) ? v.compact_blank : v }
-
-    if @doc.save
+    if ok
       flash[:success] = 'Success! Find Updated'
-      redirect_to registrar_path(id: @item_id, pail_id: pail['pail_number'], item_number: item['field_number'],
-                                 item_locus_code: @item_locus_code)
+      redirect_to registrar_path(id: @item_id, pail_id: @pail['pail_number'],
+                                 item_number: @find['field_number'], item_locus_code: @item_locus_code)
     else
-      flash.now[:error] = 'Something went wrong'
+      flash.now[:error] = 'This find could not be saved (it may have just been changed elsewhere). ' \
+                          'Please review and try again.'
       render :edit
     end
   end
@@ -60,14 +59,16 @@ class RegistrarController < ApplicationController
       return
     end
 
-    @find.merge!(
-      'state' => Registrar::DISCARDED_STATE,
-      'discard_reason' => reason,
-      'discarded_at' => Time.current.iso8601,
-      'discarded_by' => current_user&.email
-    )
+    ok = save_find_change do |find|
+      find.merge!(
+        'state' => Registrar::DISCARDED_STATE,
+        'discard_reason' => reason,
+        'discarded_at' => Time.current.iso8601,
+        'discarded_by' => current_user&.email
+      )
+    end
 
-    if @doc.save
+    if ok
       redirect_to registrar_index_path(season: params[:season]),
                   notice: "Find ##{@find['field_number']} discarded and returned to the field."
     else
@@ -78,12 +79,14 @@ class RegistrarController < ApplicationController
   # Undo a discard: the find returns to Incoming and the discard metadata is
   # cleared, so a mistaken discard isn't a dead end.
   def restore
-    @find.merge!('state' => Registrar::RESTORED_STATE)
-    @find.delete('discard_reason')
-    @find.delete('discarded_at')
-    @find.delete('discarded_by')
+    ok = save_find_change do |find|
+      find.merge!('state' => Registrar::RESTORED_STATE)
+      find.delete('discard_reason')
+      find.delete('discarded_at')
+      find.delete('discarded_by')
+    end
 
-    if @doc.save
+    if ok
       redirect_to registrar_path(**find_path_params), notice: 'Find restored to Incoming.'
     else
       redirect_to registrar_path(**find_path_params), alert: 'Something went wrong restoring the find.'
@@ -96,8 +99,8 @@ class RegistrarController < ApplicationController
     key = params[:cover_key].to_s
     return redirect_to registrar_path(**find_path_params), alert: 'That photo could not be found.' unless helpers.find_photos(@find).any? { |p| p['key'] == key }
 
-    @find['cover_key'] = key
-    if @doc.save
+    ok = save_find_change { |find| find['cover_key'] = key }
+    if ok
       redirect_to registrar_path(**find_path_params), notice: 'Cover photo updated.'
     else
       redirect_to registrar_path(**find_path_params), alert: 'Could not update the cover photo.'
@@ -111,15 +114,44 @@ class RegistrarController < ApplicationController
     @area, @square, @locus_code = @item_locus_code.to_s.split('.')
     @pail_id = params[:pail_id]
     @doc = @db.get(@item_id)
-
-    pail = embedded_rows(@doc['pails']).find { |p| p['pail_number'].to_s == @pail_id.to_s }
-    # Compare as strings: field_number may be stored as a number while the URL
-    # param is a string, which otherwise silently misses and leaves @find nil.
-    @find = pail && embedded_rows(pail['finds']).find { |item| item['field_number'].to_s == @item_number }
+    locate_find
 
     return if @find
 
     redirect_to registrar_index_path, alert: 'That find could not be located.'
+  end
+
+  # Locate the pail + find inside the current @doc. Compare as strings:
+  # field_number may be stored as a number while the URL param is a string.
+  def locate_find
+    @pail = embedded_rows(@doc['pails']).find { |p| p['pail_number'].to_s == @pail_id.to_s }
+    @find = @pail && embedded_rows(@pail['finds']).find { |i| i['field_number'].to_s == @item_number }
+  end
+
+  # Apply a change to the find and save, retrying on a 409 conflict. CouchRest
+  # RAISES CouchRest::Conflict on 409 (it never returns false), so a concurrent
+  # edit to the same locus doc used to 500 and lose the registrar's change. On
+  # conflict we re-fetch the doc, re-locate the find, and RE-APPLY the block onto
+  # the latest data (so the change lands on top of the concurrent edit instead of
+  # clobbering it). Returns true on success, false if it can't be located or
+  # still conflicts after several tries. The block receives the (fresh) find.
+  def save_find_change(attempts: 3)
+    attempts.times do |i|
+      if i.positive?
+        @doc = @db.get(@item_id)
+        locate_find
+      end
+      return false unless @find
+
+      yield @find
+      begin
+        @doc.save
+        return true
+      rescue CouchRest::Conflict
+        next
+      end
+    end
+    false
   end
 
   # The composite params that identify a find across registrar routes.
