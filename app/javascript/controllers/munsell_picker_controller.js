@@ -87,9 +87,12 @@ export default class extends Controller {
   render(query) {
     const norm = (s) => s.toLowerCase().replace(/\s+/g, "")
     const q = norm(query)
+    // `hidden` chips (legacy "1 GLEY 8/10Y" aliases) stay out of the pickable
+    // list but remain in the data so already-saved values still render a swatch.
+    const base = this.colorsValue.filter((c) => !c.hidden)
     const matches = q
-      ? this.colorsValue.filter((c) => norm(c.n).includes(q))
-      : this.colorsValue
+      ? base.filter((c) => norm(c.n).includes(q))
+      : base
     const shown = matches.slice(0, this.MAX_ROWS)
 
     const rows = shown
