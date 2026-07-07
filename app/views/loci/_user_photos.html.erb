@@ -16,7 +16,9 @@
         </tr>
       </thead>
       <tbody>
-        <% field_note_photos(@locus).each do |photo| %>
+        <% photos = field_note_photos(@locus) %>
+        <% annotations_by_photo = PhotoAnnotations.for_photos(photos) %>
+        <% photos.each do |photo| %>
           <%
             # Field notes come from two shapes: the dedicated user_photos[] array
             # (taken_at + user_name) and photos[] entries the device tagged as
@@ -35,7 +37,8 @@
                      data-full="<%= Photo.url_for_key(photo["key"], :medium) %>"
                      data-caption="<%= [photo['subject'].presence, 'Field note'].compact.join(' · ') %>"
                      data-meta="<%= [date, uploader].map(&:presence).compact.join(' · ') %>"
-                     @click="open=true; img=$el.dataset.full; caption=$el.dataset.caption; meta=$el.dataset.meta" />
+                     data-annotations="<%= (annotations_by_photo[photo] || []).to_json %>"
+                     @click="open=true; img=$el.dataset.full; caption=$el.dataset.caption; meta=$el.dataset.meta; annotations=JSON.parse($el.dataset.annotations || '[]')" />
               <% else %>
                 <span class="text-amber-700 text-xs">No image</span>
               <% end %>

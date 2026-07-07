@@ -11,7 +11,9 @@
         </tr>
       </thead>
       <tbody>
-        <% official_photos(@locus).each do |photo| %>
+        <% photos = official_photos(@locus) %>
+        <% annotations_by_photo = PhotoAnnotations.for_photos(photos) %>
+        <% photos.each do |photo| %>
           <%
             # Convention-named/bulk photos reference an S3 key; legacy daily
             # photos reference a number.
@@ -31,7 +33,8 @@
                    data-full="<%= medium %>"
                    data-caption="<%= label %>"
                    data-meta="<%= [read_date(photo['date']), photo['subject']].map(&:presence).compact.join(' · ') %>"
-                   @click="open=true; img=$el.dataset.full; caption=$el.dataset.caption; meta=$el.dataset.meta" />
+                   data-annotations="<%= (annotations_by_photo[photo] || []).to_json %>"
+                   @click="open=true; img=$el.dataset.full; caption=$el.dataset.caption; meta=$el.dataset.meta; annotations=JSON.parse($el.dataset.annotations || '[]')" />
             </td>
           </tr>
         <% end %>
