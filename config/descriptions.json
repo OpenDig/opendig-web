@@ -2699,7 +2699,7 @@
         "samples": {
             "title": "Samples",
             "field_set": "samples",
-            "style": "table",
+            "style": "photo",
             "group_by": "allocation"
         },
         "objects": {
