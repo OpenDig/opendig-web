@@ -3,6 +3,7 @@
     <p class="repeat-row__title">Pail<%= " #{pail['pail_number']}" if pail['pail_number'].present? %></p>
     <button name="button" onclick="removeThisPail(this);" type="button" class="btn btn-danger btn-sm">Remove pail</button>
   </div>
+
   <div class="form-group col-md-2">
     <%= label_tag "locus[pails[#{index}][pail_number]]", "Number" %>
     <%= text_field_tag "locus[pails[#{index}][pail_number]]", pail['pail_number'], class: 'form-control' %>
@@ -15,7 +16,6 @@
     <%= label_tag "locus[pails[#{index}][baskets]]", "Baskets" %>
     <%= text_field_tag "locus[pails[#{index}][baskets]]", pail['baskets'], class: 'form-control' %>
   </div>
-
   <div class="form-group col-md-2">
     <%= label_tag "locus[pails[#{index}][total_count]]", "Total Sherd Count" %>
     <%= text_field_tag "locus[pails[#{index}][total_count]]", pail['total_count'], class: 'form-control' %>
@@ -28,52 +28,51 @@
     <%= label_tag "locus[pails[#{index}][publish]]", "Publish Count" %>
     <%= text_field_tag "locus[pails[#{index}][publish]]", pail['publish'], class: 'form-control' %>
   </div>
-  <div class="form-group col-md-10">
+
+  <div class="form-group pail-comments">
     <%= label_tag "locus[pails[#{index}][pottery_comments]]", "Comments" %>
     <%= text_area_tag "locus[pails[#{index}][pottery_comments]]", pail['pottery_comments'], class: 'form-control' %>
   </div>
-  <div class="col">
-    <div class="row">
-      <div class="form-group col-md-1">
+
+  <div class="pail-subs">
+    <div class="pail-sub">
+      <div class="pail-sub__head">
+        <h3 class="ls-sub">Readings</h3>
+        <input type="button" id="add-pail-<%= index %>-reading-row" name="add-pail-<%= index %>-reading-row" value="+ Add Reading" class="btn-add" />
       </div>
-      <div class="form-group col-md-4 pail-<%= index %>-reading-container">
-        <h3>Pail <%= pail['pail_number'] %> Readings</h3>
+      <div class="pail-sub__rows pail-<%= index %>-reading-container">
         <% hash_rows(pail['readings']).each_with_index do |reading, reading_index| %>
-          <%= render 'pail_reading_form_row', pail: pail, reading: reading, pail_index: index, reading_index: reading_index  %>
+          <%= render 'pail_reading_form_row', pail: pail, reading: reading, pail_index: index, reading_index: reading_index %>
         <% end %>
       </div>
-      <div class="form-group col-md-2">
+    </div>
+
+    <div class="pail-sub">
+      <div class="pail-sub__head">
+        <h3 class="ls-sub">Finds</h3>
       </div>
-      <div class="form-group col-md-4 pail-<%= index %>-find-container">
-        <h3>Pail <%= pail['pail_number'] %> Finds</h3>
-        <% hash_rows(pail['finds']).each_with_index do |find, find_index| %>
-          <%= render 'pail_find_form_row', pail: pail, find: find, pail_index: index, find_index: find_index  %>
+      <div class="pail-sub__rows pail-<%= index %>-find-container">
+        <% pail_finds = hash_rows(pail['finds']) %>
+        <% if pail_finds.empty? %>
+          <p class="pail-sub__empty">No finds recorded for this pail.</p>
         <% end %>
-      </div>
-      <div class="form-group col-md-1">
+        <% pail_finds.each_with_index do |find, find_index| %>
+          <%= render 'pail_find_form_row', pail: pail, find: find, pail_index: index, find_index: find_index %>
+        <% end %>
       </div>
     </div>
   </div>
+
+  <script>
+    $(function($) {
+      var lastReadingIndex = $('.pail-<%= index %>-reading-row').last().data('pail-<%= index %>-reading-index')
+      var nextPailReadingIndex = (lastReadingIndex === undefined ? -1 : Number(lastReadingIndex)) + 1
+
+      var html = "<%= j render 'pail_reading_form_row', pail: pail, reading: {}, pail_index: index, reading_index: 'TEMPREADINGROW' %>".replace('TEMPREADINGROW', nextPailReadingIndex)
+
+      $('#add-pail-<%= index %>-reading-row').click(function() {
+        $('.pail-<%= index %>-reading-container').append(html);
+      });
+    })
+  </script>
 </div>
-  <div class="row mb-3">
-    <div class="col-md-1"></div>
-    <div class="col-md-11">
-      <input type="button" id="add-pail-<%= index %>-reading-row" name="add-pail-<%= index %>-reading-row" value="Add Reading" />
-    </div>
-  </div>
-
-<script>
-
-  $(function($) {
-    var lastReadingIndex = $('.pail-<%= index %>-reading-row').last().data('pail-<%= index %>-reading-index')
-    var nextPailReadingIndex = (lastReadingIndex === undefined ? -1 : Number(lastReadingIndex)) + 1
-
-    var html = "<%= j render 'pail_reading_form_row', pail: pail, reading: {}, pail_index: index, reading_index: 'TEMPREADINGROW' %>".replace('TEMPREADINGROW', nextPailReadingIndex)
-
-    var $button = $('#add-pail-<%= index %>-reading-row')
-
-    $button.click(function() {
-      $('.pail-<%= index %>-reading-container').append(html);
-    });
-  })
-</script>
