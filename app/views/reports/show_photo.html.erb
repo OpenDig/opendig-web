@@ -13,7 +13,7 @@
       <div class="col-9">
         <ul class="list-inline">
           <% @field_set.each do |field_set| %>
-              <li class="list-inline-item"><b><%= field_set.keys.first %></b>&nbsp;&nbsp;<%= row.dig(field_set.values.first) %></li>
+              <li class="list-inline-item"><b><%= field_set.keys.first %></b>&nbsp;&nbsp;<%= report_value(row.dig(field_set.values.first)) %></li>
           <% end %>
         </ul>
       </div>

@@ -16,7 +16,7 @@
         <% @field_set.each do |field_set| %>
           <div class="field-set">
             <span class="data-title"><%= field_set.keys.first %></span>
-            <span class="data"><%= row.dig(field_set.values.first) %></span>
+            <span class="data"><%= report_value(row.dig(field_set.values.first)) %></span>
           </div>
         <% end %>
       </td>

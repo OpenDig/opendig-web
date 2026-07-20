@@ -175,9 +175,15 @@ module ApplicationHelper
     when 'munsell_swatch'
       munsell_value(value)
     else
-      # Multi-value fields (e.g. Decoration) store an array; show them comma-joined.
-      value.is_a?(Array) ? value.compact_blank.join(', ') : value
+      report_value(value)
     end
+  end
+
+  # A report cell value. Multi-value fields (e.g. Decoration, Colour) are stored
+  # as arrays; show them comma-joined ("Molding", "Molding, Painted") rather than
+  # rendering the raw array literal (["Molding"]).
+  def report_value(value)
+    value.is_a?(Array) ? value.compact_blank.join(', ') : value
   end
 
   # The full Munsell Book of Color: an ordered array of { 'n' => notation,
