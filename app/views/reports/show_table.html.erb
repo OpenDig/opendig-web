@@ -7,23 +7,12 @@
   </div>
   <% if @rows.empty? %>
     <%= render 'empty' %>
+  <% elsif @grouped %>
+    <% @grouped.each do |label, rows| %>
+      <h4 class="report-group"><%= label %></h4>
+      <%= render 'data_table', rows: rows %>
+    <% end %>
+  <% else %>
+    <%= render 'data_table', rows: @rows %>
   <% end %>
-  <table>
-  <thead>
-    <tr>
-      <% @field_set.each do |field_set| %>
-        <th><%= field_set.keys.first %></th>
-      <% end %>
-    </tr>
-  </thead>
-  <tbody>
-  <% @rows.each do |row| %>
-    <tr>
-      <% @field_set.each do |field_set| %>
-        <td><%= row.dig(field_set.values.first) %></td>
-      <% end %>
-    </tr>
-  <% end %>
-  </tbody>
-  </table>
 </div>
