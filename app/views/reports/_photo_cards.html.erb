@@ -1,0 +1,17 @@
+<% rows.each do |row| %>
+  <div class="row">
+    <div class="col-9">
+      <ul class="list-inline">
+        <% @field_set.each do |field_set| %>
+          <li class="list-inline-item"><b><%= field_set.keys.first %></b>&nbsp;&nbsp;<%= report_value(row.dig(field_set.values.first)) %></li>
+        <% end %>
+      </ul>
+    </div>
+    <div class="col-3">
+      <% cover_key = find_cover_key(row) %>
+      <% if cover_key.present? %>
+        <%= image_tag(Find.url(cover_key, :preview), class: 'find-img-small', loading: 'lazy') %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

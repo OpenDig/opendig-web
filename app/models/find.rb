@@ -15,11 +15,10 @@ class Find
     [locus, pail_number, pail_date, field_number, type, remarks, gis_id, id]
   end
 
+  # Any registered find may have photos (they live at finds/<reg#>*). Samples (S)
+  # used to be excluded; they carry photos now, so all categories are eligible.
   def self.can_have_image?(registration_number)
-    return unless registration_number.present?
-    return false if registration_number.upcase.start_with?('S')
-
-    true
+    registration_number.present?
   end
 
   def self.get_image_keys(registration_number)

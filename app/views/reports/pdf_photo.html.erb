@@ -8,25 +8,11 @@
 </div>
 <% if @rows.empty? %>
   <%= render 'empty' %>
-<% else %>
-<table>
-  <% @rows.each do |row| %>
-    <tr>
-      <td class="report_info">
-        <% @field_set.each do |field_set| %>
-          <div class="field-set">
-            <span class="data-title"><%= field_set.keys.first %></span>
-            <span class="data"><%= report_value(row.dig(field_set.values.first)) %></span>
-          </div>
-        <% end %>
-      </td>
-      <td class="report_image">
-        <% cover_key = find_cover_key(row) %>
-        <% if cover_key.present? %>
-          <%= image_tag(Find.url(cover_key, :preview), class: 'find-img') %>
-        <% end %>
-      </td>
-    </tr>
+<% elsif @grouped %>
+  <% @grouped.each do |label, rows| %>
+    <h4 class="report-group"><%= label %></h4>
+    <%= render 'photo_rows', rows: rows %>
   <% end %>
-</table>
+<% else %>
+  <%= render 'photo_rows', rows: @rows %>
 <% end %>
