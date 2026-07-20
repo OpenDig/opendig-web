@@ -1,4 +1,5 @@
 require 'date'
+require 'erb'
 require 'aws-sdk-s3'
 require 'net/http'
 
@@ -40,7 +41,15 @@ class Find
     end
   end
 
-  NO_IMAGE_PLACEHOLDER = 'https://via.placeholder.com/250x250.png?text=No+Image'.freeze
+  # Self-contained SVG data URI — never an external host. wkhtmltopdf fetches
+  # every image while rendering a report; an external placeholder (e.g. a dead
+  # via.placeholder.com) would hang or fail the whole PDF, so keep it inline.
+  NO_IMAGE_SVG =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">' \
+    '<rect width="250" height="250" fill="#f1e9d8"/>' \
+    '<text x="125" y="130" font-family="sans-serif" font-size="18" fill="#9c8e78" ' \
+    'text-anchor="middle">No image</text></svg>'.freeze
+  NO_IMAGE_PLACEHOLDER = "data:image/svg+xml,#{ERB::Util.url_encode(NO_IMAGE_SVG)}".freeze
 
   # Imgproxy URL for a find's representative (first) image at the given style, or
   # the placeholder when it has none. Use wherever a single find image is shown
@@ -50,6 +59,16 @@ class Find
 
     key = get_image_keys(registration_number).first
     key ? url(key, style) : NO_IMAGE_PLACEHOLDER
+  end
+
+  # Imgproxy URLs for EVERY image a find has (e.g. A220168.jpg AND A220168b.jpg,
+  # discovered together by S3 prefix), at the given style. Empty when it has
+  # none — callers render nothing rather than a placeholder. Use in reports/
+  # galleries that should show all photos, not just the representative one.
+  def self.image_urls(registration_number, style = :medium)
+    return [] unless can_have_image?(registration_number)
+
+    get_image_keys(registration_number).map { |key| url(key, style) }
   end
 
   def self.url(key, style = :original)

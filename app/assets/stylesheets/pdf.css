@@ -45,6 +45,15 @@ td.report_image {
   max-height: 175px;
 }
 
+/* A find can have several photos (A220168.jpg, A220168b.jpg, ...); stack them. */
+.report_image .find-img {
+  display: block;
+  margin: 0 auto 8px;
+}
+.report_image .find-img:last-child {
+  margin-bottom: 0;
+}
+
 div.row h1, h2, h3 {
   text-align: center;
   font-weight: bold;
