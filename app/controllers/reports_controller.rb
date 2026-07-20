@@ -30,10 +30,21 @@ class ReportsController < ApplicationController
       @rows.sort_by! { |row| [row['area'], row['square'], row['locus'], row['pail']] }
     end
 
-    field_set_selector = @descriptions['reports'][@report_type]['field_set']
-    @report_type_title = @descriptions['reports'][@report_type]['title']
-    style = @descriptions['reports'][@report_type]['style']
+    report_config = @descriptions['reports'][@report_type]
+    field_set_selector = report_config['field_set']
+    @report_type_title = report_config['title']
+    style = report_config['style']
     @field_set = @descriptions['field_sets'][field_set_selector]
+
+    # Some reports (samples) are broken into sections by a field, e.g. one list
+    # per allocation within a single PDF. @grouped is [label, rows] sorted;
+    # rows with no value fall under "Unassigned".
+    @group_by = report_config['group_by']
+    if @group_by
+      @grouped = @rows
+                 .group_by { |row| row[@group_by].to_s.strip.presence || 'Unassigned' }
+                 .sort_by { |label, _| label.downcase }
+    end
 
     respond_to do |format|
       format.html do

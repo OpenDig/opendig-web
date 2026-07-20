@@ -1,4 +1,10 @@
-FROM ruby:3.2.0-alpine as base
+# Pinned to alpine 3.16 on purpose: it ships OpenSSL 1.1.1, which the
+# wkhtmltopdf binary below (built on alpine 3.10) links against. On alpine 3.17+
+# (OpenSSL 3.x) that binary fails at runtime with "symbol not found" (BIO_s_mem,
+# SSL_ctrl, TLSv1_server_method, …) and every PDF report download errors out.
+# Longer-term fix: move to a wkhtmltopdf 0.12.6 build made for OpenSSL 3
+# (e.g. surnet/alpine-wkhtmltopdf) and drop this pin.
+FROM ruby:3.2.0-alpine3.16 as base
 
 RUN apk add --update --no-cache \
   build-base \
