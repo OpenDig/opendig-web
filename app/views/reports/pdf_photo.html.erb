@@ -21,8 +21,9 @@
         <% end %>
       </td>
       <td class="report_image">
-        <% Find.image_urls(row.dig('registration_number'), :preview).each do |image| %>
-          <%= image_tag(image, class: 'find-img') %>
+        <% cover_key = find_cover_key(row) %>
+        <% if cover_key.present? %>
+          <%= image_tag(Find.url(cover_key, :preview), class: 'find-img') %>
         <% end %>
       </td>
     </tr>
