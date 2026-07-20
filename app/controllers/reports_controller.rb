@@ -10,22 +10,10 @@ class ReportsController < ApplicationController
     @season = params[:id].to_i
     report_type_param = params[:report_type]
     if %w[A B S].include? report_type_param
-      case report_type_param
-      when 'A'
-        @report_type = 'artifacts'
-      when 'B'
-        @report_type = 'objects'
-      when 'S'
-        @report_type = 'samples'
-      end
-      @rows = CsvData.new(@report_type).rows
-      # @rows = @db.view(
-      #   'opendig/report',
-      #   {reduce: false, start_key: [@season, report_type_param], end_key:[@season, report_type_param, {}] }
-      # )["rows"]
-      @rows.select! do |row|
-        row['allocation']&.upcase&.include?('DoA'.upcase)
-      end
+      @report_type = { 'A' => 'artifacts', 'B' => 'objects', 'S' => 'samples' }[report_type_param]
+      # Finalized finds for this season + category, live from CouchDB — replaces
+      # the legacy static data/*.csv export.
+      @rows = finalized_finds(@season, report_type_param)
       @rows.sort_by! { |row| row['registration_number'].to_s }
     elsif %w[Z].include? report_type_param
       @report_type = 'bones'
@@ -63,6 +51,24 @@ class ReportsController < ApplicationController
   end
 
   protected
+
+  # A find is "finalized" when the registrar has moved it to the Completed stage.
+  FINALIZED_STATE = 'registration complete'.freeze
+
+  # Finalized finds for a season + category (A/B/S), sourced live from the
+  # per-project CouchDB via the `opendig/report` view (which emits every find
+  # carrying a registration number, keyed by [season, category-letter], with the
+  # find's fields — including `state` — merged in). Only Completed-stage finds
+  # are kept; the report is empty until finds are finalized in the registrar.
+  def finalized_finds(season, type)
+    @db.view('opendig/report',
+             { reduce: false, start_key: [season, type], end_key: [season, type, {}] })['rows']
+       .map { |row| row['value'] }
+       .select { |find| find['state'] == FINALIZED_STATE }
+  rescue StandardError => e
+    Rails.logger.warn("finalized_finds(#{season}, #{type}) failed: #{e.class}: #{e.message}")
+    []
+  end
 
   def debug?
     params[:debug].present? && Rails.env == 'development'

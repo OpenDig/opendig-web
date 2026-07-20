@@ -5,6 +5,9 @@
       <h2>Balu'a Regional Archaeology Project</h2>
       <h3><%= @season %> <%= @report_type_title %> Report</h3>
   </div>
+  <% if @rows.empty? %>
+    <%= render 'empty' %>
+  <% end %>
   <table>
   <thead>
     <tr>

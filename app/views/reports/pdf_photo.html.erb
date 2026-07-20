@@ -4,9 +4,11 @@
       <h1>Khirbat al-Balu'a</h1>
       <h2>Balu'a Regional Archaeology Project</h2>
       <h3><%= @season %> <%= @report_type_title %> Report</h3>
-      <h3>DoA - Karak</h3>
   </div>
 </div>
+<% if @rows.empty? %>
+  <%= render 'empty' %>
+<% else %>
 <table>
   <% @rows.each do |row| %>
     <tr>
@@ -26,3 +28,4 @@
     </tr>
   <% end %>
 </table>
+<% end %>
