@@ -18,8 +18,8 @@
         </ul>
       </div>
       <div class="col-3">
-        <% if Find.can_have_image?(row.dig('registration_number')) %>
-          <%= image_tag(Find.image_url(row.dig('registration_number'), :preview), class: 'find-img-small', loading: 'lazy') %>
+        <% Find.image_urls(row.dig('registration_number'), :preview).each do |image| %>
+          <%= image_tag(image, class: 'find-img-small', loading: 'lazy') %>
         <% end %>
       </div>
     </div>
