@@ -36,11 +36,12 @@ class Find
   end
 
   # Warm the per-find image-key cache for a whole report in ONE S3 listing
-  # instead of a LIST per find. The report calls image_urls for every row, and a
-  # cold cache meant ~N sequential S3 list calls before the PDF even started
+  # instead of a LIST per find. The report resolves each find's cover photo
+  # (find_cover_key -> find_photos -> get_image_keys) for every row, and a cold
+  # cache meant ~N sequential S3 list calls before the PDF even started
   # rendering — the main source of slow report generation. Groups every object
   # under finds/ by find (same prefix match as get_image_keys) and primes each
-  # find's cache entry, so the subsequent image_urls calls are cache hits.
+  # find's cache entry, so the subsequent get_image_keys calls are cache hits.
   def self.prime_image_keys!(registration_numbers)
     bucket = Rails.application.config.try(:s3_bucket)
     return if bucket.nil?
@@ -82,16 +83,6 @@ class Find
 
     key = get_image_keys(registration_number).first
     key ? url(key, style) : NO_IMAGE_PLACEHOLDER
-  end
-
-  # Imgproxy URLs for EVERY image a find has (e.g. A220168.jpg AND A220168b.jpg,
-  # discovered together by S3 prefix), at the given style. Empty when it has
-  # none — callers render nothing rather than a placeholder. Use in reports/
-  # galleries that should show all photos, not just the representative one.
-  def self.image_urls(registration_number, style = :medium)
-    return [] unless can_have_image?(registration_number)
-
-    get_image_keys(registration_number).map { |key| url(key, style) }
   end
 
   def self.url(key, style = :original)
