@@ -46,6 +46,10 @@ class ReportsController < ApplicationController
                  .sort_by { |label, _| label.downcase }
     end
 
+    # Photo reports fetch an image per find; warm the whole report's image-key
+    # cache in one S3 listing so rendering doesn't do a list-per-find.
+    Find.prime_image_keys!(@rows.map { |row| row['registration_number'] }) if style == 'photo'
+
     respond_to do |format|
       format.html do
         render template: "reports/show_#{style}"
@@ -55,7 +59,13 @@ class ReportsController < ApplicationController
                template: "reports/pdf_#{style}",
                layout: 'pdf', formats: [:html],
                show_as_html: debug?,
-               footer: { right: '[page] of [topage]' }
+               footer: { right: '[page] of [topage]' },
+               # Page numbers come from the footer option, not JS — disabling
+               # scripts skips wkhtmltopdf's JS wait. Ignore load errors so one
+               # slow/missing image can't hang the whole render.
+               disable_javascript: true,
+               load_error_handling: 'ignore',
+               load_media_error_handling: 'ignore'
         # disposition: 'attachment'
       end
     end
