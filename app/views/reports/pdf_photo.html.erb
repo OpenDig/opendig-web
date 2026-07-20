@@ -21,7 +21,7 @@
         <% end %>
       </td>
       <td class="report_image">
-        <% Find.image_urls(row.dig('registration_number'), :medium).each do |image| %>
+        <% Find.image_urls(row.dig('registration_number'), :preview).each do |image| %>
           <%= image_tag(image, class: 'find-img') %>
         <% end %>
       </td>

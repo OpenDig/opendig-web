@@ -35,6 +35,29 @@ class Find
     []
   end
 
+  # Warm the per-find image-key cache for a whole report in ONE S3 listing
+  # instead of a LIST per find. The report calls image_urls for every row, and a
+  # cold cache meant ~N sequential S3 list calls before the PDF even started
+  # rendering — the main source of slow report generation. Groups every object
+  # under finds/ by find (same prefix match as get_image_keys) and primes each
+  # find's cache entry, so the subsequent image_urls calls are cache hits.
+  def self.prime_image_keys!(registration_numbers)
+    bucket = Rails.application.config.try(:s3_bucket)
+    return if bucket.nil?
+
+    regs = Array(registration_numbers).map { |r| r.to_s.strip }.reject(&:empty?).uniq
+    regs.select! { |reg| can_have_image?(reg) }
+    return if regs.empty?
+
+    all_keys = bucket.objects(prefix: "#{ProjectStorage.finds_prefix}/").map(&:key)
+    regs.each do |reg|
+      keys = all_keys.select { |k| k.start_with?("#{ProjectStorage.finds_prefix}/#{reg}") }
+      Rails.cache.write("#{ProjectStorage.storage_project}/#{reg}_images", keys, expires_in: 5.minutes)
+    end
+  rescue StandardError => e
+    Rails.logger.warn("Find.prime_image_keys! failed: #{e.class}: #{e.message}")
+  end
+
   def self.check_image(registration_number)
     Rails.cache.fetch("#{ProjectStorage.storage_project}/#{registration_number}_has_keys", expires_in: 5.minutes) do
       get_image_keys(registration_number).any?
