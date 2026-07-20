@@ -65,7 +65,13 @@ div.row h1, h2, h3 {
   text-align: left;
   font-size: 1.3em;
   font-weight: bold;
-  margin: 26px 0 8px;
+  margin: 0 0 8px;
   padding-bottom: 4px;
   border-bottom: 2px solid black;
+}
+
+/* Start a group on a new page. Applied to every group after the first (the
+   first stays on the title page), so grouped reports get one group per page. */
+.page-break {
+  page-break-before: always;
 }

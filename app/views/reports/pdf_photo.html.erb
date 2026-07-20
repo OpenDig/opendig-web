@@ -9,8 +9,8 @@
 <% if @rows.empty? %>
   <%= render 'empty' %>
 <% elsif @grouped %>
-  <% @grouped.each do |label, rows| %>
-    <h4 class="report-group"><%= label %></h4>
+  <% @grouped.each_with_index do |(label, rows), i| %>
+    <h4 class="report-group<%= ' page-break' if i.positive? %>"><%= label %></h4>
     <%= render 'photo_rows', rows: rows %>
   <% end %>
 <% else %>
