@@ -3,6 +3,11 @@
     <h1 class="text-xl font-bold">Stratigraphy</h1>
   </div>
 </div>
+<%# Marker so the controller can tell "section submitted, all rows removed"
+    (=> save an empty array) from "section not on this form". Without it,
+    deleting the LAST relationship submits no stratigraphies key and the merge
+    keeps the stored array, so the delete silently wouldn't persist. %>
+<%= hidden_field_tag 'locus[stratigraphies_present]', '1' %>
 <div class="row">
   <div class="col stratigraphy-container">
     <% hash_rows(@locus['stratigraphies']).each do |stratigraphy| %>

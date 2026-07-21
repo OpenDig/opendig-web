@@ -5,6 +5,11 @@
   </div>
 </div>
 
+<%# See stratigraphy form: marker lets the controller distinguish "all rows
+    removed" (=> save []) from "section absent", so deleting the last supplement
+    actually persists. %>
+<%= hidden_field_tag 'locus[supplements_present]', '1' %>
+
 <div id="supplements-container">
   <% hash_rows(@locus['supplements']).each_with_index do |supp, i| %>
     <%= render 'supplement_block', supp: supp, index: i, stype: supp['supplement_type'].to_s %>

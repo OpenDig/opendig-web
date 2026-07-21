@@ -37,6 +37,7 @@ class LociController < ApplicationController
 
   def update
     repaired = repair_nested_params(params[:locus].to_enum.to_h)
+    normalize_deletable_arrays!(repaired)
     merged = save_locus_with_retry(repaired)
 
     if merged
@@ -61,6 +62,23 @@ class LociController < ApplicationController
   end
 
   private
+
+    # Sections rendered as removable rows (stratigraphies, supplements) submit no
+    # key at all once the user deletes every row, so LocusMerge would keep the
+    # stored array and the deletion of the LAST row silently wouldn't persist.
+    # Each such form emits a hidden `<section>_present` marker; when it's set but
+    # the array key is absent, the user cleared the section -> default it to []
+    # so the merge replaces the stored array. Drop the marker so it never lands
+    # in the saved doc.
+    DELETABLE_ARRAY_SECTIONS = %w[stratigraphies supplements].freeze
+
+    def normalize_deletable_arrays!(repaired)
+      DELETABLE_ARRAY_SECTIONS.each do |section|
+        next unless repaired.delete("#{section}_present")
+
+        repaired[section] ||= []
+      end
+    end
 
     def loci_for_search(query)
       normalized_query = query.delete(' ').upcase
