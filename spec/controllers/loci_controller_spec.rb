@@ -225,5 +225,31 @@ RSpec.describe LociController, type: :controller do
         expect(response).to redirect_to(area_square_locus_path(area_id, square_id, locus_code))
       end
     end
+
+    context 'when the user deletes every row of a removable section' do
+      let(:locus_data) {
+        {
+          'area' => area_id, 'square' => square_id, 'code' => locus_code,
+          '_id' => 'locus_123', 'locus_type' => 'context',
+          'stratigraphies' => [{ 'is_related' => 'above', 'related' => 'wall', 'related_locus' => '1.1.002' }],
+          'supplements' => [{ 'supplement_type' => 'earth_supplement' }]
+        }
+      }
+
+      it 'clears the array (the form marker means "submitted but empty") and drops the marker' do
+        # Removing the last stratigraphy row submits no stratigraphies key, only
+        # the hidden marker. Without normalization the stored array would survive.
+        expected_doc = locus_data.merge('stratigraphies' => [])
+        expect(db).to receive(:save_doc).with(expected_doc).and_return(true)
+
+        patch :update, params: {
+          area_id: area_id, square_id: square_id, id: locus_code,
+          locus: { 'stratigraphies_present' => '1', 'supplements_present' => '1',
+                   'supplements' => { '0' => { 'supplement_type' => 'earth_supplement' } } }
+        }
+
+        expect(response).to redirect_to(area_square_locus_path(area_id, square_id, locus_code))
+      end
+    end
   end
 end
