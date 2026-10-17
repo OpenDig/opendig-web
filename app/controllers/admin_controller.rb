@@ -20,7 +20,7 @@ class AdminController < ApplicationController
     if requested_role.present? && !current_user.can_assign_role?(requested_role)
       flash.now[:alert] = "You are not allowed to assign the #{requested_role.to_s.humanize.downcase} role"
       return respond_to do |format|
-        format.html { render partial: 'admin/manage_users_role_form', user: @user, open: true, layout: false }
+        format.html { render_role_form }
         format.turbo_stream
       end
     end
@@ -28,13 +28,13 @@ class AdminController < ApplicationController
     if @user.update(user_params)
       respond_to do |format|
         flash.now[:notice] = "User updated successfully"
-        format.html { render partial: 'admin/manage_users_role_form', user: @user, open: true, layout: false }
+        format.html { render_role_form }
         format.turbo_stream
       end
     else
       respond_to do |format|
         flash.now[:alert] = "Failed to update user"
-        format.html { render partial: 'admin/manage_users_role_form', user: @user, open: true, layout: false }
+        format.html { render_role_form }
         format.turbo_stream
       end
     end
@@ -52,6 +52,10 @@ class AdminController < ApplicationController
   end
 
   private
+
+  def render_role_form
+    render partial: 'admin/manage_users_role_form', locals: { user: @user, open: true }, layout: false
+  end
 
   def user_params
     params.require(:user).permit(:role, scopes: [])

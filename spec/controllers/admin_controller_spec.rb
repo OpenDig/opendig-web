@@ -80,6 +80,28 @@ RSpec.describe AdminController, type: :controller do
     end
   end
 
+  describe 'PATCH update_user (rendered)' do
+    render_views
+
+    let(:target) { users[:viewer] }
+
+    before do
+      allow(User).to receive(:find).and_call_original
+      allow(User).to receive(:find).with(target.id_as_string).and_return(target)
+      allow(User).to receive(:role_scopes_for).and_return({})
+      allow(target).to receive(:update).and_return(true)
+    end
+
+    it "redraws the user's role form after an HTML update" do
+      session[:user_id] = users[:dig_director].id
+
+      patch :update_user, params: { id: target.id_as_string, user: { role: 'registrar' } }
+
+      expect(response).to be_successful
+      expect(response.body).to include(%(id="user_role_#{target.id_as_string}"))
+    end
+  end
+
   describe 'PATCH update_user with an email account id' do
     it 'routes ids ending in a domain to the whole id, not a format' do
       expect(patch: '/admin/update_user/email__swat@lasierra.edu')

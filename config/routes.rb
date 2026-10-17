@@ -66,6 +66,7 @@ Rails.application.routes.draw do
 
   resources :invitations, only: %i[create]
   delete '/invitations', to: 'invitations#destroy', as: :revoke_invitation
+  post '/invitations/resend', to: 'invitations#resend', as: :resend_invitation
 
   # User account (holds the low-frequency device-pairing section)
   get    '/account',               to: 'account#show',               as: :account

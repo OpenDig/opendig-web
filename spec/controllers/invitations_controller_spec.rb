@@ -58,6 +58,45 @@ RSpec.describe InvitationsController, type: :controller do
     end
   end
 
+  describe 'POST resend' do
+    before do
+      Invitation.new(email: 'new@example.com', project: 'opendig', role: 'registrar', invited_by: 'a@example.com').save!
+      session[:user_id] = users[:dig_director].id
+    end
+
+    it 'emails the invitation again' do
+      expect do
+        post :resend, params: { email: 'new@example.com' }
+      end.to have_enqueued_mail(InvitationMailer, :invitation).with('opendig', 'new@example.com')
+
+      expect(flash[:notice]).to eq('Invitation re-sent to new@example.com')
+      expect(response).to redirect_to(controller.manage_users_admin_index_path)
+    end
+
+    it 'reports an invitation that no longer exists' do
+      expect { post :resend, params: { email: 'gone@example.com' } }.not_to have_enqueued_mail
+
+      expect(flash[:alert]).to match(/no longer exists/)
+    end
+
+    context 'when mail is not configured' do
+      include_context 'without mail'
+
+      it 'explains that it cannot send' do
+        expect { post :resend, params: { email: 'new@example.com' } }.not_to have_enqueued_mail
+
+        expect(flash[:alert]).to match(/isn't set up yet/)
+      end
+    end
+
+    it 'forbids a registrar' do
+      session[:user_id] = users[:registrar].id
+
+      expect { post :resend, params: { email: 'new@example.com' } }.not_to have_enqueued_mail
+      expect(response).to redirect_to(controller.root_path)
+    end
+  end
+
   describe 'DELETE destroy' do
     it 'revokes a pending invitation' do
       Invitation.new(email: 'new@example.com', project: 'opendig', role: 'registrar', invited_by: 'a@example.com').save!

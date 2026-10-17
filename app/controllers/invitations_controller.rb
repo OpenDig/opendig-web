@@ -38,6 +38,21 @@ class InvitationsController < ApplicationController
     redirect_to manage_users_admin_index_path
   end
 
+  # Email a pending invitation again. Keyed by email like #destroy.
+  def resend
+    invitation = Invitation.find(current_dig, params[:email])
+    if invitation.nil? || !invitation.pending?
+      flash[:alert] = 'That invitation no longer exists'
+    elsif !mail_enabled?
+      flash[:alert] = "Email isn't set up yet, so the invitation can't be sent. #{invitation.email} can still sign up " \
+                      'or sign in with that address to get access.'
+    else
+      InvitationMailer.invitation(invitation.project, invitation.email).deliver_later
+      flash[:notice] = "Invitation re-sent to #{invitation.email}"
+    end
+    redirect_to manage_users_admin_index_path
+  end
+
   private
 
   def invitation_params

@@ -87,7 +87,11 @@
                   <% end %>
                 </td>
                 <td class="px-4 py-3 text-[#6a5d4c]"><%= invitation.invited_by %></td>
-                <td class="px-4 py-3 text-right">
+                <td class="px-4 py-3 text-right whitespace-nowrap">
+                  <%= button_to 'Re-send', resend_invitation_path(email: invitation.email),
+                                method: :post,
+                                form: { class: 'inline' },
+                                class: 'rounded-full border border-[#ddcfb4] bg-white px-3 py-1 text-sm font-medium text-[#2a231b] hover:bg-[#fbf6ec] cursor-pointer' %>
                   <%= button_to 'Revoke', revoke_invitation_path(email: invitation.email),
                                 method: :delete,
                                 form: { class: 'inline' },
