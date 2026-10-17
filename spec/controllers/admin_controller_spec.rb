@@ -110,25 +110,48 @@ RSpec.describe AdminController, type: :controller do
     end
   end
 
-  describe 'PATCH update_user (rendered)' do
-    render_views
-
+  describe 'PATCH update_user response' do
     let(:target) { users[:viewer] }
 
     before do
       allow(User).to receive(:find).and_call_original
       allow(User).to receive(:find).with(target.id_as_string).and_return(target)
-      allow(User).to receive(:role_scopes_for).and_return({})
-      allow(target).to receive(:update).and_return(true)
+      session[:user_id] = users[:dig_director].id
     end
 
-    it "redraws the user's role form after an HTML update" do
-      session[:user_id] = users[:dig_director].id
+    it "redirects back to the page with the user's row open and a notice" do
+      allow(target).to receive(:update).and_return(true)
 
       patch :update_user, params: { id: target.id_as_string, user: { role: 'registrar' } }
 
-      expect(response).to be_successful
-      expect(response.body).to include(%(id="user_role_#{target.id_as_string}"))
+      expect(response).to redirect_to(controller.manage_users_admin_index_path(open: target.id_as_string))
+      expect(flash[:notice]).to start_with(target.name)
+    end
+
+    it 'redirects with an alert when the update fails' do
+      allow(target).to receive(:update).and_return(false)
+
+      patch :update_user, params: { id: target.id_as_string, user: { role: 'registrar' } }
+
+      expect(response).to redirect_to(controller.manage_users_admin_index_path(open: target.id_as_string))
+      expect(flash[:alert]).to match(/Failed to update/)
+    end
+  end
+
+  describe 'GET manage_users with a row to reopen' do
+    render_views
+
+    before do
+      session[:user_id] = users[:dig_director].id
+      allow(User).to receive_messages(find_all: [users[:dig_director], users[:viewer]], role_scopes_for: {})
+      allow(Invitation).to receive(:for_project).and_return([])
+    end
+
+    it "opens that user's role form, which submits as a full-page navigation" do
+      get :manage_users, params: { open: users[:viewer].id_as_string }
+
+      frame = response.body[%r{<turbo-frame id="user_role_#{Regexp.escape(users[:viewer].id_as_string)}">.*?</turbo-frame>}m]
+      expect(frame).to include('<details', 'open>', 'data-turbo-frame="_top"')
     end
   end
 

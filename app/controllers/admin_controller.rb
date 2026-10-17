@@ -18,30 +18,18 @@ class AdminController < ApplicationController
 
     requested_role = params.dig(:user, :role)
     if requested_role.present? && !current_user.can_assign_role?(requested_role)
-      flash.now[:alert] = "You are not allowed to assign the #{requested_role.to_s.humanize.downcase} role"
-      return respond_to do |format|
-        format.html { render_role_form }
-        format.turbo_stream
-      end
-    end
-
-    if @user.update(user_params)
+      flash[:alert] = "You are not allowed to assign the #{requested_role.to_s.humanize.downcase} role"
+    elsif @user.update(user_params)
       # Setting the role directly replaces any invitation still waiting for this
       # person; otherwise it would overwrite this role at their next sign-in.
       pending = @user.email.present? && Invitation.find(current_dig, @user.email)
       pending.revoke! if pending&.pending?
-      respond_to do |format|
-        flash.now[:notice] = "User updated successfully"
-        format.html { render_role_form }
-        format.turbo_stream
-      end
+      flash[:notice] = "#{@user.name} is now #{@user.role.humanize.downcase}"
     else
-      respond_to do |format|
-        flash.now[:alert] = "Failed to update user"
-        format.html { render_role_form }
-        format.turbo_stream
-      end
+      flash[:alert] = "Failed to update #{@user.name}"
     end
+    # Reopen this user's row, e.g. to pick scopes for a supervisor role.
+    redirect_to manage_users_admin_index_path(open: @user.id_as_string)
   end
 
   # Delete the selected accounts (e.g. spam signups). Never deletes the current
@@ -56,10 +44,6 @@ class AdminController < ApplicationController
   end
 
   private
-
-  def render_role_form
-    render partial: 'admin/manage_users_role_form', locals: { user: @user, open: true }, layout: false
-  end
 
   def user_params
     params.require(:user).permit(:role, scopes: [])

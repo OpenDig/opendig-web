@@ -53,7 +53,7 @@
                 </div>
               </td>
               <td class="px-4 py-3 w-1/3">
-                <%= render partial: 'admin/manage_users_role_form', locals: { user: user, open: false } %>
+                <%= render partial: 'admin/manage_users_role_form', locals: { user: user, open: params[:open] == user.id_as_string } %>
               </td>
               <td class="px-4 py-3 text-[#6a5d4c]"><%= user.email %></td>
             </tr>

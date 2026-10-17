@@ -14,7 +14,8 @@
         </svg>
       </summary>
       <hr class="my-2 border-[#e7dcc4]" />
-      <%= form_with(model: user, url: admin_update_user_path(id: user.id_as_string), method: :patch, local: true, class: "space-y-2") do |f| %>
+      <%= form_with(model: user, url: admin_update_user_path(id: user.id_as_string), method: :patch, class: "space-y-2",
+                    data: { turbo_frame: '_top' }) do |f| %>
         <%= f.label :role, class: 'block text-xs font-medium text-[#6a5d4c]' %>
         <% assignable_roles = User.roles.select { |role| current_user.can_assign_role?(role) } %>
         <%= f.select :role,
