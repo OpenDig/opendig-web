@@ -6,6 +6,27 @@ RSpec.describe InvitationsController, type: :controller do
   after { Invitation.find('opendig', 'new@example.com')&.revoke! }
 
   describe 'POST create' do
+    context 'when the email already has an account' do
+      let(:member) { User.register(email: 'member@example.com', password: 'supersecret', name: 'Member', verify_email: false) }
+
+      before { member.save }
+
+      after do
+        Invitation.find('opendig', 'member@example.com')&.revoke!
+        User.for_email('member@example.com')&.destroy!
+      end
+
+      it 'applies the role right away instead of leaving a pending invitation' do
+        session[:user_id] = users[:dig_director].id
+
+        post :create, params: { invitation: { email: 'Member@Example.com', role: 'registrar' } }
+
+        expect(User.for_email('member@example.com').roles['opendig']).to eq(['registrar'])
+        expect(Invitation.pending_for('member@example.com')).to be_empty
+        expect(flash[:notice]).to match(/already has an account/)
+      end
+    end
+
     it 'lets a dig director invite a non-superuser role for the current project' do
       session[:user_id] = users[:dig_director].id
 

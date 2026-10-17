@@ -80,6 +80,36 @@ RSpec.describe AdminController, type: :controller do
     end
   end
 
+  describe 'PATCH update_user with a pending invitation' do
+    let(:target) { users[:viewer] }
+
+    before do
+      allow(User).to receive(:find).and_call_original
+      allow(User).to receive(:find).with(target.id_as_string).and_return(target)
+      allow(target).to receive(:update).and_return(true)
+      Invitation.new(email: target.email, project: 'opendig', role: 'area_supervisor', invited_by: 'a@example.com').save!
+    end
+
+    after { Invitation.find('opendig', target.email)&.revoke! }
+
+    it 'removes the invitation, so it cannot override the new role at next sign-in' do
+      session[:user_id] = users[:dig_director].id
+
+      patch :update_user, params: { id: target.id_as_string, user: { role: 'registrar' } }
+
+      expect(Invitation.find('opendig', target.email)).to be_nil
+    end
+
+    it 'keeps it if the update fails' do
+      allow(target).to receive(:update).and_return(false)
+      session[:user_id] = users[:dig_director].id
+
+      patch :update_user, params: { id: target.id_as_string, user: { role: 'registrar' } }
+
+      expect(Invitation.find('opendig', target.email)).to be_pending
+    end
+  end
+
   describe 'PATCH update_user (rendered)' do
     render_views
 

@@ -18,12 +18,15 @@ class InvitationsController < ApplicationController
     )
 
     if @invitation.save
-      if mail_enabled?
-        InvitationMailer.invitation(@invitation.project, @invitation.email).deliver_later
-        flash[:notice] = "Invitation sent to #{@invitation.email}"
-      else
-        flash[:notice] = "Invitation created for #{@invitation.email}"
-      end
+      applied = @invitation.apply_to_existing_users!
+      InvitationMailer.invitation(@invitation.project, @invitation.email).deliver_later if mail_enabled?
+      flash[:notice] = if applied.any?
+                         "#{@invitation.email} already has an account, so they're now #{role.to_s.humanize.downcase}"
+                       elsif mail_enabled?
+                         "Invitation sent to #{@invitation.email}"
+                       else
+                         "Invitation created for #{@invitation.email}"
+                       end
     else
       flash[:alert] = "Could not create invitation: #{@invitation.errors.full_messages.to_sentence}"
     end

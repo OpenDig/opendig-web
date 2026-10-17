@@ -107,6 +107,21 @@ class Invitation
     false
   end
 
+  # Apply this invitation now to any accounts already using its email, instead
+  # of waiting for their next sign-in. Returns the users it was applied to.
+  def apply_to_existing_users!
+    users = User.find_all.select { |user| user.email.to_s.casecmp?(email) }
+    return [] if users.empty?
+
+    users.each do |user|
+      user.roles ||= {}
+      user.roles[project] = [role, *scopes].compact
+      user.save!
+    end
+    accept!
+    users
+  end
+
   def accept!
     @status = 'accepted'
     @accepted_at = Time.current.iso8601

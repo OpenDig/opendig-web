@@ -26,6 +26,10 @@ class AdminController < ApplicationController
     end
 
     if @user.update(user_params)
+      # Setting the role directly replaces any invitation still waiting for this
+      # person; otherwise it would overwrite this role at their next sign-in.
+      pending = @user.email.present? && Invitation.find(current_dig, @user.email)
+      pending.revoke! if pending&.pending?
       respond_to do |format|
         flash.now[:notice] = "User updated successfully"
         format.html { render_role_form }
