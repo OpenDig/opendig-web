@@ -1,8 +1,8 @@
 # An invitation pre-authorizes an email address for a role on a project ("dig").
-# Because login is OAuth-only, an invitation is an email-match pre-authorization:
-# no email is sent. When the invited person next signs in with a matching email,
-# `User#apply_pending_invitations!` applies the role and marks the invitation
-# accepted (see SessionsController#create).
+# Creating one emails the invitee (InvitationMailer), but the grant itself is an
+# email-match pre-authorization: when the invited person next signs in with a
+# matching email, `User#apply_pending_invitations!` applies the role and marks
+# the invitation accepted (see SessionsController#create).
 #
 # Invitations are stored in the shared auth database (`CouchDB.auth_db`) alongside
 # users, distinguished by `type: 'invitation'`. The `_id` is deterministic per

@@ -3,12 +3,17 @@ class SessionsController < ApplicationController
   # Login is project-agnostic and must work on the apex (no subdomain), so skip
   # the project resolution + db wiring that the rest of the app requires.
   skip_before_action :resolve_project, :set_db
-  layout false, only: %i[login password_login]
+  layout 'auth', only: %i[login password_login]
 
   # Email/password sign-in.
   def password_login
     user = User.authenticate_email(params[:email], params[:password])
-    if user
+    if user&.pending_verification?
+      UserMailer.email_verification(user.id_as_string).deliver_later
+      @email = params[:email]
+      flash.now[:error] = "Please confirm your email first. We've sent a new confirmation link to #{user.email}."
+      render :login, status: :unprocessable_entity
+    elsif user
       user.apply_pending_invitations!
       session[:user_id] = user.id
       redirect_to root_path, notice: "Welcome back#{user.name.present? ? ", #{user.name}" : ''}!"

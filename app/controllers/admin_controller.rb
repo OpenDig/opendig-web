@@ -1,5 +1,7 @@
 class AdminController < ApplicationController
   before_action :require_manage_users
+  # Accounts are shared across every dig, so only a superuser may delete them.
+  before_action :require_superuser, only: :destroy_users
 
   def manage_users
     # Roles are per-project; show each user's role for the project we're on.
@@ -10,6 +12,8 @@ class AdminController < ApplicationController
 
   def update_user
     @user = User.find(params[:id])
+    return head :not_found unless @user
+
     @user.current_dig = current_dig
 
     requested_role = params.dig(:user, :role)
@@ -34,6 +38,17 @@ class AdminController < ApplicationController
         format.turbo_stream
       end
     end
+  end
+
+  # Delete the selected accounts (e.g. spam signups). Never deletes the current
+  # user or a superuser.
+  def destroy_users
+    ids = Array(params[:user_ids]).compact_blank - [current_user.id_as_string]
+    users = ids.filter_map { |id| User.find(id) }.reject(&:superuser?)
+    users.each(&:destroy!)
+
+    flash[:notice] = "Deleted #{helpers.pluralize(users.size, 'user')}"
+    redirect_to manage_users_admin_index_path
   end
 
   private

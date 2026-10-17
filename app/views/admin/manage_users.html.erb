@@ -3,12 +3,27 @@
 
   <%= render 'admin/invite_form' %>
 
-  <div class="mt-8">
-    <h2 class="font-serif text-2xl text-[#2a231b] mb-3">Members</h2>
+  <% can_delete = current_user.superuser? %>
+  <div class="mt-8" <%= 'data-controller=bulk-select' if can_delete %>>
+    <div class="mb-3 flex items-center justify-between gap-4">
+      <h2 class="font-serif text-2xl text-[#2a231b]">Members</h2>
+      <% if can_delete %>
+        <%= form_with url: admin_destroy_users_path, method: :delete, id: 'delete_users_form',
+                      data: { turbo_confirm: 'Permanently delete the selected accounts? This removes them from every dig and cannot be undone.' } do |f| %>
+          <%= f.submit 'Delete selected', disabled: true, data: { bulk_select_target: 'submit' },
+                       class: 'rounded-full border border-[#f0c5bd] bg-[#fdecea] px-4 py-1.5 text-sm font-medium text-[#9c2a1c] hover:bg-[#f8d7d2] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50' %>
+        <% end %>
+      <% end %>
+    </div>
     <div class="overflow-x-auto rounded-xl border border-[#ddcfb4]">
       <table class="w-full text-sm">
         <thead class="bg-[#f1e9d8] text-left text-[#6a5d4c]">
           <tr>
+            <% if can_delete %>
+              <th class="w-8 px-4 py-3">
+                <input type="checkbox" aria-label="Select all" data-bulk-select-target="all" data-action="bulk-select#toggleAll">
+              </th>
+            <% end %>
             <th class="px-4 py-3 font-medium">User</th>
             <th class="px-4 py-3 font-medium">Role</th>
             <th class="px-4 py-3 font-medium">Email</th>
@@ -17,11 +32,25 @@
         <tbody class="divide-y divide-[#e7dcc4] bg-white">
           <% @users.each do |user| %>
             <tr class="align-top hover:bg-[#fbf6ec]">
+              <% if can_delete %>
+                <td class="px-4 py-3">
+                  <% unless user == current_user || user.superuser? %>
+                    <input type="checkbox" name="user_ids[]" value="<%= user.id_as_string %>" form="delete_users_form"
+                           aria-label="Select <%= user.name %>" data-bulk-select-target="item" data-action="bulk-select#update">
+                  <% end %>
+                </td>
+              <% end %>
               <td class="px-4 py-3">
                 <span class="text-[#2a231b]"><%= user.name %></span>
                 <% if user == current_user %>
                   <span class="text-xs text-[#9c8e78]">(You)</span>
                 <% end %>
+                <div class="mt-0.5 text-xs text-[#9c8e78]">
+                  <%= user.provider == User::EMAIL_PROVIDER ? 'Email & password' : user.provider.to_s.sub('_oauth2', '').humanize %>
+                  <% if user.pending_verification? %>
+                    · <span class="text-[#9c2a1c]">Unconfirmed</span>
+                  <% end %>
+                </div>
               </td>
               <td class="px-4 py-3 w-1/3">
                 <%= render partial: 'admin/manage_users_role_form', locals: { user: user, open: false } %>

@@ -92,6 +92,16 @@ end
 # Temporarily set ENV vars for the duration of the block, restoring prior values
 # afterwards. A nil value unsets the variable. Used to exercise config that reads
 # from the environment (e.g. the device S3 bundle).
+# Run examples as if the app had no outgoing mail configured.
+RSpec.shared_context 'without mail' do
+  around do |example|
+    Rails.configuration.x.mail_enabled = false
+    example.run
+  ensure
+    Rails.configuration.x.mail_enabled = true
+  end
+end
+
 def with_env(vars)
   previous = vars.keys.index_with { |k| ENV.fetch(k, nil) }
   vars.each { |k, v| v.nil? ? ENV.delete(k) : ENV[k] = v }

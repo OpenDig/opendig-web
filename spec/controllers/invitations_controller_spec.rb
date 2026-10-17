@@ -17,6 +17,28 @@ RSpec.describe InvitationsController, type: :controller do
       expect(response).to redirect_to(controller.manage_users_admin_index_path)
     end
 
+    it 'emails the invitee' do
+      session[:user_id] = users[:dig_director].id
+
+      expect do
+        post :create, params: { invitation: { email: 'new@example.com', role: 'registrar' } }
+      end.to have_enqueued_mail(InvitationMailer, :invitation).with('opendig', 'new@example.com')
+    end
+
+    context 'when mail is not configured' do
+      include_context 'without mail'
+
+      it 'creates the invitation without emailing' do
+        session[:user_id] = users[:dig_director].id
+
+        expect do
+          post :create, params: { invitation: { email: 'new@example.com', role: 'registrar' } }
+        end.not_to have_enqueued_mail
+
+        expect(Invitation.pending_for('new@example.com')).to be_present
+      end
+    end
+
     it 'blocks a dig director from inviting a superuser' do
       session[:user_id] = users[:dig_director].id
 

@@ -1,0 +1,8 @@
+Hello,
+
+<%= @invitation.invited_by %> has invited you to join <%= @invitation.project.to_s.humanize %> on OpenDig as <%= @invitation.role.to_s.humanize.downcase %>.
+
+Sign in (or create an account) with this email address, <%= @invitation.email %>, and your access is applied automatically.
+
+Open the project: <%= @project_url %>
+No account yet? Create one: <%= @signup_url %>

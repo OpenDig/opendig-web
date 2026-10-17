@@ -1,0 +1,18 @@
+<% content_for :title, 'Choose a new password' %>
+<p class="eyebrow">Account help</p>
+<h1>Choose a new password</h1>
+<p class="sub">For <strong><%= @user.email %></strong>.</p>
+
+<%= form_with url: password_reset_path, method: :patch do |f| %>
+  <%= hidden_field_tag :token, params[:token] %>
+  <div class="field">
+    <%= f.label :password, "New password" %>
+    <%= f.password_field :password, autofocus: true, autocomplete: "new-password", required: true %>
+    <p class="hint">At least 8 characters.</p>
+  </div>
+  <div class="field">
+    <%= f.label :password_confirmation, "Confirm new password" %>
+    <%= f.password_field :password_confirmation, autocomplete: "new-password", required: true %>
+  </div>
+  <%= f.submit "Save password", class: "submit" %>
+<% end %>

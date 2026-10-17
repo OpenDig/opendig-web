@@ -18,7 +18,12 @@ class InvitationsController < ApplicationController
     )
 
     if @invitation.save
-      flash[:notice] = "Invitation created for #{@invitation.email}"
+      if mail_enabled?
+        InvitationMailer.invitation(@invitation.project, @invitation.email).deliver_later
+        flash[:notice] = "Invitation sent to #{@invitation.email}"
+      else
+        flash[:notice] = "Invitation created for #{@invitation.email}"
+      end
     else
       flash[:alert] = "Could not create invitation: #{@invitation.errors.full_messages.to_sentence}"
     end

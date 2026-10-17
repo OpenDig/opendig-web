@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
 
   helper_method :current_user, :user_signed_in?, :require_authentication, :user_role?, :require_role,
                 :require_superuser, :require_dig_director, :require_area_supervisor, :require_square_supervisor,
-                :require_registrar_read, :require_registrar_write, :require_manage_users, :current_dig, :current_project
+                :require_registrar_read, :require_registrar_write, :require_manage_users, :current_dig, :current_project, :mail_enabled?
 
   private
 
@@ -232,6 +232,8 @@ class ApplicationController < ActionController::Base
   # Falls back to the thread-local current project for contexts that bypass the
   # request cycle (e.g. unit tests invoking helpers directly).
   def current_dig = @project || CouchDB.current_project
+
+  def mail_enabled? = Rails.configuration.x.mail_enabled
 
   alias current_project current_dig
 end

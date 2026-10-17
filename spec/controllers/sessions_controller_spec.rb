@@ -97,8 +97,33 @@ RSpec.describe SessionsController, type: :controller do
     end
   end
 
+  describe "GET login" do
+    render_views
+
+    it "links to password reset" do
+      get :login
+
+      expect(response.body).to include('Forgot your password?', controller.new_password_reset_path)
+    end
+
+    context 'when mail is not configured' do
+      include_context 'without mail'
+
+      it "doesn't offer password reset" do
+        get :login
+
+        expect(response.body).not_to include('Forgot your password?')
+      end
+    end
+  end
+
   describe "POST password_login" do
-    before { User.register(email: 'login@example.com', password: 'supersecret', name: 'Login').save }
+    let(:user) { User.register(email: 'login@example.com', password: 'supersecret', name: 'Login') }
+
+    before do
+      user.save
+      User.for_email('login@example.com').verify_email!
+    end
     after do
       doc = CouchDB.auth_db.get('email__login@example.com') rescue nil
       CouchDB.auth_db.delete_doc(doc) if doc
@@ -116,6 +141,18 @@ RSpec.describe SessionsController, type: :controller do
 
       expect(session[:user_id]).to be_nil
       expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "refuses an unconfirmed account and re-sends the confirmation link" do
+      User.for_email('login@example.com').update!({ pending_verification: true })
+
+      expect do
+        post :password_login, params: { email: 'login@example.com', password: 'supersecret' }
+      end.to have_enqueued_mail(UserMailer, :email_verification).with('email__login@example.com')
+
+      expect(session[:user_id]).to be_nil
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(flash[:error]).to match(/confirm your email/i)
     end
   end
 

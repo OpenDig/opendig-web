@@ -1,0 +1,5 @@
+<p>Hello,</p>
+<p><%= @invitation.invited_by %> has invited you to join <strong><%= @invitation.project.to_s.humanize %></strong> on OpenDig as <%= @invitation.role.to_s.humanize.downcase %>.</p>
+<p>Sign in (or create an account) with this email address, <strong><%= @invitation.email %></strong>, and your access is applied automatically.</p>
+<p style="margin:24px 0;"><a href="<%= @project_url %>" style="background:#b1542b;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:bold;">Open <%= @invitation.project.to_s.humanize %></a></p>
+<p style="color:#6a5d4c;font-size:13px;">No account yet? <a href="<%= @signup_url %>" style="color:#b1542b;">Create one here</a>.</p>

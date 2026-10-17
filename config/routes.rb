@@ -12,6 +12,11 @@ Rails.application.routes.draw do
   post '/login', to: 'sessions#password_login' # email/password sign-in
   get '/signup', to: 'registrations#new', as: :signup
   post '/signup', to: 'registrations#create'
+  get '/verify_email', to: 'email_verifications#show', as: :verify_email
+  get '/password/forgot', to: 'password_resets#new', as: :new_password_reset
+  post '/password/forgot', to: 'password_resets#create', as: :password_resets
+  get '/password/reset', to: 'password_resets#edit', as: :edit_password_reset
+  patch '/password/reset', to: 'password_resets#update', as: :password_reset
   direct(:auth) { |provider| "/auth/#{provider}" } # As per OmniAuth documentation
   get '/auth/:provider/callback', to: 'sessions#create', as: :auth_callback
   get '/auth/failure', to: 'sessions#failure', as: :auth_failure
@@ -48,7 +53,11 @@ Rails.application.routes.draw do
   # Superuser project administration (runs at the apex host, no subdomain).
   resources :projects, only: %i[index new create edit update]
 
-  patch '/admin/update_user/:id', to: 'admin#update_user', as: :admin_update_user
+  # User ids contain dots (email__someone@example.edu), so don't let Rails read
+  # the last segment as a format.
+  patch '/admin/update_user/:id', to: 'admin#update_user', as: :admin_update_user,
+                                  constraints: { id: %r{[^/]+} }, format: false
+  delete '/admin/users', to: 'admin#destroy_users', as: :admin_destroy_users
   resources :admin, only: [] do
     collection do
       get 'manage_users', as: :manage_users

@@ -1,0 +1,14 @@
+<% content_for :title, 'Reset your password' %>
+<p class="eyebrow">Account help</p>
+<h1>Reset your password</h1>
+<p class="sub">Enter your account's email and we'll send you a link to choose a new password.</p>
+
+<%= form_with url: password_resets_path, method: :post do |f| %>
+  <div class="field">
+    <%= f.label :email, "Email" %>
+    <%= f.email_field :email, value: @email, autofocus: true, autocomplete: "email", required: true %>
+  </div>
+  <%= f.submit "Send reset link", class: "submit" %>
+<% end %>
+
+<p class="foot"><a href="<%= login_path %>">Back to sign in</a></p>

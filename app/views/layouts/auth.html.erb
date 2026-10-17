@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= content_for(:title) %> — OpenDig</title>
+  <%= csrf_meta_tags %>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--sand:#f4ecdd;--paper:#fbf6ec;--ink:#2a231b;--ink-soft:#6a5d4c;
+      --line:#ddcfb4;--rust:#b1542b;--rust-deep:#8d3f1d;--clay:#9c6b3f;--err:#9c2b1a}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Archivo',system-ui,sans-serif;background:var(--sand);color:var(--ink);
+      min-height:100vh;display:flex;flex-direction:column}
+    a{text-decoration:none;color:inherit}
+    .top{max-width:1180px;width:100%;margin:0 auto;padding:1.25rem clamp(1rem,5vw,3.5rem)}
+    .brand{font-family:'Spectral',serif;font-weight:600;font-size:1.5rem}
+    .brand b{color:var(--rust)}
+    .wrap{flex:1;display:grid;place-items:center;padding:1.5rem}
+    .card{width:100%;max-width:25rem;background:var(--paper);border:1px solid var(--line);
+      border-radius:18px;padding:2.2rem 2rem;box-shadow:0 12px 40px rgba(111,74,44,.08)}
+    .eyebrow{font-size:.75rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--clay)}
+    h1{font-family:'Spectral',serif;font-weight:600;font-size:1.9rem;margin:.4rem 0 .4rem}
+    .sub{color:var(--ink-soft);font-size:.95rem;margin-bottom:1.5rem}
+    .err{background:#f7e3dd;border:1px solid #e3b6aa;color:var(--err);border-radius:10px;
+      padding:.65rem .85rem;font-size:.9rem;margin-bottom:1.1rem}
+    .ok{background:#e9efdc;border:1px solid #c5d3a8;color:#3e5221;border-radius:10px;
+      padding:.65rem .85rem;font-size:.9rem;margin-bottom:1.1rem}
+    label{display:block;font-size:.85rem;font-weight:600;color:var(--ink-soft);margin-bottom:.35rem}
+    .field{margin-bottom:1rem}
+    input[type=text],input[type=email],input[type=password]{width:100%;padding:.7rem .85rem;
+      border:1.5px solid var(--line);border-radius:10px;font:inherit;background:#fff;color:var(--ink)}
+    input:focus{outline:none;border-color:var(--clay)}
+    .hint{font-size:.78rem;color:var(--ink-soft);margin-top:.3rem}
+    .hint a,.link{color:var(--rust);font-weight:600}
+    /* Honeypot: hidden from people, visible to naive form-filling bots. */
+    .hp{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+    .submit{width:100%;background:var(--rust);color:#fff;border:none;border-radius:10px;
+      padding:.75rem;font:inherit;font-weight:600;cursor:pointer}
+    .submit:hover{background:var(--rust-deep)}
+    .divider{display:flex;align-items:center;gap:.8rem;color:var(--ink-soft);font-size:.8rem;
+      text-transform:uppercase;letter-spacing:.1em;margin:1.3rem 0}
+    .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+    .providers{display:flex;flex-direction:column;gap:.7rem}
+    .providers form{margin:0}
+    .prov{display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;
+      padding:.7rem 1rem;border-radius:10px;font-weight:600;font-size:.98rem;border:1.5px solid var(--line);
+      background:#fff;color:var(--ink);transition:.15s;cursor:pointer}
+    .prov:hover{border-color:var(--clay);background:var(--paper)}
+    .prov svg{width:20px;height:20px}
+    .prov.dev{border-style:dashed;color:var(--ink-soft)}
+    .foot{text-align:center;color:var(--ink-soft);font-size:.9rem;margin-top:1.5rem}
+    .foot a{color:var(--rust);font-weight:600}
+  </style>
+</head>
+<body>
+  <% domain = "#{request.protocol}#{request.domain}#{request.optional_port ? ":#{request.optional_port}" : ''}/" %>
+  <header class="top"><a href="<%= domain %>" class="brand">Open<b>Dig</b></a></header>
+
+  <div class="wrap">
+    <div class="card">
+      <% if flash[:error] %><div class="err"><%= flash[:error] %></div><% end %>
+      <% if flash[:notice] %><div class="ok"><%= flash[:notice] %></div><% end %>
+      <%= yield %>
+    </div>
+  </div>
+</body>
+</html>

@@ -23,4 +23,15 @@ RSpec.describe Device, type: :model do
     device.revoke!
     expect(described_class.for_user(user.id_as_string).map(&:device_id)).not_to include(device.device_id)
   end
+
+  it 'is revoked when its user is deleted' do
+    owner = User.register(email: 'device-owner@example.com', password: 'supersecret', name: 'Owner')
+    owner.save
+    _device, token = described_class.create_for(owner)
+
+    owner.destroy!
+
+    expect(described_class.authenticate(token)).to be_nil
+    expect(User.for_email('device-owner@example.com')).to be_nil
+  end
 end

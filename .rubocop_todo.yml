@@ -368,14 +368,17 @@ Rails/I18nLocaleTexts:
     - 'app/controllers/application_controller.rb'
     - 'app/controllers/areas_controller.rb'
     - 'app/controllers/descriptions_controller.rb'
+    - 'app/controllers/email_verifications_controller.rb'
     - 'app/controllers/invitations_controller.rb'
     - 'app/controllers/loci_controller.rb'
     - 'app/controllers/pails_controller.rb'
+    - 'app/controllers/password_resets_controller.rb'
     - 'app/controllers/photos_controller.rb'
     - 'app/controllers/projects_controller.rb'
     - 'app/controllers/registrar_controller.rb'
     - 'app/controllers/sessions_controller.rb'
     - 'app/controllers/squares_controller.rb'
+    - 'app/mailers/user_mailer.rb'
 
 # Offense count: 2
 # Configuration parameters: Include.

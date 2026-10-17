@@ -102,3 +102,6 @@ gem "tailwindcss-rails", "~> 2.0"
 gem "omniauth"
 gem "omniauth-rails_csrf_protection"
 gem "omniauth-google-oauth2"
+
+# Throttle signup/login/password-reset requests (config/initializers/rack_attack.rb)
+gem "rack-attack"

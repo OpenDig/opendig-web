@@ -38,6 +38,10 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
+  # Write outgoing mail to tmp/mails instead of sending it.
+  config.action_mailer.delivery_method = :file
+  config.action_mailer.default_url_options = { host: 'lvh.me', port: 3000 }
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 

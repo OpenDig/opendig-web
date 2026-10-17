@@ -75,12 +75,15 @@ class User
     def id_fields = %w[provider uid]
 
     # `attr_accessor` pulls from this list. To add a new attribute, update it here.
-    def data_fields = id_fields + %w[email name roles password_digest _rev]
+    def data_fields = id_fields + %w[email name roles password_digest pending_verification _rev]
 
     # Build (unsaved) a self-service email/password user. Call `save` to persist.
-    def register(email:, password:, name:, password_confirmation: nil)
+    def register(email:, password:, name:, password_confirmation: nil, verify_email: true)
       normalized = email.to_s.strip.downcase
-      user = new(provider: EMAIL_PROVIDER, uid: normalized, email: normalized, name: name, persist: false)
+      # New email accounts can't sign in until the address is confirmed. Existing
+      # accounts have no `pending_verification` field and are treated as verified.
+      user = new(provider: EMAIL_PROVIDER, uid: normalized, email: normalized, name: name,
+                 pending_verification: verify_email.presence, persist: false)
       user.password = password
       user.password_confirmation = password_confirmation unless password_confirmation.nil?
       user
@@ -90,9 +93,29 @@ class User
     def authenticate_email(email, password)
       return nil if email.blank? || password.blank?
 
-      user = find_by(provider: EMAIL_PROVIDER, uid: email.to_s.strip.downcase)
-      user&.authenticate(password) || nil
+      for_email(email)&.authenticate(password) || nil
     end
+
+    # The email/password user for an address, if any.
+    def for_email(email)
+      return nil if email.blank?
+
+      find_by(provider: EMAIL_PROVIDER, uid: email.to_s.strip.downcase)
+    end
+
+    # Resolve a token from #email_verification_token / #password_reset_token.
+    # Returns nil if the token is invalid, expired, or (for password resets)
+    # already used.
+    def find_by_token(token, purpose:)
+      id, fingerprint = token_verifier.verified(token.to_s, purpose: purpose)
+      user = id && find(id)
+      return nil unless user
+      return nil if purpose == :password_reset && fingerprint != user.password_fingerprint
+
+      user
+    end
+
+    def token_verifier = Rails.application.message_verifier(:user_tokens)
 
     def where(provider: nil, uid: nil)
       start_key = if provider
@@ -262,6 +285,17 @@ class User
     false
   end
 
+  # Permanently delete the account, and revoke any devices paired to it.
+  def destroy!
+    Device.for_user(id_as_string).each(&:revoke!)
+    doc = begin
+      CouchDB.auth_db.get(id_as_string)
+    rescue StandardError
+      nil
+    end
+    CouchDB.auth_db.delete_doc(doc) if doc
+  end
+
   def ==(other)
     return false unless other.is_a? User
 
@@ -358,6 +392,26 @@ class User
         user_scope.to_s == area || user_scope.to_s == current_dig
       end
     end
+  end
+
+  def pending_verification? = pending_verification.present?
+
+  # Signed link token proving control of the account's email address.
+  def email_verification_token
+    User.token_verifier.generate([id_as_string], purpose: :email_verification, expires_in: 3.days)
+  end
+
+  # Signed link token for resetting the password. Embeds part of the current
+  # password digest, so the token stops working once the password changes.
+  def password_reset_token
+    User.token_verifier.generate([id_as_string, password_fingerprint], purpose: :password_reset, expires_in: 1.hour)
+  end
+
+  def password_fingerprint = password_digest.to_s.last(10)
+
+  def verify_email!
+    self.pending_verification = nil
+    save!
   end
 
   # Apply any pending invitations matching this user's email. Each invitation sets

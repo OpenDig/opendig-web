@@ -61,9 +61,24 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
-  # Ignore bad email addresses and do not raise email delivery errors.
-  # Set this to true and configure the email server for immediate delivery to raise delivery errors.
-  # config.action_mailer.raise_delivery_errors = false
+  # Outgoing mail goes through SMTP (SendGrid in production: SMTP_USER is the
+  # literal "apikey" and SMTP_PWD is the API key). Mail is sent via deliver_later,
+  # so delivery errors are raised in the background job and logged, not shown
+  # to the user.
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address: ENV.fetch('SMTP_SERVER', 'smtp.sendgrid.net'),
+    port: ENV.fetch('SMTP_PORT', 587).to_i,
+    user_name: ENV.fetch('SMTP_USER', nil),
+    password: ENV.fetch('SMTP_PWD', nil),
+    domain: ENV.fetch('MAILER_DOMAIN', 'opendig.org'),
+    authentication: :plain,
+    enable_starttls_auto: true
+  }
+  config.action_mailer.raise_delivery_errors = true
+  config.x.mail_enabled = ENV['SMTP_PWD'].present?
+  # Links in emails point at the apex; project links add their own subdomain.
+  config.action_mailer.default_url_options = { host: ENV.fetch('MAILER_HOST', 'opendig.org'), protocol: 'https' }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

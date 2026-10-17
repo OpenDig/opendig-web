@@ -31,6 +31,10 @@ module OpendigWeb7
     # Both opendig.org and lvh.me (dev) are two-label registrable domains, so a
     # tld_length of 1 yields the project key as request.subdomain for each.
     config.action_dispatch.tld_length = 1
+
+    # Whether the app can send email. Email confirmation on signup, password
+    # resets and invitation emails are switched off until it can.
+    config.x.mail_enabled = true
     config.autoload_paths += Dir["#{Rails.root}/lib/**/"] if Rails.env == 'development'
     config.assets.css_compressor = nil
 
